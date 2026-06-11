@@ -210,7 +210,7 @@ body {
 @media (max-width: 520px) {
   .choices { gap: 12px; margin-top: 30px; }
   .choice-btn { width: min(100%, 320px); padding: 14px 20px; }
-  #debug-panel { max-width: 92vw; width: calc(100vw - 24px); }
+  #debug-panel { display: none !important; }
   #cam-preview { width: 104px; height: 78px; }
   .hint { display: none; }
   .intro-how { display: none; }
