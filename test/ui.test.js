@@ -61,4 +61,47 @@ describe('ui.showResult', () => {
     expect(root.textContent).toContain('결과 카드 저장');
     expect(root.textContent).toContain('갤러리에 남기기');
   });
+
+  it('shows the path receipt when choices were recorded', () => {
+    const root = document.createElement('div');
+    showResult(root, {
+      topCategory: 'joy',
+      isComposite: false,
+      message: '메시지다',
+      receipts: ['돌상에서 붓을 잡았다', '내가 원하는 길을 갔다'],
+    });
+    expect(root.querySelector('.receipt').textContent).toContain(
+      '돌상에서 붓을 잡았다 · 내가 원하는 길을 갔다'
+    );
+  });
+
+  it('omits the receipt block when no receipts exist', () => {
+    const root = document.createElement('div');
+    showResult(root, { topCategory: 'joy', isComposite: false, message: '메시지다' });
+    expect(root.querySelector('.receipt')).toBeNull();
+  });
+
+  it('accepts a reveal handle, shows its canvas, and starts playback', async () => {
+    const root = document.createElement('div');
+    const handle = {
+      canvas: document.createElement('canvas'),
+      full: document.createElement('canvas'),
+      play: vi.fn(),
+    };
+    showResult(root, { topCategory: 'joy', isComposite: false, message: '메시지다' }, handle);
+    expect(root.querySelector('.mosaic-slot canvas')).toBe(handle.canvas);
+    await new Promise((r) => requestAnimationFrame(r));
+    expect(handle.play).toHaveBeenCalled();
+  });
+
+  it('shows the daily stats line when provided', () => {
+    const root = document.createElement('div');
+    showResult(root, {
+      topCategory: 'joy',
+      isComposite: false,
+      message: '메시지다',
+      statsText: '당신은 오늘 이 부스를 지나간 첫 번째 인생입니다.',
+    });
+    expect(root.querySelector('.daily-stats').textContent).toContain('첫 번째 인생');
+  });
 });

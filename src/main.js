@@ -1,8 +1,11 @@
 import story from '../content/story.json';
-import { createEngine, current, choose, advance, isEnding } from './engine.js';
+import { createEngine, current, choose, advance, isEnding, receipts } from './engine.js';
 import { renderIntro, renderScene, showResult, setTint } from './ui.js';
 import { createLog, record, aggregate, emotionTimeline } from './experienceLog.js';
 import { gradientFor } from './emotionColor.js';
+import { browserDailyStats, statsLine } from './dailyStats.js';
+import { CATEGORY_LABELS } from './comfortMessages.js';
+import { createReveal } from './mosaicReveal.js';
 import { startLiveEmotion, stopLiveEmotion, setFallback } from './liveEmotion.js';
 import { setTargetFrom, addTile, getTarget, getTiles, hasEnough, reset as resetSnapshots } from './snapshots.js';
 import { buildMosaic } from './mosaic.js';
@@ -71,8 +74,14 @@ function show() {
         logCurrent();
         stopLiveEmotion();
         live = { ...live, active: false };
-        const mosaic = hasEnough() ? buildMosaic(getTarget(), getTiles()) : null;
-        showResult(root, { ...aggregate(log), timeline: emotionTimeline(log) }, mosaic);
+        const result = { ...aggregate(log), timeline: emotionTimeline(log), receipts: receipts(engine) };
+        // 오늘의 익명 통계에 이번 인생을 더하고, "N번째 인생" 문구 생성
+        const statsCategory = result.isComposite ? 'composite' : result.topCategory;
+        const stats = browserDailyStats();
+        if (stats) result.statsText = statsLine(stats.record(statsCategory), CATEGORY_LABELS[statsCategory]);
+        const full = hasEnough() ? buildMosaic(getTarget(), getTiles()) : null;
+        const mosaic = full ? { full, ...createReveal(full) } : null; // 타일이 차오르는 타임랩스 리빌
+        showResult(root, result, mosaic);
         updateDebug(engine, log, live);
       },
     });

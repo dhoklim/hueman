@@ -11,12 +11,12 @@
       "text": "소파에 크레용으로 처음 낙서를 한다.\n온 세상이 도화지다.", "next": "doljabi_choice" },
     "doljabi_choice": { "id": "doljabi_choice", "stage": "infancy", "type": "choice", "emotion": "joy",
       "text": "돌잔치. 상 위에 놓인 것들 중 하나로 손이 간다.", "choices": [
-        { "label": "붓", "effects": {}, "next": "childhood_bike" },
-        { "label": "실", "effects": {}, "next": "childhood_bike" },
-        { "label": "돈", "effects": {}, "next": "childhood_bike" },
-        { "label": "종이", "effects": {}, "next": "childhood_bike" },
-        { "label": "청진기", "effects": {}, "next": "childhood_bike" },
-        { "label": "판사봉", "effects": {}, "next": "childhood_bike" }
+        { "label": "붓", "effects": {}, "receipt": "돌상에서 붓을 잡았다", "next": "childhood_bike" },
+        { "label": "실", "effects": {}, "receipt": "돌상에서 실을 잡았다", "next": "childhood_bike" },
+        { "label": "돈", "effects": {}, "receipt": "돌상에서 돈을 잡았다", "next": "childhood_bike" },
+        { "label": "종이", "effects": {}, "receipt": "돌상에서 종이를 잡았다", "next": "childhood_bike" },
+        { "label": "청진기", "effects": {}, "receipt": "돌상에서 청진기를 잡았다", "next": "childhood_bike" },
+        { "label": "판사봉", "effects": {}, "receipt": "돌상에서 판사봉을 잡았다", "next": "childhood_bike" }
       ]},
 
     "childhood_bike": { "id": "childhood_bike", "stage": "childhood", "type": "scene", "emotion": "joy",
@@ -31,8 +31,8 @@
       "text": "운동회 달리기. 출발 신호와 함께 힘껏 내달린다.", "next": "childhood_fall_choice" },
     "childhood_fall_choice": { "id": "childhood_fall_choice", "stage": "childhood", "type": "choice", "emotion": "anxiety",
       "text": "결승선 직전, 발이 엉켜 넘어졌다. 무릎이 아리다.", "choices": [
-        { "label": "일어난다", "effects": { "grit": 1 }, "next": "childhood_fall_up" },
-        { "label": "포기한다", "effects": {}, "next": "childhood_fall_quit" }
+        { "label": "일어난다", "effects": { "grit": 1 }, "receipt": "넘어졌지만, 다시 일어났다", "next": "childhood_fall_up" },
+        { "label": "포기한다", "effects": {}, "receipt": "넘어진 그날, 주저앉았다", "next": "childhood_fall_quit" }
       ]},
     "childhood_fall_up": { "id": "childhood_fall_up", "stage": "childhood", "type": "scene", "emotion": "joy",
       "text": "이를 악물고 다시 일어나 끝까지 뛴다.\n결승선을 넘는다.", "next": "teen_uniform" },
@@ -47,8 +47,8 @@
       "text": "친구들과 떠들며 하교하는 길.", "next": "teen_confess_choice" },
     "teen_confess_choice": { "id": "teen_confess_choice", "stage": "adolescence", "type": "choice", "emotion": "anxiety",
       "text": "누군가 너에게 고백한다.\n\"나랑 사귈래?\"", "choices": [
-        { "label": "사귄다", "effects": { "dating": true }, "next": "date_1" },
-        { "label": "안 사귄다", "effects": {}, "next": "single_1" }
+        { "label": "사귄다", "effects": { "dating": true }, "receipt": "설렘에 손을 내밀었다", "next": "date_1" },
+        { "label": "안 사귄다", "effects": {}, "receipt": "혼자의 시간을 지켰다", "next": "single_1" }
       ]},
 
     "date_1": { "id": "date_1", "stage": "adolescence", "type": "scene", "emotion": "anxiety",
@@ -75,8 +75,8 @@
 
     "smoke_choice": { "id": "smoke_choice", "stage": "adolescence", "type": "choice", "emotion": "anxiety",
       "text": "친구들이 슬그머니 담배를 권한다.", "choices": [
-        { "label": "받아들인다", "effects": { "deviated": 1 }, "next": "dev_1" },
-        { "label": "거절한다", "effects": {}, "next": "study_1" }
+        { "label": "받아들인다", "effects": { "deviated": 1 }, "receipt": "어긋난 길에 발을 들였다", "next": "dev_1" },
+        { "label": "거절한다", "effects": {}, "receipt": "권유를 조용히 거절했다", "next": "study_1" }
       ]},
 
     "dev_1": { "id": "dev_1", "stage": "adolescence", "type": "scene", "emotion": "anger",
@@ -89,8 +89,8 @@
       "text": "집에서 담배가 걸렸다. 공기가 얼어붙는다.", "next": "dev_counsel_choice" },
     "dev_counsel_choice": { "id": "dev_counsel_choice", "stage": "adolescence", "type": "choice", "emotion": "sad",
       "text": "온 가족이 마주 앉아 상담을 받는다.", "choices": [
-        { "label": "일탈을 계속한다", "effects": {}, "next": "prison_scene" },
-        { "label": "멈춘다", "effects": { "reformed": 1 }, "next": "study_1" }
+        { "label": "일탈을 계속한다", "effects": {}, "receipt": "끝내 멈추지 않았다", "next": "prison_scene" },
+        { "label": "멈춘다", "effects": { "reformed": 1 }, "receipt": "늦지 않게 돌아왔다", "next": "study_1" }
       ]},
     "prison_scene": { "id": "prison_scene", "stage": "ending", "type": "scene", "emotion": "numb",
       "text": "검은 화면이 길게 이어지다, 천천히 밝아지며 교도소.\n차가운 철문이 닫힌다.", "next": "ending_unfinished" },
@@ -119,8 +119,8 @@
       "text": "거리에서 창업 포스터를 발견한다. 가슴이 뛴다.", "next": "career_choice" },
     "career_choice": { "id": "career_choice", "stage": "youth", "type": "choice", "emotion": "anger",
       "text": "진로를 두고 부모님과 부딪힌다.", "choices": [
-        { "label": "내가 원하는 일을 한다", "effects": {}, "next": "startup_1" },
-        { "label": "부모님이 원하는 일을 한다", "effects": {}, "next": "job_1" }
+        { "label": "내가 원하는 일을 한다", "effects": {}, "receipt": "내가 원하는 길을 갔다", "next": "startup_1" },
+        { "label": "부모님이 원하는 일을 한다", "effects": {}, "receipt": "부모님의 길을 따랐다", "next": "job_1" }
       ]},
 
     "startup_1": { "id": "startup_1", "stage": "youth", "type": "scene", "emotion": "anxiety",
@@ -151,9 +151,9 @@
 
     "blinddate_choice": { "id": "blinddate_choice", "stage": "midlife", "type": "choice", "emotion": "anxiety",
       "text": "\"소개팅 받을래?\" 친구가 묻는다.", "choices": [
-        { "label": "소개팅을 나간다", "effects": {}, "next": "marry_arranged_1" },
-        { "label": "첫사랑에게 전화를 한다", "effects": {}, "next": "marry_love_1" },
-        { "label": "결혼을 하지 않는다", "effects": {}, "next": "single_funeral_choice" }
+        { "label": "소개팅을 나간다", "effects": {}, "receipt": "새로운 인연을 만나러 갔다", "next": "marry_arranged_1" },
+        { "label": "첫사랑에게 전화를 한다", "effects": {}, "receipt": "첫사랑에게 전화를 걸었다", "next": "marry_love_1" },
+        { "label": "결혼을 하지 않는다", "effects": {}, "receipt": "혼자의 삶을 골랐다", "next": "single_funeral_choice" }
       ]},
 
     "marry_arranged_1": { "id": "marry_arranged_1", "stage": "midlife", "type": "scene", "emotion": "joy",
@@ -168,8 +168,8 @@
 
     "single_funeral_choice": { "id": "single_funeral_choice", "stage": "elder", "type": "choice", "emotion": "sad",
       "text": "일하던 중, 친구의 장례식 연락이 온다.", "choices": [
-        { "label": "간다", "effects": {}, "next": "funeral_go" },
-        { "label": "안 간다", "effects": {}, "next": "lonely_death" }
+        { "label": "간다", "effects": {}, "receipt": "마지막 인사를 하러 갔다", "next": "funeral_go" },
+        { "label": "안 간다", "effects": {}, "receipt": "끝내 가지 못했다", "next": "lonely_death" }
       ]},
     "funeral_go": { "id": "funeral_go", "stage": "elder", "type": "scene", "emotion": "sad",
       "text": "오랜 친구들과 둘러앉아 회식한다.", "next": "funeral_death" },

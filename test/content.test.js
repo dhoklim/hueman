@@ -53,6 +53,17 @@ describe('story.json integrity', () => {
     }
   });
 
+  it('every choice carries a receipt line for the path summary', () => {
+    for (const id of ids) {
+      const s = story.scenes[id];
+      if (s.type !== 'choice') continue;
+      for (const c of s.choices) {
+        expect(typeof c.receipt, `${id} "${c.label}".receipt`).toBe('string');
+        expect(c.receipt.length, `${id} "${c.label}".receipt`).toBeGreaterThan(0);
+      }
+    }
+  });
+
   it('walking from start with all-left and all-right choices both reach an ending', () => {
     for (const pick of [0, 1]) {
       let id = story.start;

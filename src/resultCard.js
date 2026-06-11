@@ -5,6 +5,11 @@ export function resultFilename(result) {
   return `hueman-result-${suffix}.png`;
 }
 
+// 갈림길에서 한 선택들을 한 줄로 — "돌상에서 붓을 잡았다 · 내가 원하는 길을 갔다"
+export function receiptLine(receipts) {
+  return (receipts || []).join(' · ');
+}
+
 export function resultSummaryLines(result) {
   const label = result.isComposite
     ? CATEGORY_LABELS.composite
@@ -39,6 +44,14 @@ export function createResultCardCanvas(result, mosaicCanvas) {
   wrapText(ctx, lines[1], canvas.width / 2, 900, 760, 46);
   ctx.font = '400 30px system-ui, sans-serif';
   wrapText(ctx, lines[2], canvas.width / 2, 1010, 760, 48);
+
+  const receipt = receiptLine(result.receipts);
+  if (receipt) {
+    ctx.font = '400 24px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,.78)';
+    wrapText(ctx, receipt, canvas.width / 2, 1120, 800, 36);
+    ctx.fillStyle = '#ffffff';
+  }
 
   ctx.font = '400 22px system-ui, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';

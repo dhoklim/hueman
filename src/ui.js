@@ -1,7 +1,7 @@
 import { gradientFor } from './emotionColor.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
 import { browserGalleryStore } from './gallery.js';
-import { createResultCardCanvas, resultFilename } from './resultCard.js';
+import { createResultCardCanvas, resultFilename, receiptLine } from './resultCard.js';
 
 let keyHandler = null;
 
@@ -82,6 +82,10 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
 
 export function showResult(root, result, mosaicCanvas) {
   clearKeys();
+  // mosaicCanvas: 캔버스(완성본) 또는 리빌 핸들 { canvas(점점 채워짐), full(완성본), play }
+  const mosaic = mosaicCanvas
+    ? (mosaicCanvas.canvas ? mosaicCanvas : { canvas: mosaicCanvas, full: mosaicCanvas, play: null })
+    : null;
   const el = document.createElement('div');
   el.className = 'scene result';
   const label = result.isComposite ? CATEGORY_LABELS.composite : (CATEGORY_LABELS[result.topCategory] || '감정');
@@ -93,19 +97,31 @@ export function showResult(root, result, mosaicCanvas) {
     <div class="mosaic-slot"></div>
     <div class="result-actions"></div>
   `;
+  if (result.receipts && result.receipts.length) {
+    const receipt = document.createElement('div');
+    receipt.className = 'receipt';
+    receipt.textContent = receiptLine(result.receipts);
+    el.querySelector('.message').after(receipt);
+  }
+  if (result.statsText) {
+    const stats = document.createElement('div');
+    stats.className = 'daily-stats';
+    stats.textContent = result.statsText;
+    el.querySelector('.timeline').after(stats);
+  }
   renderTimeline(el.querySelector('.timeline'), result.timeline || []);
   const slot = el.querySelector('.mosaic-slot');
   const actions = el.querySelector('.result-actions');
 
-  if (mosaicCanvas) {
-    mosaicCanvas.className = 'mosaic-canvas';
-    slot.appendChild(mosaicCanvas);
+  if (mosaic) {
+    mosaic.canvas.className = 'mosaic-canvas';
+    slot.appendChild(mosaic.canvas);
 
     const saveCard = document.createElement('button');
     saveCard.className = 'choice-btn save-btn';
     saveCard.textContent = '결과 카드 저장';
     saveCard.addEventListener('click', () => {
-      const card = createResultCardCanvas(result, mosaicCanvas);
+      const card = createResultCardCanvas(result, mosaic.full);
       downloadCanvas(card, resultFilename(result));
     });
     actions.appendChild(saveCard);
@@ -113,7 +129,7 @@ export function showResult(root, result, mosaicCanvas) {
     const save = document.createElement('button');
     save.className = 'choice-btn save-btn';
     save.textContent = '모자이크만 저장';
-    save.addEventListener('click', () => downloadCanvas(mosaicCanvas, `hueman-${result.topCategory}.png`));
+    save.addEventListener('click', () => downloadCanvas(mosaic.full, `hueman-${result.topCategory}.png`));
     actions.appendChild(save);
 
     const gallery = document.createElement('button');
@@ -122,7 +138,7 @@ export function showResult(root, result, mosaicCanvas) {
     gallery.addEventListener('click', () => {
       const store = browserGalleryStore();
       if (!store) return;
-      const card = createResultCardCanvas(result, mosaicCanvas);
+      const card = createResultCardCanvas(result, mosaic.full);
       store.add({
         image: card.toDataURL('image/png'),
         emotion: result.isComposite ? 'composite' : result.topCategory,
@@ -142,6 +158,7 @@ export function showResult(root, result, mosaicCanvas) {
 
   setTint(gradientFor(result.isComposite ? 'sad' : result.topCategory));
   mount(root, el);
+  if (mosaic && mosaic.play) requestAnimationFrame(() => mosaic.play());
 }
 
 function renderTimeline(el, timeline) {

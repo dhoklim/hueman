@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { createEngine, current, choose, advance, isEnding } from '../src/engine.js';
+import { createEngine, current, choose, advance, isEnding, receipts } from '../src/engine.js';
 
 const story = {
   start: 's0',
   scenes: {
     s0: { id: 's0', type: 'scene', text: '시작', emotion: 'joy', next: 's1' },
     s1: { id: 's1', type: 'choice', text: '고른다', emotion: 'anxiety', choices: [
-      { label: '왼쪽', effects: { deviation: 2 }, next: { variants: [
+      { label: '왼쪽', effects: { deviation: 2 }, receipt: '왼쪽으로 갔다', next: { variants: [
         { when: { deviation: '>=2' }, to: 'bad' },
         { default: true, to: 'good' },
       ]}},
@@ -44,5 +44,34 @@ describe('engine', () => {
   it('isEnding detects ending scenes', () => {
     expect(isEnding({ type: 'ending' })).toBe(true);
     expect(isEnding({ type: 'scene' })).toBe(false);
+  });
+});
+
+describe('engine path receipts', () => {
+  it('records each choice on the engine path', () => {
+    const e = createEngine(story);
+    advance(e);
+    choose(e, 0);
+    expect(e.path).toEqual([
+      { sceneId: 's1', index: 0, label: '왼쪽', receipt: '왼쪽으로 갔다' },
+    ]);
+  });
+
+  it('receipts returns only choices that carry a receipt line', () => {
+    const e = createEngine(story);
+    advance(e);
+    choose(e, 1); // '오른쪽' has no receipt
+    expect(e.path).toHaveLength(1);
+    expect(receipts(e)).toEqual([]);
+  });
+
+  it('receipts keeps the order choices were made', () => {
+    const e = createEngine(story);
+    e.path = [
+      { sceneId: 'a', index: 0, label: 'x', receipt: '넘어졌지만 일어났다' },
+      { sceneId: 'b', index: 1, label: 'y' },
+      { sceneId: 'c', index: 0, label: 'z', receipt: '내 길을 갔다' },
+    ];
+    expect(receipts(e)).toEqual(['넘어졌지만 일어났다', '내 길을 갔다']);
   });
 });
