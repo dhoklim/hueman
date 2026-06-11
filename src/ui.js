@@ -167,6 +167,10 @@ function renderTimeline(el, totals) {
     el.innerHTML = '<div class="timeline-empty">감정 타임라인은 체험이 진행되면 채워집니다</div>';
     return;
   }
+  const label = document.createElement('div');
+  label.className = 'timeline-label';
+  label.textContent = '감정 흐름';
+  el.before(label);
   const total = entries.reduce((s, [, v]) => s + v, 0);
   entries.sort((a, b) => b[1] - a[1]).forEach(([cat, dur]) => {
     const pct = Math.max(4, Math.round((dur / total) * 100));

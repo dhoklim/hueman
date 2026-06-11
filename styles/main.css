@@ -78,11 +78,15 @@ body {
 .result-actions { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
 .save-btn { padding: 12px 22px; font-size: 15px; }
 
+.timeline-label {
+  font-size: 11px; letter-spacing: .1em; opacity: .55;
+  margin-top: 18px; margin-bottom: 6px;
+}
 .timeline {
-  display: flex; width: min(520px, 84vw); height: 20px;
-  margin-top: 16px; overflow: hidden; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.22);
-  background: rgba(255,255,255,.12);
+  display: flex; width: min(520px, 84vw); height: 28px;
+  overflow: hidden; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.08);
 }
 .timeline-segment { display: block; min-width: 3px; }
 .timeline-empty {
@@ -92,7 +96,7 @@ body {
 .emotion-joy { background: #FFD23F; }
 .emotion-sad { background: #3B7DD8; }
 .emotion-anger { background: #E03131; }
-.emotion-numb { background: #555568; }
+.emotion-numb { background: #9090a8; }
 .emotion-anxiety { background: #FF8C2B; }
 .emotion-surprise { background: #2FB873; }
 
