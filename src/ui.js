@@ -93,8 +93,8 @@ export function showResult(root, result, mosaicCanvas) {
     <div class="label">당신의 인생을 가장 많이 채운 감정</div>
     <div class="top">${label}</div>
     <div class="message">${result.message}</div>
-    <div class="mosaic-slot"></div>
     <div class="timeline" aria-label="감정 타임라인"></div>
+    <div class="mosaic-slot"></div>
     <div class="result-actions"></div>
   `;
   if (result.receipts && result.receipts.length) {
