@@ -83,13 +83,14 @@ body {
   margin-top: 18px; margin-bottom: 6px;
 }
 .timeline {
-  display: flex; width: min(520px, 84vw); height: 32px;
+  display: flex; align-items: stretch;
+  width: min(520px, 84vw); height: 32px;
   overflow: hidden; border-radius: 999px;
   border: 2px solid rgba(255,255,255,.5);
   background: rgba(255,255,255,.15);
   box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 2px 12px rgba(0,0,0,.6);
 }
-.timeline-segment { display: block; min-width: 3px; }
+.timeline-segment { display: block; min-width: 3px; height: 100%; }
 .timeline-empty {
   font-size: 12px; opacity: .6; width: 100%;
   display: flex; align-items: center; justify-content: center;
