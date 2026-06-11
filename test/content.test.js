@@ -43,11 +43,12 @@ describe('story.json integrity', () => {
     }
   });
 
-  it('choice scenes have exactly two choices with labels', () => {
+  it('choice scenes have 2 to 6 choices with labels', () => {
     for (const id of ids) {
       const s = story.scenes[id];
       if (s.type !== 'choice') continue;
-      expect(s.choices.length, `${id}.choices`).toBe(2);
+      expect(s.choices.length, `${id}.choices`).toBeGreaterThanOrEqual(2);
+      expect(s.choices.length, `${id}.choices`).toBeLessThanOrEqual(6);
       for (const c of s.choices) expect(typeof c.label).toBe('string');
     }
   });

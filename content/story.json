@@ -1,132 +1,193 @@
 {
   "start": "opening",
   "scenes": {
-    "opening": { "id": "opening", "stage": "opening", "type": "scene", "emotion": "joy",
-      "text": "암흑 속, 작은 빛 한 점이 점점 커진다.\n갓난아기의 울음과 함께 세상이 노랗게 밝아온다.\n가족의 손들이 너를 감싼다.", "next": "infancy_daily" },
-
-    "infancy_daily": { "id": "infancy_daily", "stage": "infancy", "type": "scene", "emotion": "joy",
-      "text": "옹알이를 하고, 기어다니고, 소파에 처음으로 낙서를 한다.\n세상은 온통 처음이다.", "next": "infancy_cry_choice" },
-    "infancy_cry_choice": { "id": "infancy_cry_choice", "stage": "infancy", "type": "choice", "emotion": "anxiety",
-      "text": "넘어져 무릎이 까졌다. 울음이 차오른다.", "choices": [
-        { "label": "운다", "effects": {}, "next": "infancy_cry_yes" },
-        { "label": "참는다", "effects": {}, "next": "infancy_cry_no" }
+    "opening": { "id": "opening", "stage": "infancy", "type": "scene", "emotion": "joy",
+      "text": "요람에서 천천히 눈을 뜬다.\n흐릿한 시야 가득, 부모님의 얼굴이 들어온다.", "next": "infancy_milk" },
+    "infancy_milk": { "id": "infancy_milk", "stage": "infancy", "type": "scene", "emotion": "joy",
+      "text": "엄마의 품에 안겨 분유를 먹는다.\n따뜻하고 나른하다.", "next": "infancy_steps" },
+    "infancy_steps": { "id": "infancy_steps", "stage": "infancy", "type": "scene", "emotion": "joy",
+      "text": "아빠를 향해 비틀비틀 첫 걸음마.\n두 손이 너를 기다린다.", "next": "infancy_doodle" },
+    "infancy_doodle": { "id": "infancy_doodle", "stage": "infancy", "type": "scene", "emotion": "joy",
+      "text": "소파에 크레용으로 처음 낙서를 한다.\n온 세상이 도화지다.", "next": "doljabi_choice" },
+    "doljabi_choice": { "id": "doljabi_choice", "stage": "infancy", "type": "choice", "emotion": "joy",
+      "text": "돌잔치. 상 위에 놓인 것들 중 하나로 손이 간다.", "choices": [
+        { "label": "붓", "effects": {}, "next": "childhood_bike" },
+        { "label": "실", "effects": {}, "next": "childhood_bike" },
+        { "label": "돈", "effects": {}, "next": "childhood_bike" },
+        { "label": "종이", "effects": {}, "next": "childhood_bike" },
+        { "label": "청진기", "effects": {}, "next": "childhood_bike" },
+        { "label": "판사봉", "effects": {}, "next": "childhood_bike" }
       ]},
-    "infancy_cry_yes": { "id": "infancy_cry_yes", "stage": "infancy", "type": "scene", "emotion": "joy",
-      "text": "으앙— 울음을 터뜨리자 가족들이 달려와 안아준다.\n웃음과 박수가 쏟아진다.", "next": "childhood_daily" },
-    "infancy_cry_no": { "id": "infancy_cry_no", "stage": "infancy", "type": "scene", "emotion": "numb",
-      "text": "이를 악물고 울음을 삼킨다.\n아무도 모른 채 그 순간은 지나간다.", "next": "childhood_daily" },
 
-    "childhood_daily": { "id": "childhood_daily", "stage": "childhood", "type": "scene", "emotion": "anxiety",
-      "text": "엄마 손을 잡고 유치원에 가고, 받아쓰기 시험을 치고,\n드디어 체육대회 날이 밝았다.", "next": "childhood_fall_choice" },
+    "childhood_bike": { "id": "childhood_bike", "stage": "childhood", "type": "scene", "emotion": "joy",
+      "text": "보조바퀴 자전거를 타고 아빠에게 달려간다.", "next": "childhood_kinder" },
+    "childhood_kinder": { "id": "childhood_kinder", "stage": "childhood", "type": "scene", "emotion": "anxiety",
+      "text": "엄마 손을 잡고 처음 유치원에 가는 길.", "next": "childhood_school" },
+    "childhood_school": { "id": "childhood_school", "stage": "childhood", "type": "scene", "emotion": "anxiety",
+      "text": "초등학교 입학식. 큰 가방이 어깨를 누른다.", "next": "childhood_dictation" },
+    "childhood_dictation": { "id": "childhood_dictation", "stage": "childhood", "type": "scene", "emotion": "anxiety",
+      "text": "받아쓰기 시험. 연필 끝이 떨린다.", "next": "childhood_run" },
+    "childhood_run": { "id": "childhood_run", "stage": "childhood", "type": "scene", "emotion": "anxiety",
+      "text": "운동회 달리기. 출발 신호와 함께 힘껏 내달린다.", "next": "childhood_fall_choice" },
     "childhood_fall_choice": { "id": "childhood_fall_choice", "stage": "childhood", "type": "choice", "emotion": "anxiety",
-      "text": "달리기 결승선 직전, 발이 엉켜 넘어졌다. 무릎이 아리다.", "choices": [
-        { "label": "손을 내민다", "effects": { "warmth": 1 }, "next": "childhood_fall_helped" },
-        { "label": "혼자 일어선다", "effects": {}, "next": "childhood_fall_alone" }
+      "text": "결승선 직전, 발이 엉켜 넘어졌다. 무릎이 아리다.", "choices": [
+        { "label": "일어난다", "effects": { "grit": 1 }, "next": "childhood_fall_up" },
+        { "label": "포기한다", "effects": {}, "next": "childhood_fall_quit" }
       ]},
-    "childhood_fall_helped": { "id": "childhood_fall_helped", "stage": "childhood", "type": "scene", "emotion": "joy",
-      "text": "누군가 달려와 손을 잡아준다. 따뜻한 손.\n다시 일어나 함께 결승선을 넘는다.", "next": "adolescence_daily" },
-    "childhood_fall_alone": { "id": "childhood_fall_alone", "stage": "childhood", "type": "scene", "emotion": "sad",
-      "text": "아무에게도 기대지 않고 혼자 일어선다.\n텅 빈 운동장이 유난히 넓다.", "next": "adolescence_daily" },
+    "childhood_fall_up": { "id": "childhood_fall_up", "stage": "childhood", "type": "scene", "emotion": "joy",
+      "text": "이를 악물고 다시 일어나 끝까지 뛴다.\n결승선을 넘는다.", "next": "teen_uniform" },
+    "childhood_fall_quit": { "id": "childhood_fall_quit", "stage": "childhood", "type": "scene", "emotion": "sad",
+      "text": "그대로 주저앉는다.\n운동장이 천천히 흐려진다.", "next": "teen_uniform" },
 
-    "adolescence_daily": { "id": "adolescence_daily", "stage": "adolescence", "type": "scene", "emotion": "joy",
-      "text": "교실, 짝꿍, 졸린 오후 수업, 친구들과의 시끌벅적한 하교.", "next": "adolescence_confess_choice" },
-    "adolescence_confess_choice": { "id": "adolescence_confess_choice", "stage": "adolescence", "type": "choice", "emotion": "anxiety",
+    "teen_uniform": { "id": "teen_uniform", "stage": "adolescence", "type": "scene", "emotion": "joy",
+      "text": "교복을 처음 맞춰 입는다.\n거울 속 낯선 내가 어색하다.", "next": "teen_class" },
+    "teen_class": { "id": "teen_class", "stage": "adolescence", "type": "scene", "emotion": "numb",
+      "text": "나른한 오후 수업.\n창밖으로 자꾸 시선이 샌다.", "next": "teen_home" },
+    "teen_home": { "id": "teen_home", "stage": "adolescence", "type": "scene", "emotion": "joy",
+      "text": "친구들과 떠들며 하교하는 길.", "next": "teen_confess_choice" },
+    "teen_confess_choice": { "id": "teen_confess_choice", "stage": "adolescence", "type": "choice", "emotion": "anxiety",
       "text": "누군가 너에게 고백한다.\n\"나랑 사귈래?\"", "choices": [
-        { "label": "사귄다", "effects": { "dating": true }, "next": "adolescence_dating" },
-        { "label": "거절한다", "effects": {}, "next": "adolescence_single" }
-      ]},
-    "adolescence_dating": { "id": "adolescence_dating", "stage": "adolescence", "type": "scene", "emotion": "anxiety",
-      "text": "설렘과 다툼이 오가는 첫 연애.\n교복을 입고 손을 잡고 걷는다.", "next": "adolescence_smoke_choice" },
-    "adolescence_single": { "id": "adolescence_single", "stage": "adolescence", "type": "scene", "emotion": "numb",
-      "text": "혼자 밥을 먹고, 독서실에 앉는다.\n덤덤한 나날이 흐른다.", "next": "adolescence_smoke_choice" },
-
-    "adolescence_smoke_choice": { "id": "adolescence_smoke_choice", "stage": "adolescence", "type": "choice", "emotion": "anxiety",
-      "text": "쉬는 시간, 친구가 슬그머니 담배를 내민다.\n\"한 대 할래?\"", "choices": [
-        { "label": "받아들인다", "effects": { "deviation": 1 }, "next": "adolescence_deviant_1" },
-        { "label": "거절한다", "effects": {}, "next": "adolescence_model_1" }
+        { "label": "사귄다", "effects": { "dating": true }, "next": "date_1" },
+        { "label": "안 사귄다", "effects": {}, "next": "single_1" }
       ]},
 
-    "adolescence_deviant_1": { "id": "adolescence_deviant_1", "stage": "adolescence", "type": "scene", "emotion": "anger",
-      "text": "담배, 게임, 늦은 귀가가 쌓여간다.\n집과 부딪히는 날이 늘어난다.", "next": "adolescence_deviant_choice2" },
-    "adolescence_deviant_choice2": { "id": "adolescence_deviant_choice2", "stage": "adolescence", "type": "choice", "emotion": "anger",
-      "text": "부모님이 처음으로 크게 화를 냈다.\n더 멀리 나갈까, 여기서 멈출까.", "choices": [
-        { "label": "집을 나간다", "effects": { "deviation": 1 }, "next": "adolescence_family_counsel" },
-        { "label": "멈칫한다", "effects": {}, "next": "adolescence_family_counsel" }
+    "date_1": { "id": "date_1", "stage": "adolescence", "type": "scene", "emotion": "anxiety",
+      "text": "설레는 마음으로 손을 잡고 걷는다.", "next": "date_2" },
+    "date_2": { "id": "date_2", "stage": "adolescence", "type": "scene", "emotion": "joy",
+      "text": "수줍게 꽃 한 송이를 건넨다.", "next": "date_3" },
+    "date_3": { "id": "date_3", "stage": "adolescence", "type": "scene", "emotion": "anxiety",
+      "text": "데이트 중 걸려온 엄마의 전화를 슬쩍 끊는다.", "next": "date_4" },
+    "date_4": { "id": "date_4", "stage": "adolescence", "type": "scene", "emotion": "anger",
+      "text": "결국 엄마에게 크게 혼이 난다.", "next": "date_5" },
+    "date_5": { "id": "date_5", "stage": "adolescence", "type": "scene", "emotion": "sad",
+      "text": "\"우리 그만하자.\" 카톡을 보낸다.", "next": "date_6" },
+    "date_6": { "id": "date_6", "stage": "adolescence", "type": "scene", "emotion": "numb",
+      "text": "친구에게서 전화가 온다. 받는다.", "next": "date_7" },
+    "date_7": { "id": "date_7", "stage": "adolescence", "type": "scene", "emotion": "joy",
+      "text": "친구를 만나러 집을 나선다.", "next": "smoke_choice" },
+
+    "single_1": { "id": "single_1", "stage": "adolescence", "type": "scene", "emotion": "numb",
+      "text": "혼자 조용히 집으로 돌아간다.", "next": "single_2" },
+    "single_2": { "id": "single_2", "stage": "adolescence", "type": "scene", "emotion": "numb",
+      "text": "독서실에 앉아 묵묵히 공부한다.", "next": "single_3" },
+    "single_3": { "id": "single_3", "stage": "adolescence", "type": "scene", "emotion": "joy",
+      "text": "전화를 받고 친구를 만나러 나간다.", "next": "smoke_choice" },
+
+    "smoke_choice": { "id": "smoke_choice", "stage": "adolescence", "type": "choice", "emotion": "anxiety",
+      "text": "친구들이 슬그머니 담배를 권한다.", "choices": [
+        { "label": "받아들인다", "effects": { "deviated": 1 }, "next": "dev_1" },
+        { "label": "거절한다", "effects": {}, "next": "study_1" }
       ]},
-    "adolescence_family_counsel": { "id": "adolescence_family_counsel", "stage": "adolescence", "type": "scene", "emotion": "sad",
-      "text": "결국 온 가족이 마주 앉아 상담을 받게 된다.",
+
+    "dev_1": { "id": "dev_1", "stage": "adolescence", "type": "scene", "emotion": "anger",
+      "text": "처음으로 담배에 불을 붙인다.", "next": "dev_2" },
+    "dev_2": { "id": "dev_2", "stage": "adolescence", "type": "scene", "emotion": "anger",
+      "text": "놀이터에서 친구들과 술을 마신다.", "next": "dev_3" },
+    "dev_3": { "id": "dev_3", "stage": "adolescence", "type": "scene", "emotion": "numb",
+      "text": "담임선생님의 연락을 무시한다.", "next": "dev_4" },
+    "dev_4": { "id": "dev_4", "stage": "adolescence", "type": "scene", "emotion": "anger",
+      "text": "집에서 담배가 걸렸다. 공기가 얼어붙는다.", "next": "dev_counsel_choice" },
+    "dev_counsel_choice": { "id": "dev_counsel_choice", "stage": "adolescence", "type": "choice", "emotion": "sad",
+      "text": "온 가족이 마주 앉아 상담을 받는다.", "choices": [
+        { "label": "일탈을 계속한다", "effects": {}, "next": "prison_scene" },
+        { "label": "멈춘다", "effects": { "reformed": 1 }, "next": "study_1" }
+      ]},
+    "prison_scene": { "id": "prison_scene", "stage": "ending", "type": "scene", "emotion": "numb",
+      "text": "검은 화면이 길게 이어지다, 천천히 밝아지며 교도소.\n차가운 철문이 닫힌다.", "next": "ending_unfinished" },
+
+    "study_1": { "id": "study_1", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "학교에 앉아 묵묵히 공부한다.", "next": "study_2" },
+    "study_2": { "id": "study_2", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "모의고사를 채점한다. 빨간 펜이 바쁘다.", "next": "study_3" },
+    "study_3": { "id": "study_3", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "정시 상담을 받는다.", "next": "study_4" },
+    "study_4": { "id": "study_4", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "드디어 수능 시험을 친다.", "next": "study_5" },
+    "study_5": { "id": "study_5", "stage": "youth", "type": "scene", "emotion": "joy",
+      "text": "수능장을 나서며, 기다리던 부모님과 안긴다.", "next": "study_6" },
+    "study_6": { "id": "study_6", "stage": "youth", "type": "scene", "emotion": "joy",
+      "text": "대학 합격. 믿기지 않아 화면을 다시 본다.", "next": "study_7" },
+    "study_7": { "id": "study_7", "stage": "youth", "type": "scene", "emotion": "joy",
+      "text": "합격 방송을 보며 술잔을 부딪힌다.", "next": "study_8" },
+    "study_8": { "id": "study_8", "stage": "youth", "type": "scene", "emotion": "joy",
+      "text": "설레는 입학식.", "next": "study_9" },
+    "study_9": { "id": "study_9", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "과제로 밤을 샌다.", "next": "study_10" },
+    "study_10": { "id": "study_10", "stage": "youth", "type": "scene", "emotion": "numb",
+      "text": "생활비를 벌러 알바를 한다.", "next": "study_11" },
+    "study_11": { "id": "study_11", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "거리에서 창업 포스터를 발견한다. 가슴이 뛴다.", "next": "career_choice" },
+    "career_choice": { "id": "career_choice", "stage": "youth", "type": "choice", "emotion": "anger",
+      "text": "진로를 두고 부모님과 부딪힌다.", "choices": [
+        { "label": "내가 원하는 일을 한다", "effects": {}, "next": "startup_1" },
+        { "label": "부모님이 원하는 일을 한다", "effects": {}, "next": "job_1" }
+      ]},
+
+    "startup_1": { "id": "startup_1", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "동료들과 머리를 맞댄 창업 준비 회의.",
       "next": { "variants": [
-        { "when": { "deviation": ">=2" }, "to": "bad_ending" },
-        { "default": true, "to": "adolescence_rejoin" }
+        { "when": { "grit": ">=1" }, "to": "startup_success" },
+        { "default": true, "to": "startup_fail" }
       ]}},
-    "adolescence_rejoin": { "id": "adolescence_rejoin", "stage": "adolescence", "type": "scene", "emotion": "sad",
-      "text": "그날의 눈물 이후, 조금씩 마음을 다잡는다.", "next": "youth_daily" },
+    "startup_success": { "id": "startup_success", "stage": "youth", "type": "scene", "emotion": "joy",
+      "text": "결승선에서 끝까지 뛰었던 그 끈기로,\n끝내 투자설명회를 성공시킨다.\n어릴 적 일어났던 그 순간이 너를 여기까지 데려왔다.", "next": "blinddate_choice" },
+    "startup_fail": { "id": "startup_fail", "stage": "youth", "type": "scene", "emotion": "sad",
+      "text": "포기했던 그날의 운동장처럼, 사업은 끝내 무너진다.\n결국 부모님이 권하던 회사의 문을 두드린다.", "next": "job_6" },
 
-    "adolescence_model_1": { "id": "adolescence_model_1", "stage": "adolescence", "type": "scene", "emotion": "anxiety",
-      "text": "야간자율학습, 모의고사, 그리고 수능.\n끝없는 공부의 터널.", "next": "adolescence_model_2" },
-    "adolescence_model_2": { "id": "adolescence_model_2", "stage": "adolescence", "type": "scene", "emotion": "joy",
-      "text": "대학 합격 발표. 입학식, 새 친구들, 첫 MT.", "next": "youth_daily" },
+    "job_1": { "id": "job_1", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "취업 준비. 도서관과 스터디카페를 오간다.", "next": "job_2" },
+    "job_2": { "id": "job_2", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "첫 면접. 손끝이 차갑다.", "next": "job_3" },
+    "job_3": { "id": "job_3", "stage": "youth", "type": "scene", "emotion": "numb",
+      "text": "면접 끝의 술 한 잔.", "next": "job_4" },
+    "job_4": { "id": "job_4", "stage": "youth", "type": "scene", "emotion": "anxiety",
+      "text": "또 다른 면접.", "next": "job_5" },
+    "job_5": { "id": "job_5", "stage": "youth", "type": "scene", "emotion": "joy",
+      "text": "합격 메시지가 도착한다.", "next": "job_6" },
+    "job_6": { "id": "job_6", "stage": "midlife", "type": "scene", "emotion": "joy",
+      "text": "회사 입사 인사. 새 명함을 받는다.", "next": "job_7" },
+    "job_7": { "id": "job_7", "stage": "midlife", "type": "scene", "emotion": "numb",
+      "text": "반복되는 근무의 나날.", "next": "blinddate_choice" },
 
-    "bad_ending": { "id": "bad_ending", "stage": "ending", "type": "scene", "emotion": "numb",
-      "text": "이야기는 여기서 멈춘다.\n하지만 끝이 빠르다고 해서, 틀린 길이었던 것은 아니다.", "next": "art_ending" },
-
-    "youth_daily": { "id": "youth_daily", "stage": "youth", "type": "scene", "emotion": "joy",
-      "text": "대학과 군대, 연애와 첫 취업.\n술자리와 여행으로 가득한 청춘.", "next": "youth_conflict_choice" },
-    "youth_conflict_choice": { "id": "youth_conflict_choice", "stage": "youth", "type": "choice", "emotion": "anger",
-      "text": "진로를 두고 부모님과 크게 부딪힌다.\n내 길을 갈까, 부모님 뜻을 따를까.",
-      "textVariants": [
-        { "when": { "warmth": ">=1" }, "text": "어릴 적 잡았던 따뜻한 손이 문득 떠오른다.\n진로를 두고 부모님과 크게 부딪힌다.\n내 길을 갈까, 부모님 뜻을 따를까." },
-        { "when": { "deviation": ">=1" }, "text": "한 번 멀리 나가봤던 마음은 아직 안에 남아 있다.\n진로를 두고 부모님과 크게 부딪힌다.\n내 길을 갈까, 부모님 뜻을 따를까." }
-      ],
-      "choices": [
-        { "label": "내가 원하는 길", "effects": { "conflict": 1 }, "next": "youth_conflict" },
-        { "label": "부모님이 원하는 길", "effects": { "adapt": 1 }, "next": "youth_adapt" }
+    "blinddate_choice": { "id": "blinddate_choice", "stage": "midlife", "type": "choice", "emotion": "anxiety",
+      "text": "\"소개팅 받을래?\" 친구가 묻는다.", "choices": [
+        { "label": "소개팅을 나간다", "effects": {}, "next": "marry_arranged_1" },
+        { "label": "첫사랑에게 전화를 한다", "effects": {}, "next": "marry_love_1" },
+        { "label": "결혼을 하지 않는다", "effects": {}, "next": "single_funeral_choice" }
       ]},
-    "youth_conflict": { "id": "youth_conflict", "stage": "youth", "type": "scene", "emotion": "anger",
-      "text": "내 고집대로 길을 간다.\n자유롭지만, 부모와는 멀어진다.", "next": "midlife_marriage_choice" },
-    "youth_adapt": { "id": "youth_adapt", "stage": "youth", "type": "scene", "emotion": "sad",
-      "text": "부모님 뜻을 따른다.\n안정되었지만 어딘가 조금 비어 있다.", "next": "midlife_marriage_choice" },
 
-    "midlife_marriage_choice": { "id": "midlife_marriage_choice", "stage": "midlife", "type": "choice", "emotion": "anxiety",
-      "text": "함께 늙어갈 사람을 만났다.\n같이 살아갈까, 혼자의 삶을 택할까.", "choices": [
-        { "label": "결혼한다", "effects": { "warmth": 1 }, "next": "midlife_married" },
-        { "label": "혼자 산다", "effects": {}, "next": "midlife_single" }
+    "marry_arranged_1": { "id": "marry_arranged_1", "stage": "midlife", "type": "scene", "emotion": "joy",
+      "text": "조건을 맞춰 식을 올린다. 성대한 결혼식.", "next": "marry_arranged_2" },
+    "marry_arranged_2": { "id": "marry_arranged_2", "stage": "midlife", "type": "scene", "emotion": "numb",
+      "text": "큰 집. 넓지만, 두 사람 사이는 어딘가 서늘하다.", "next": "elder_common" },
+
+    "marry_love_1": { "id": "marry_love_1", "stage": "midlife", "type": "scene", "emotion": "joy",
+      "text": "오래 묻어둔 마음으로, 첫사랑과 식을 올린다.", "next": "marry_love_2" },
+    "marry_love_2": { "id": "marry_love_2", "stage": "midlife", "type": "scene", "emotion": "joy",
+      "text": "작은 집. 좁지만, 웃음이 끊이지 않는다.", "next": "elder_common" },
+
+    "single_funeral_choice": { "id": "single_funeral_choice", "stage": "elder", "type": "choice", "emotion": "sad",
+      "text": "일하던 중, 친구의 장례식 연락이 온다.", "choices": [
+        { "label": "간다", "effects": {}, "next": "funeral_go" },
+        { "label": "안 간다", "effects": {}, "next": "lonely_death" }
       ]},
-    "midlife_married": { "id": "midlife_married", "stage": "midlife", "type": "scene", "emotion": "joy",
-      "text": "결혼, 직장, 육아의 무게.\n웃음과 다툼이 뒤섞인 하루하루.", "next": "elder_entry" },
-    "midlife_single": { "id": "midlife_single", "stage": "midlife", "type": "scene", "emotion": "numb",
-      "text": "혼자의 삶을 택한다.\n자유롭지만, 집은 늘 고요하다.", "next": "elder_entry" },
+    "funeral_go": { "id": "funeral_go", "stage": "elder", "type": "scene", "emotion": "sad",
+      "text": "오랜 친구들과 둘러앉아 회식한다.", "next": "funeral_death" },
+    "funeral_death": { "id": "funeral_death", "stage": "elder", "type": "scene", "emotion": "sad",
+      "text": "친구들에게 둘러싸인 채, 조용히 눈을 감는다.", "next": "ending_common" },
+    "lonely_death": { "id": "lonely_death", "stage": "ending", "type": "scene", "emotion": "numb",
+      "text": "아무도 모른 채, 홀로 생을 마친다.", "next": "ending_unfinished" },
 
-    "elder_entry": { "id": "elder_entry", "stage": "elder", "type": "scene", "emotion": "sad",
-      "text": "세월이 흐르고, 곁을 지키던 사람을 먼저 떠나보낸다.",
+    "elder_common": { "id": "elder_common", "stage": "elder", "type": "scene", "emotion": "sad",
+      "text": "세월이 흐른다. 노년의 어느 날, 천천히 눈을 감는다.",
       "textVariants": [
-        { "when": { "conflict": ">=1" }, "text": "네 길을 고집하며 살아온 세월이 지나고,\n곁을 지키던 사람을 먼저 떠나보낸다." },
-        { "when": { "adapt": ">=1" }, "text": "많은 날을 맞추며 살아온 세월이 지나고,\n곁을 지키던 사람을 먼저 떠나보낸다." }
+        { "when": { "reformed": ">=1" }, "text": "세월이 흐르고, 어느 날 병원에서 진단을 받는다.\n하얀 병실에서, 천천히 눈을 감는다." }
       ],
-      "next": "elder_distance_choice" },
-    "elder_distance_choice": { "id": "elder_distance_choice", "stage": "elder", "type": "choice", "emotion": "sad",
-      "text": "자식과의 거리.\n함께 살까, 혼자 지낼까.", "choices": [
-        { "label": "함께 산다", "effects": { "warmth": 1 }, "next": "elder_illness" },
-        { "label": "혼자 지낸다", "effects": {}, "next": "elder_illness" }
-      ]},
-    "elder_illness": { "id": "elder_illness", "stage": "elder", "type": "scene", "emotion": "sad",
-      "text": "어느 날, 몸속에서 암을 발견한다.", "next": "elder_death" },
-    "elder_death": { "id": "elder_death", "stage": "elder", "type": "scene", "emotion": "numb",
-      "text": "그리고 끝내, 죽음을 맞이한다.",
-      "next": { "variants": [
-        { "when": { "warmth": ">=2" }, "to": "ending_warm" },
-        { "default": true, "to": "ending_lonely" }
-      ]}},
-    "ending_warm": { "id": "ending_warm", "stage": "ending", "type": "scene", "emotion": "joy",
-      "text": "곁에는 사람들이 있었다.\n손을 잡힌 채, 천천히 눈을 감는다.", "next": "art_ending" },
-    "ending_lonely": { "id": "ending_lonely", "stage": "ending", "type": "scene", "emotion": "sad",
-      "text": "홀로, 조용한 방에서 눈을 감는다.",
-      "textVariants": [
-        { "when": { "warmth": ">=1" }, "text": "홀로, 조용한 방에서 눈을 감는다.\n그래도 삶 어딘가에는 누군가의 손이 남아 있었다." }
-      ],
-      "next": "art_ending" },
+      "next": "ending_common" },
 
-    "art_ending": { "id": "art_ending", "stage": "ending", "type": "ending", "emotion": "joy",
-      "text": "기뻤던 순간도, 두려웠던 순간도,\n슬프고 후회하고 멍했던 순간도.\n전부 다 네가 살아있었다는 뜻이다.\n불필요한 감정은 없었다. 그 모든 감정이, 너였다." }
+    "ending_common": { "id": "ending_common", "stage": "ending", "type": "ending", "emotion": "numb",
+      "text": "죽음 앞에서 모든 표정은 조용해졌습니다.\n하지만 사라지기 전, 당신은 알 수 있었습니다.\n울었던 날도, 웃었던 날도 그 모든 선택의 결과는 틀린 날이 아니었다는 것을.\n그 모든 흔적이 당신이라는 삶의 모양이었습니다." },
+    "ending_unfinished": { "id": "ending_unfinished", "stage": "ending", "type": "ending", "emotion": "numb",
+      "text": "당신의 이야기는 여기서 끝났습니다.\n그러나 당신이 느꼈던 감정들은 사라지지 않습니다.\n기쁨은 당신이 사랑한 것을, 슬픔은 당신이 잃은 것을, 두려움은 당신이 지키고 싶었던 것을 알려주었습니다.\n그 모든 흔적이 당신이라는 삶의 모양이었습니다." }
   }
 }

@@ -46,11 +46,10 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
   if (scene.type === 'choice') {
     const wrap = document.createElement('div');
     wrap.className = 'choices';
-    const keys = [['1', '←'], ['2', '→']];
     scene.choices.forEach((c, i) => {
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
-      btn.innerHTML = `${c.label}<span class="choice-key">[${keys[i][0]}] 또는 ${keys[i][1]}</span>`;
+      btn.innerHTML = `${c.label}<span class="choice-key">[${i + 1}]</span>`;
       btn.addEventListener('click', () => onChoice && onChoice(i));
       wrap.appendChild(btn);
     });
@@ -59,8 +58,10 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     mount(root, el);
 
     keyHandler = (e) => {
-      if (e.key === '1' || e.key === 'ArrowLeft') onChoice && onChoice(0);
-      else if (e.key === '2' || e.key === 'ArrowRight') onChoice && onChoice(1);
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= scene.choices.length) { onChoice && onChoice(n - 1); return; }
+      if (e.key === 'ArrowLeft') onChoice && onChoice(0);
+      else if (e.key === 'ArrowRight' && scene.choices.length >= 2) onChoice && onChoice(1);
     };
     document.addEventListener('keydown', keyHandler);
   } else {
