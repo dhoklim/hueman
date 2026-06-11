@@ -54,7 +54,7 @@ describe('ui.showResult', () => {
       topCategory: 'sad',
       isComposite: false,
       message: '메시지다',
-      timeline: [{ emotion: 'joy', percent: 40 }, { emotion: 'sad', percent: 60 }],
+      totals: { joy: 4000, sad: 6000 },
     }, canvas);
 
     expect(root.querySelectorAll('.timeline-segment')).toHaveLength(2);

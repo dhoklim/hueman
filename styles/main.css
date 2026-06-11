@@ -84,15 +84,7 @@ body {
   border: 1px solid rgba(255,255,255,.22);
   background: rgba(255,255,255,.12);
 }
-.timeline-segment {
-  display: block; min-width: 3px;
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.6s ease-out;
-}
-.scene.show .timeline-segment {
-  transform: scaleX(1);
-}
+.timeline-segment { display: block; min-width: 3px; }
 .timeline-empty {
   font-size: 12px; opacity: .6; width: 100%;
   display: flex; align-items: center; justify-content: center;
@@ -100,7 +92,7 @@ body {
 .emotion-joy { background: #FFD23F; }
 .emotion-sad { background: #3B7DD8; }
 .emotion-anger { background: #E03131; }
-.emotion-numb { background: #1A1A1A; }
+.emotion-numb { background: #555568; }
 .emotion-anxiety { background: #FF8C2B; }
 .emotion-surprise { background: #2FB873; }
 

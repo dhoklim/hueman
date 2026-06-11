@@ -109,7 +109,7 @@ export function showResult(root, result, mosaicCanvas) {
     stats.textContent = result.statsText;
     el.querySelector('.timeline').after(stats);
   }
-  renderTimeline(el.querySelector('.timeline'), result.timeline || []);
+  renderTimeline(el.querySelector('.timeline'), result.totals || {});
   const slot = el.querySelector('.mosaic-slot');
   const actions = el.querySelector('.result-actions');
 
@@ -161,18 +161,19 @@ export function showResult(root, result, mosaicCanvas) {
   if (mosaic && mosaic.play) requestAnimationFrame(() => mosaic.play());
 }
 
-function renderTimeline(el, timeline) {
-  if (!timeline.length) {
+function renderTimeline(el, totals) {
+  const entries = Object.entries(totals).filter(([, v]) => v > 0);
+  if (!entries.length) {
     el.innerHTML = '<div class="timeline-empty">감정 타임라인은 체험이 진행되면 채워집니다</div>';
     return;
   }
-
-  timeline.forEach((item, i) => {
+  const total = entries.reduce((s, [, v]) => s + v, 0);
+  entries.sort((a, b) => b[1] - a[1]).forEach(([cat, dur]) => {
+    const pct = Math.max(4, Math.round((dur / total) * 100));
     const seg = document.createElement('span');
-    seg.className = `timeline-segment emotion-${item.emotion}`;
-    seg.style.width = `${Math.max(3, item.percent)}%`;
-    seg.style.animationDelay = `${i * 80}ms`;
-    seg.title = `${CATEGORY_LABELS[item.category] || item.emotion} ${item.percent}%`;
+    seg.className = `timeline-segment emotion-${cat}`;
+    seg.style.width = `${pct}%`;
+    seg.title = `${CATEGORY_LABELS[cat] || cat} ${pct}%`;
     el.appendChild(seg);
   });
 }
