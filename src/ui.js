@@ -93,8 +93,8 @@ export function showResult(root, result, mosaicCanvas) {
     <div class="label">당신의 인생을 가장 많이 채운 감정</div>
     <div class="top">${label}</div>
     <div class="message">${result.message}</div>
-    <div class="timeline" aria-label="감정 타임라인"></div>
     <div class="mosaic-slot"></div>
+    <div class="timeline" aria-label="감정 타임라인"></div>
     <div class="result-actions"></div>
   `;
   if (result.receipts && result.receipts.length) {
@@ -109,7 +109,8 @@ export function showResult(root, result, mosaicCanvas) {
     stats.textContent = result.statsText;
     el.querySelector('.timeline').after(stats);
   }
-  renderTimeline(el.querySelector('.timeline'), result.timeline || []);
+  const timelineEl = el.querySelector('.timeline');
+  renderTimeline(timelineEl, result.timeline || []);
   const slot = el.querySelector('.mosaic-slot');
   const actions = el.querySelector('.result-actions');
 
@@ -158,7 +159,14 @@ export function showResult(root, result, mosaicCanvas) {
 
   setTint(gradientFor(result.isComposite ? 'sad' : result.topCategory));
   mount(root, el);
-  if (mosaic && mosaic.play) requestAnimationFrame(() => mosaic.play());
+  if (mosaic && mosaic.play) {
+    requestAnimationFrame(() => {
+      mosaic.play();
+      setTimeout(() => timelineEl.classList.add('animate'), 400);
+    });
+  } else {
+    setTimeout(() => timelineEl.classList.add('animate'), 300);
+  }
 }
 
 function renderTimeline(el, timeline) {
@@ -167,13 +175,14 @@ function renderTimeline(el, timeline) {
     return;
   }
 
-  for (const item of timeline) {
+  timeline.forEach((item, i) => {
     const seg = document.createElement('span');
     seg.className = `timeline-segment emotion-${item.emotion}`;
     seg.style.width = `${Math.max(3, item.percent)}%`;
+    seg.style.animationDelay = `${i * 80}ms`;
     seg.title = `${CATEGORY_LABELS[item.category] || item.emotion} ${item.percent}%`;
     el.appendChild(seg);
-  }
+  });
 }
 
 function downloadCanvas(canvas, filename) {

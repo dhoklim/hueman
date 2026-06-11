@@ -69,7 +69,7 @@ body {
 }
 
 /* System C — 포토 모자이크 결과 */
-.mosaic-slot { margin-top: 22px; }
+.mosaic-slot { margin-top: 22px; margin-bottom: 4px; }
 .mosaic-canvas {
   width: min(460px, 82vw); height: auto;
   image-rendering: auto;
@@ -79,12 +79,23 @@ body {
 .save-btn { padding: 12px 22px; font-size: 15px; }
 
 .timeline {
-  display: flex; width: min(520px, 84vw); height: 14px;
-  margin-top: 18px; overflow: hidden; border-radius: 999px;
+  display: flex; width: min(520px, 84vw); height: 20px;
+  margin-top: 16px; overflow: hidden; border-radius: 999px;
   border: 1px solid rgba(255,255,255,.22);
   background: rgba(255,255,255,.12);
 }
-.timeline-segment { display: block; min-width: 3px; }
+.timeline-segment {
+  display: block; min-width: 3px;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.timeline.animate .timeline-segment {
+  animation: timeline-fill 0.7s ease-out both;
+}
+@keyframes timeline-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
 .timeline-empty {
   font-size: 12px; opacity: .6; width: 100%;
   display: flex; align-items: center; justify-content: center;
