@@ -109,8 +109,7 @@ export function showResult(root, result, mosaicCanvas) {
     stats.textContent = result.statsText;
     el.querySelector('.timeline').after(stats);
   }
-  const timelineEl = el.querySelector('.timeline');
-  renderTimeline(timelineEl, result.timeline || []);
+  renderTimeline(el.querySelector('.timeline'), result.timeline || []);
   const slot = el.querySelector('.mosaic-slot');
   const actions = el.querySelector('.result-actions');
 
@@ -159,14 +158,7 @@ export function showResult(root, result, mosaicCanvas) {
 
   setTint(gradientFor(result.isComposite ? 'sad' : result.topCategory));
   mount(root, el);
-  if (mosaic && mosaic.play) {
-    requestAnimationFrame(() => {
-      mosaic.play();
-      setTimeout(() => timelineEl.classList.add('animate'), 400);
-    });
-  } else {
-    setTimeout(() => timelineEl.classList.add('animate'), 300);
-  }
+  if (mosaic && mosaic.play) requestAnimationFrame(() => mosaic.play());
 }
 
 function renderTimeline(el, timeline) {
