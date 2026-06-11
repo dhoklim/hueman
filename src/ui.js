@@ -161,6 +161,11 @@ export function showResult(root, result, mosaicCanvas) {
   if (mosaic && mosaic.play) requestAnimationFrame(() => mosaic.play());
 }
 
+const TIMELINE_COLORS = {
+  joy: '#FFD23F', sad: '#3B7DD8', anger: '#E03131',
+  numb: '#c8c8dc', anxiety: '#FF8C2B', surprise: '#2FB873',
+};
+
 function renderTimeline(el, totals) {
   const entries = Object.entries(totals).filter(([, v]) => v > 0);
   if (!entries.length) {
@@ -172,11 +177,23 @@ function renderTimeline(el, totals) {
   label.textContent = '감정 흐름';
   el.before(label);
   const total = entries.reduce((s, [, v]) => s + v, 0);
-  entries.sort((a, b) => b[1] - a[1]).forEach(([cat, dur]) => {
+  const sorted = [...entries].sort((a, b) => b[1] - a[1]);
+  // Set bar background directly as a gradient — avoids flex-child height quirks
+  let pos = 0;
+  const stops = sorted.flatMap(([cat, dur]) => {
+    const pct = Math.max(4, Math.round((dur / total) * 100));
+    const color = TIMELINE_COLORS[cat] || '#888';
+    const start = pos;
+    pos = Math.min(pos + pct, 100);
+    return [`${color} ${start}%`, `${color} ${pos}%`];
+  });
+  el.style.background = `linear-gradient(to right, ${stops.join(', ')})`;
+  // Transparent spans kept for DOM structure (tests, tooltips)
+  sorted.forEach(([cat, dur]) => {
     const pct = Math.max(4, Math.round((dur / total) * 100));
     const seg = document.createElement('span');
     seg.className = `timeline-segment emotion-${cat}`;
-    seg.style.width = `${pct}%`;
+    seg.style.cssText = `width:${pct}%;background:transparent;`;
     seg.title = `${CATEGORY_LABELS[cat] || cat} ${pct}%`;
     el.appendChild(seg);
   });
