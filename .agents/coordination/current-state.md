@@ -24,6 +24,12 @@ Last updated: 2026-06-11 20:20 KST by Claude Code
 - `npm run build`: passes. 번들 ~1.34MB (face-api/tfjs 포함, gzip ~339KB).
 - 개발 서버가 `/models/*` 서빙 200. 실제 웹캠 감지는 브라우저에서만 검증 가능.
 
+## Out of Scope (명시적 제외)
+
+- **심박 센서 Web Bluetooth** — 구현 안 함
+- **복합 감정 색 혼합** (isComposite 시 그라디언트 틴트) — 구현 안 함
+- **키오스크 모드** (어트랙트 루프, 자동 리셋, 전체화면·커서 숨김) — 구현 안 함
+
 ## Next Useful Checks
 
 - 동작 변경 전 `npm test`, 배포/전달 전 `npm run build`.
