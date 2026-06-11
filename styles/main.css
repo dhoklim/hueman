@@ -45,12 +45,14 @@ body {
   color: #fff; border-radius: 14px; padding: 16px 30px;
   font-size: 18px; font-weight: 600; cursor: pointer; backdrop-filter: blur(4px);
   transition: background .15s, transform .15s;
+  touch-action: manipulation;
 }
 .choice-btn:hover { background: rgba(255,255,255,.26); transform: translateY(-2px); }
 .choice-key { display: block; font-size: 12px; opacity: .6; margin-top: 5px; font-weight: 400; }
 
 .result {
-  gap: 6px; overflow-y: auto; justify-content: flex-start;
+  gap: 6px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  justify-content: flex-start;
   padding-top: max(32px, 6vh); padding-bottom: max(32px, 6vh);
 }
 .result .label { font-size: 14px; letter-spacing: .12em; opacity: .8; }
@@ -202,4 +204,9 @@ body {
   .choice-btn { width: min(100%, 320px); padding: 14px 20px; }
   #debug-panel { max-width: 92vw; width: calc(100vw - 24px); }
   #cam-preview { width: 104px; height: 78px; }
+  .hint { display: none; }
+  .intro-how { display: none; }
+  .intro-test { display: none; }
+  .scene-text { font-size: clamp(18px, 4.8vw, 28px); }
+  .result .message { font-size: clamp(15px, 4vw, 22px); }
 }
