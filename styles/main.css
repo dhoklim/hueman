@@ -83,10 +83,11 @@ body {
   margin-top: 18px; margin-bottom: 6px;
 }
 .timeline {
-  display: flex; width: min(520px, 84vw); height: 28px;
+  display: flex; width: min(520px, 84vw); height: 32px;
   overflow: hidden; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.35);
-  background: rgba(255,255,255,.08);
+  border: 2px solid rgba(255,255,255,.5);
+  background: rgba(255,255,255,.15);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 2px 12px rgba(0,0,0,.6);
 }
 .timeline-segment { display: block; min-width: 3px; }
 .timeline-empty {
@@ -96,7 +97,7 @@ body {
 .emotion-joy { background: #FFD23F; }
 .emotion-sad { background: #3B7DD8; }
 .emotion-anger { background: #E03131; }
-.emotion-numb { background: #9090a8; }
+.emotion-numb { background: #c8c8dc; }
 .emotion-anxiety { background: #FF8C2B; }
 .emotion-surprise { background: #2FB873; }
 
