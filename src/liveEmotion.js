@@ -29,7 +29,7 @@ export async function startLiveEmotion({ onEmotion } = {}) {
   document.body.appendChild(video);
 
   try {
-    await loadModels('/models');
+    await loadModels(`${import.meta.env.BASE_URL}models`);
     stream = await startCamera(video);
   } catch (e) {
     stopLiveEmotion();
