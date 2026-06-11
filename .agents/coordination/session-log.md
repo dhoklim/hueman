@@ -1,5 +1,11 @@
 # Session Log
 
+## 2026-06-11
+
+- 20:20 KST | Claude Code | 결과 화면 3기능 구현(TDD) — ① 선택 경로 영수증: `engine.path` 기록 + `receipts()`, story.json 전 선택지(21개)에 `receipt` 문구, 결과 화면 `.receipt` + 결과 카드에 출력. ② 오늘의 감정 통계: `src/dailyStats.js`(일별 익명 카운트, localStorage, 날짜 롤오버) + `statsLine()` → 결과 화면 `.daily-stats` "N번의 인생 중…". ③ 모자이크 타임랩스: `src/mosaicReveal.js`(결정적 셔플 `revealOrder`, 프레임 분할 `revealBatches`, `createReveal`) — 타일이 차오르는 리빌, 저장/카드는 항상 완성본(full) 사용. Verification: `npm test` 80 passed (17 files, +22); `npm run build` exit 0; Playwright 스모크 — 카메라 없이 2회 완주, 영수증 5건 표시, 통계 1회차 "첫 번째 인생"→2회차 누적, 콘솔 에러 0. Lock taken+released.
+- 18:13 KST | Claude Code | 10x 전략 분석 세션 2 작성 — `.claude/docs/ai/hueman/10x/session-2.md` (세션 1 후속; 제안서 대비 격차 분석: 영상 씬 레이어, 키오스크 모드, QR 가져가기, 리빙 갤러리 월, 오늘의 감정 통계, 돌잡이 콜백, 갤러리 용량 보호 등 우선순위 정리). 문서 작업만 — 코드 변경 없음. Verification: 문서 작성 확인; 직전 `npm test` 58 passed, `npm run build` passed.
+- 18:06 KST | Claude Code | `content/story.json` 전면 교체 — 사용자 `영상분기모음.docx`의 전체 분기 트리 반영(유아기 돌잡이 6지선다, 유년기 넘어짐 grit, 청소년기 연애/담배, 일탈→교도소 / 갱생→공부, 창업 grit 성패 회상, 부모루트 취업, 소개팅 3지선다, 결혼/장례/고독사, 노년기 reformed→병원 진단사 변형, 엔딩멘트 2종 common/unfinished). `src/ui.js` 선택 UI 2지→N지 일반화(숫자키 1..N). `test/content.test.js` 선택지 2~6개 허용. Verification: `npm test` 58 passed (15 files); `npm run build` passed; Playwright 두 경로(전부 1/전부 2) 끝까지 도달, 선택지 2/3/6개 렌더, 콘솔 에러 0. Lock taken+released.
+
 ## 2026-06-08
 
 - 10:29 KST | Codex | Checked project status to recommend next work. Verification: `npm test` passed 35 tests in 8 files; `npm run build` passed; `git status --short` reports this is not a Git repository.
