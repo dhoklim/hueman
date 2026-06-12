@@ -3,8 +3,8 @@
 import { loadModels, startCamera, detectExpressions } from './faceEmotion.js';
 import { expressionToEmotion, smooth } from './emotionMapping.js';
 
-const TICK_MS = 700;
-const HISTORY = 6;
+const TICK_MS = 600;
+const HISTORY = 4;
 
 let timer = null;
 let stream = null;

@@ -52,7 +52,7 @@ function handleEmotion(info) {
 
   if (camVideo) {
     if (!getTarget()) setTargetFrom(camVideo); // 첫 프레임 = 타깃 얼굴
-    else if (tickCount % 2 === 0) addTile(camVideo, info.emotion); // 이후 ~1.4초마다 타일
+    else addTile(camVideo, info.emotion); // 이후 매 틱마다 타일
     tickCount++;
   }
 

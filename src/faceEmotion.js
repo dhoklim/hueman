@@ -22,7 +22,7 @@ export async function startCamera(video) {
 
 // video 한 프레임에서 표정 확률 객체 반환. 얼굴 없으면 null.
 export async function detectExpressions(video) {
-  const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
+  const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 });
   const result = await faceapi.detectSingleFace(video, options).withFaceExpressions();
   return result ? result.expressions : null;
 }
