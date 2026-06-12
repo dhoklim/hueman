@@ -8,35 +8,43 @@ let keyHandler = null;
 let bgVideoEl = null;
 let currentVideoFile = null;
 
-function setBgVideo(videoFile) {
-  if (videoFile === currentVideoFile) return;
-  currentVideoFile = videoFile;
+// opts.loop  = true  → 영상 반복 (선택지 장면)
+// opts.onEnded = fn  → 영상 1회 재생 후 자동 호출 (나레이션 장면 자동 진행)
+function setBgVideo(videoFile, opts = {}) {
+  const { loop = false, onEnded = null } = opts;
 
-  if (videoFile) {
-    if (!bgVideoEl) {
-      bgVideoEl = document.createElement('video');
-      bgVideoEl.id = 'bg-video';
-      bgVideoEl.muted = true;
-      bgVideoEl.loop = true;
-      bgVideoEl.setAttribute('playsinline', '');
-      bgVideoEl.setAttribute('webkit-playsinline', '');
-      // tint 앞에 삽입 (DOM 순서상 tint가 위에 쌓임)
-      const tint = document.getElementById('tint');
-      document.body.insertBefore(bgVideoEl, tint || document.body.firstChild);
-    }
-    const src = `${import.meta.env.BASE_URL}video/${videoFile}`;
-    bgVideoEl.src = src;
+  // 이전 ended 핸들러 항상 교체
+  if (bgVideoEl) bgVideoEl.onended = null;
+
+  if (!videoFile) {
+    currentVideoFile = null;
+    if (bgVideoEl) { bgVideoEl.style.display = 'none'; bgVideoEl.src = ''; }
+    if (tintEl) tintEl.style.opacity = '1';
+    return;
+  }
+
+  if (!bgVideoEl) {
+    bgVideoEl = document.createElement('video');
+    bgVideoEl.id = 'bg-video';
+    bgVideoEl.muted = true;
+    bgVideoEl.setAttribute('playsinline', '');
+    bgVideoEl.setAttribute('webkit-playsinline', '');
+    const tint = document.getElementById('tint');
+    document.body.insertBefore(bgVideoEl, tint || document.body.firstChild);
+  }
+
+  // 파일이 달라질 때만 새로 로드 — 같은 영상은 이어서 재생
+  if (videoFile !== currentVideoFile) {
+    currentVideoFile = videoFile;
+    bgVideoEl.src = `${import.meta.env.BASE_URL}video/${videoFile}`;
     bgVideoEl.load();
     bgVideoEl.play().catch(() => {});
-    bgVideoEl.style.display = 'block';
-    if (tintEl) tintEl.style.opacity = '0.55';
-  } else {
-    if (bgVideoEl) {
-      bgVideoEl.style.display = 'none';
-      bgVideoEl.src = '';
-    }
-    if (tintEl) tintEl.style.opacity = '1';
   }
+
+  bgVideoEl.loop = loop;
+  bgVideoEl.onended = onEnded;
+  bgVideoEl.style.display = 'block';
+  if (tintEl) tintEl.style.opacity = '0.55';
 }
 
 function clearKeys() {
@@ -69,8 +77,19 @@ function mount(root, sceneEl) {
   requestAnimationFrame(() => sceneEl.classList.add('show'));
 }
 
+// 영상이 있는 장면: 대사를 delay ms 후 페이드인
+function delayedFadeIn(el, delay) {
+  el.style.opacity = '0';
+  setTimeout(() => {
+    if (!document.body.contains(el)) return;
+    el.style.transition = 'opacity 0.8s ease';
+    el.style.opacity = '1';
+  }, delay);
+}
+
 export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
   const el = document.createElement('div');
+  const videoFile = SCENE_VIDEOS[scene.id] || null;
 
   const text = document.createElement('div');
   text.className = 'scene-text';
@@ -89,8 +108,13 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     });
     el.appendChild(wrap);
     setTint(gradientFor(scene.emotion));
-    setBgVideo(SCENE_VIDEOS[scene.id] || null);
+    // 선택지: 영상 반복, 대사 1.5s → 버튼 2.2s 페이드인
+    setBgVideo(videoFile, { loop: true });
     mount(root, el);
+    if (videoFile) {
+      delayedFadeIn(text, 1500);
+      delayedFadeIn(wrap, 2200);
+    }
 
     keyHandler = (e) => {
       const n = parseInt(e.key, 10);
@@ -100,14 +124,19 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     };
     document.addEventListener('keydown', keyHandler);
   } else {
-    const hint = document.createElement('div');
-    hint.className = 'hint';
-    hint.textContent = '클릭 · Space · Enter 로 계속';
-    el.appendChild(hint);
+    // 나레이션: 영상이 끝나면 자동 진행, 클릭/키도 여전히 동작
+    const hasVideo = !!videoFile;
+    if (!hasVideo) {
+      const hint = document.createElement('div');
+      hint.className = 'hint';
+      hint.textContent = '클릭 · Space · Enter 로 계속';
+      el.appendChild(hint);
+    }
     el.addEventListener('click', () => onAdvance && onAdvance());
     setTint(gradientFor(scene.emotion));
-    setBgVideo(SCENE_VIDEOS[scene.id] || null);
+    setBgVideo(videoFile, { onEnded: hasVideo ? () => onAdvance?.() : null });
     mount(root, el);
+    if (hasVideo) delayedFadeIn(text, 1500);
 
     keyHandler = (e) => {
       if (e.key === ' ' || e.key === 'Enter') onAdvance && onAdvance();
