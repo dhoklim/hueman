@@ -7,21 +7,29 @@ import { SCENE_VIDEOS } from './videoMap.js';
 let keyHandler = null;
 let bgVideoEl = null;
 let currentVideoFile = null;
+let bgTimer = null; // 구간 타이머 — 장면 전환 시 항상 취소
 
-// opts.loop  = true  → 영상 반복 (선택지 장면)
-// opts.onEnded = fn  → 영상 1회 재생 후 자동 호출 (나레이션 장면 자동 진행)
-function setBgVideo(videoFile, opts = {}) {
-  const { loop = false, onEnded = null } = opts;
-
-  // 이전 ended 핸들러 항상 교체
+// 진행 중인 구간 타이머와 ended 핸들러를 모두 해제
+function clearBgTimer() {
+  if (bgTimer !== null) { clearTimeout(bgTimer); bgTimer = null; }
   if (bgVideoEl) bgVideoEl.onended = null;
+}
 
-  if (!videoFile) {
+// videoConfig: { file, start, end } | null
+// opts.loop   = true  → 구간 끝에서 구간 처음으로 반복 (선택지 장면)
+// opts.onEnded = fn   → 구간 1회 재생 후 자동 호출 (나레이션 장면 자동 진행)
+function setBgVideo(videoConfig, opts = {}) {
+  const { loop = false, onEnded = null } = opts;
+  clearBgTimer();
+
+  if (!videoConfig) {
     currentVideoFile = null;
     if (bgVideoEl) { bgVideoEl.style.display = 'none'; bgVideoEl.src = ''; }
     if (tintEl) tintEl.style.opacity = '1';
     return;
   }
+
+  const { file, start = 0, end = null } = videoConfig;
 
   if (!bgVideoEl) {
     bgVideoEl = document.createElement('video');
@@ -33,18 +41,47 @@ function setBgVideo(videoFile, opts = {}) {
     document.body.insertBefore(bgVideoEl, tint || document.body.firstChild);
   }
 
-  // 파일이 달라질 때만 새로 로드 — 같은 영상은 이어서 재생
-  if (videoFile !== currentVideoFile) {
-    currentVideoFile = videoFile;
-    bgVideoEl.src = `${import.meta.env.BASE_URL}video/${videoFile}`;
-    bgVideoEl.load();
-    bgVideoEl.play().catch(() => {});
-  }
-
-  bgVideoEl.loop = loop;
-  bgVideoEl.onended = onEnded;
+  bgVideoEl.loop = false; // 구간 루프는 bgTimer로 직접 관리
   bgVideoEl.style.display = 'block';
   if (tintEl) tintEl.style.opacity = '0.55';
+
+  // 구간 시작 + 타이머 설정
+  const beginSegment = () => {
+    bgVideoEl.currentTime = start;
+    bgVideoEl.play().catch(() => {});
+
+    if (end !== null) {
+      // setTimeout으로 구간 끝 감지 (timeupdate보다 정밀)
+      const scheduleNext = () => {
+        const remaining = Math.max(0, (end - bgVideoEl.currentTime) * 1000);
+        bgTimer = setTimeout(() => {
+          bgTimer = null;
+          if (loop) {
+            bgVideoEl.currentTime = start;
+            bgVideoEl.play().catch(() => {});
+            scheduleNext();
+          } else {
+            onEnded?.();
+          }
+        }, remaining);
+      };
+      scheduleNext();
+    } else {
+      // end 없음: 파일 전체 끝날 때
+      bgVideoEl.onended = loop
+        ? () => { bgVideoEl.currentTime = 0; bgVideoEl.play().catch(() => {}); }
+        : onEnded;
+    }
+  };
+
+  if (file !== currentVideoFile) {
+    currentVideoFile = file;
+    bgVideoEl.src = `${import.meta.env.BASE_URL}video/${file}`;
+    bgVideoEl.load();
+    bgVideoEl.addEventListener('canplay', beginSegment, { once: true });
+  } else {
+    beginSegment();
+  }
 }
 
 function clearKeys() {
@@ -89,7 +126,13 @@ function delayedFadeIn(el, delay) {
 
 export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
   const el = document.createElement('div');
-  const videoFile = SCENE_VIDEOS[scene.id] || null;
+  const videoConfig = SCENE_VIDEOS[scene.id] || null;
+
+  // 구간 길이(ms)에 따라 텍스트 페이드인 딜레이 계산
+  const segMs = videoConfig && videoConfig.end != null
+    ? (videoConfig.end - videoConfig.start) * 1000
+    : Infinity;
+  const textDelay = segMs < 5000 ? 600 : segMs < 10000 ? 1000 : 1500;
 
   const text = document.createElement('div');
   text.className = 'scene-text';
@@ -108,12 +151,12 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     });
     el.appendChild(wrap);
     setTint(gradientFor(scene.emotion));
-    // 선택지: 영상 반복, 대사 1.5s → 버튼 2.2s 페이드인
-    setBgVideo(videoFile, { loop: true });
+    // 선택지: 구간 반복, 대사 → 버튼 순서로 페이드인
+    setBgVideo(videoConfig, { loop: true });
     mount(root, el);
-    if (videoFile) {
-      delayedFadeIn(text, 1500);
-      delayedFadeIn(wrap, 2200);
+    if (videoConfig) {
+      delayedFadeIn(text, textDelay);
+      delayedFadeIn(wrap, textDelay + 700);
     }
 
     keyHandler = (e) => {
@@ -124,8 +167,8 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     };
     document.addEventListener('keydown', keyHandler);
   } else {
-    // 나레이션: 영상이 끝나면 자동 진행, 클릭/키도 여전히 동작
-    const hasVideo = !!videoFile;
+    // 나레이션: 구간이 끝나면 자동 진행, 클릭/키도 여전히 동작
+    const hasVideo = !!videoConfig;
     if (!hasVideo) {
       const hint = document.createElement('div');
       hint.className = 'hint';
@@ -134,9 +177,9 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     }
     el.addEventListener('click', () => onAdvance && onAdvance());
     setTint(gradientFor(scene.emotion));
-    setBgVideo(videoFile, { onEnded: hasVideo ? () => onAdvance?.() : null });
+    setBgVideo(videoConfig, { onEnded: hasVideo ? () => onAdvance?.() : null });
     mount(root, el);
-    if (hasVideo) delayedFadeIn(text, 1500);
+    if (hasVideo) delayedFadeIn(text, textDelay);
 
     keyHandler = (e) => {
       if (e.key === ' ' || e.key === 'Enter') onAdvance && onAdvance();
