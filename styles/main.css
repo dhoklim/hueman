@@ -6,8 +6,16 @@ body {
 }
 #app { position: relative; z-index: 1; }
 
+/* 배경 영상 레이어 — tint 아래(DOM 순서), 앱 콘텐츠 뒤 */
+#bg-video {
+  position: fixed; inset: 0; z-index: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  display: none;
+}
+
 /* 실시간 감정 색이 칠해지는 전체화면 틴트 레이어 (System B) */
-#tint { position: fixed; inset: 0; z-index: 0; transition: background 0.9s ease; background: #000; }
+#tint { position: fixed; inset: 0; z-index: 0; transition: background 0.9s ease, opacity 0.6s ease; background: #000; }
 
 /* 테스트용 웹캠 미리보기 (좌우 반전 거울) */
 #cam-preview {

@@ -2,8 +2,42 @@ import { gradientFor } from './emotionColor.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
 import { browserGalleryStore } from './gallery.js';
 import { createResultCardCanvas, resultFilename, receiptLine } from './resultCard.js';
+import { SCENE_VIDEOS } from './videoMap.js';
 
 let keyHandler = null;
+let bgVideoEl = null;
+let currentVideoFile = null;
+
+function setBgVideo(videoFile) {
+  if (videoFile === currentVideoFile) return;
+  currentVideoFile = videoFile;
+
+  if (videoFile) {
+    if (!bgVideoEl) {
+      bgVideoEl = document.createElement('video');
+      bgVideoEl.id = 'bg-video';
+      bgVideoEl.muted = true;
+      bgVideoEl.loop = true;
+      bgVideoEl.setAttribute('playsinline', '');
+      bgVideoEl.setAttribute('webkit-playsinline', '');
+      // tint 앞에 삽입 (DOM 순서상 tint가 위에 쌓임)
+      const tint = document.getElementById('tint');
+      document.body.insertBefore(bgVideoEl, tint || document.body.firstChild);
+    }
+    const src = `${import.meta.env.BASE_URL}video/${videoFile}`;
+    bgVideoEl.src = src;
+    bgVideoEl.load();
+    bgVideoEl.play().catch(() => {});
+    bgVideoEl.style.display = 'block';
+    if (tintEl) tintEl.style.opacity = '0.55';
+  } else {
+    if (bgVideoEl) {
+      bgVideoEl.style.display = 'none';
+      bgVideoEl.src = '';
+    }
+    if (tintEl) tintEl.style.opacity = '1';
+  }
+}
 
 function clearKeys() {
   if (keyHandler) {
@@ -55,6 +89,7 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     });
     el.appendChild(wrap);
     setTint(gradientFor(scene.emotion));
+    setBgVideo(SCENE_VIDEOS[scene.id] || null);
     mount(root, el);
 
     keyHandler = (e) => {
@@ -71,6 +106,7 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     el.appendChild(hint);
     el.addEventListener('click', () => onAdvance && onAdvance());
     setTint(gradientFor(scene.emotion));
+    setBgVideo(SCENE_VIDEOS[scene.id] || null);
     mount(root, el);
 
     keyHandler = (e) => {
@@ -157,6 +193,7 @@ export function showResult(root, result, mosaicCanvas) {
   actions.appendChild(statement);
 
   setTint(gradientFor(result.isComposite ? 'sad' : result.topCategory));
+  setBgVideo(null); // 결과 화면에서는 배경 영상 없음
   mount(root, el);
   if (mosaic && mosaic.play) requestAnimationFrame(() => mosaic.play());
 }
@@ -293,6 +330,7 @@ export function renderIntro(root, { onStart } = {}) {
   el.querySelector('.intro-gallery').addEventListener('click', () => openGallery());
   el.querySelector('.intro-statement').addEventListener('click', () => openStatement());
   setTint(INTRO_BG);
+  setBgVideo(null);
   mount(root, el);
 
   keyHandler = (e) => {
