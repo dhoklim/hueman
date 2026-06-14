@@ -1,13 +1,20 @@
 import story from '../content/story.json';
 import { createEngine, current, choose, advance, isEnding, receipts } from './engine.js';
-import { renderIntro, renderScene, showResult, setTint } from './ui.js';
+import { renderIntro, renderScene, showResult } from './ui.js';
 import { createLog, record, aggregate, emotionTimeline } from './experienceLog.js';
-import { gradientFor } from './emotionColor.js';
 import { browserDailyStats, statsLine } from './dailyStats.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
 import { createReveal } from './mosaicReveal.js';
 import { startLiveEmotion, stopLiveEmotion, setFallback } from './liveEmotion.js';
-import { setTargetFrom, addTile, getTarget, getTiles, hasEnough, reset as resetSnapshots } from './snapshots.js';
+import {
+  captureTargetFrom,
+  captureTargetWhenReady,
+  addTile,
+  getTarget,
+  getTiles,
+  hasEnough,
+  reset as resetSnapshots,
+} from './snapshots.js';
 import { buildMosaic } from './mosaic.js';
 import { updateDebug } from './debug.js';
 import { resolveSceneText } from './storyText.js';
@@ -21,6 +28,10 @@ let webcamActive = false;
 let camVideo = null;
 let tickCount = 0;
 let live = { active: false, emotion: null, detected: null, faceFound: false, tiles: 0, hasTarget: false };
+let introSetLoading = null;
+let introSetCaptureReady = null;
+let starting = false; // begin() 재진입 가드 — 로딩 중 중복 시작 방지
+let gameStarted = false;
 
 const WEBCAM_TICK_MS = 700;
 
@@ -39,9 +50,14 @@ function logCurrent() {
   enteredAt = now;
 }
 
-// 웹캠 감지 콜백: 관람자 감정으로 화면을 물들이고, 실제 감정 기록 + 모자이크 재료 수집
+// 웹캠 감지 콜백: 실제 감정 기록 + 모자이크 재료 수집. 화면 영상은 원본 색으로 유지한다.
 function handleEmotion(info) {
-  setTint(gradientFor(info.emotion));
+  if (!gameStarted) {
+    live = { active: true, ...info, tiles: getTiles().length, hasTarget: !!getTarget() };
+    updateDebug(engine, log, live);
+    return;
+  }
+
   record(log, {
     sceneId: current(engine).id,
     emotion: info.emotion,
@@ -51,8 +67,8 @@ function handleEmotion(info) {
   });
 
   if (camVideo) {
-    if (!getTarget()) setTargetFrom(camVideo); // 첫 프레임 = 타깃 얼굴
-    else addTile(camVideo, info.emotion); // 이후 매 틱마다 타일
+    if (!getTarget()) captureTargetFrom(camVideo);
+    if (getTarget()) addTile(camVideo, info.emotion);
     tickCount++;
   }
 
@@ -94,22 +110,39 @@ function show() {
 }
 
 async function begin(withCamera) {
+  if (starting) return; // 로딩 중 클릭/키 중복 진입 차단
+  starting = true;
   enableSound();
   if (withCamera) {
+    introSetLoading?.('카메라와 모델을 불러오는 중…');
     try {
       resetSnapshots();
       tickCount = 0;
       camVideo = await startLiveEmotion({ onEmotion: handleEmotion });
       webcamActive = true;
-      live.active = true;
+      live = { ...live, active: true, hasTarget: !!getTarget() };
+      introSetCaptureReady?.(async () => {
+        introSetLoading?.('사진을 찍는 중…');
+        const captured = await captureTargetWhenReady(camVideo);
+        if (!captured) console.warn('모자이크 기준 사진을 아직 찍지 못했습니다. 체험 중 다시 시도합니다.');
+        live = { ...live, hasTarget: !!getTarget() };
+        gameStarted = true;
+        enteredAt = Date.now();
+        show();
+        starting = false;
+      });
+      return;
     } catch (e) {
       console.warn('카메라 사용 불가 — 장면 색으로 진행합니다.', e);
+      introSetLoading?.(null);
       webcamActive = false;
       camVideo = null;
     }
   }
+  gameStarted = true;
   enteredAt = Date.now();
   show();
+  starting = false;
 }
 
 document.addEventListener('keydown', (e) => {
@@ -117,4 +150,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 // 인트로(간단한 설명) → 카메라 켜고/없이 시작
-renderIntro(root, { onStart: begin });
+const { setLoading, setCaptureReady } = renderIntro(root, { onStart: begin });
+introSetLoading = setLoading;
+introSetCaptureReady = setCaptureReady;

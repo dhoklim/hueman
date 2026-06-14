@@ -36,9 +36,9 @@ export function updateDebug(engine, log, live = {}) {
 
   let camHtml;
   if (live.active) {
-    const applied = EMOTIONS[live.emotion] || {};
-    const det = live.detected ? (EMOTIONS[live.detected]?.label || live.detected) : '얼굴 없음';
-    camHtml = `<span class="swatch" style="background:${applied.hex || '#888'}"></span> ${det} → <b>${applied.label || live.emotion}</b>`;
+    camHtml = live.faceFound
+      ? '<span>ON · 얼굴 감지됨</span>'
+      : '<span>ON · 얼굴 없음</span>';
   } else {
     camHtml = '<span class="dim">OFF · 장면 색 사용</span>';
   }

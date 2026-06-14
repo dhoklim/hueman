@@ -1,6 +1,6 @@
 // 감정 키 → 색/카테고리. hueman 제안서 4장 표.
 // aggregate=false 인 감정(놀람)은 위로 메시지 집계에서 제외한다.
-// System B 는 나중에 실시간 웹캠 감정으로 이 색을 덮어쓴다.
+// 결과 집계/타임라인/모자이크 색 분류에 사용한다. 화면 영상은 원본 색으로 둔다.
 export const EMOTIONS = {
   joy:      { label: '기쁨',   hex: '#FFD23F', category: 'joy',      aggregate: true },
   sad:      { label: '슬픔',   hex: '#3B7DD8', category: 'sad',      aggregate: true },

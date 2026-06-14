@@ -1,5 +1,5 @@
-// 웹캠 프레임 캡처 → 타깃 얼굴 1장 + 표정 스냅샷 타일들 보관. (System C)
-// 타일은 캡처 시점의 감정 색 필터를 입혀 저장한다 (System B의 화면 색을 사진에도 반영).
+// 웹캠 프레임 캡처 → 게임 시작 전 타깃 얼굴 1장 + 표정 스냅샷 타일들 보관. (System C)
+// 타일은 캡처 시점의 감정 색 필터를 입혀 저장한다.
 import { hexFor } from './emotionColor.js';
 
 const TARGET_SIZE = 480; // 타깃(얼굴) 해상도
@@ -28,11 +28,30 @@ function captureSquare(video, size) {
   return c;
 }
 
-export function setTargetFrom(video) {
-  if (target) return;
-  const c = captureSquare(video, TARGET_SIZE);
-  if (c) target = c;
+function nextFrame() {
+  return new Promise((resolve) => {
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(resolve);
+    else setTimeout(resolve, 16);
+  });
 }
+
+export function captureTargetFrom(video) {
+  if (target) return true;
+  const c = captureSquare(video, TARGET_SIZE);
+  if (!c) return false;
+  target = c;
+  return true;
+}
+
+export async function captureTargetWhenReady(video, attempts = 24) {
+  for (let i = 0; i < attempts; i++) {
+    if (captureTargetFrom(video)) return true;
+    await nextFrame();
+  }
+  return false;
+}
+
+export const setTargetFrom = captureTargetFrom;
 
 export function addTile(video, emotion) {
   if (tiles.length >= MAX_TILES) return;

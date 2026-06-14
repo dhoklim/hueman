@@ -1,5 +1,25 @@
 # Session Log
 
+## 2026-06-14
+
+- 22:50 KST | Codex | Changed mosaic target capture from automatic camera-ready capture to manual red `사진 찍기` button capture before the first scene. The game waits on the intro screen until the button is pressed. Verification: `npm test -- test/mainLiveEmotion.test.js --run` 2 passed; `npm test -- test/ui.test.js --run` 12 passed; `npm test -- --run` 92 passed; `npm run build` passed (existing chunk-size warning).
+- 22:46 KST | Codex | Added pre-game photo mosaic target capture and mosaic zoom: camera start now waits for a target face photo before first scene, emotion ticks add tiles against that target, and result mosaics get a `크게 보기` overlay. Added regression coverage in `test/mainLiveEmotion.test.js` and `test/ui.test.js`. Verification: `npm test -- --run` 91 passed; `npm run build` passed (existing chunk-size warning). Browser plugin `iab` unavailable in this session.
+- 22:38 KST | Codex | Kept screen/video output visually original: `#tint` now stays transparent, mapped video scenes are tested to remain unobstructed, and visible intro/artist copy no longer says emotions color the screen. Verification: `npm test -- --run` 89 passed; `npm run build` passed (existing chunk-size warning).
+- 22:27 KST | Codex | Removed on-screen viewer-current-emotion color display: webcam emotion no longer recolors `#tint`, debug camera row no longer shows emotion color/name, and intro/test copy no longer says camera colors the screen. Added regression tests in `test/mainLiveEmotion.test.js` and `test/debug.test.js`. Verification: `npm test -- test/mainLiveEmotion.test.js test/debug.test.js --run` 2 passed; `npm test -- --run` 88 passed; `npm run build` passed (existing chunk-size warning).
+- 22:04 KST | Codex | Restored video playback for `study_2` and `study_5`: split `담배 권유 NO- 모의고사공부.mp4` between `study_1`/`study_2`, split `담배 권유 NO- 수능.mp4` between `study_4`/`study_5`, and adjusted those two dialogue lines to match the available clips. Added `test/videoMap.test.js` assertion that required study scenes stay mapped. Verification: `npm test -- test/videoMap.test.js --run` 5 passed; `npm test -- --run` 86 passed; `npm run build` passed.
+- 21:56 KST | Codex | Tightened video/dialog matching after user reported remaining mismatches: removed legacy fallback clips (`childhood.mp4`, `teen.mp4`, `no-date.mp4`, `smoke-no.mp4`, `startup.mp4`) from `src/videoMap.js`, leaving uncertain scenes text-only; made `elder_common` use one fixed hospital-dialog text; expanded `test/videoMap.test.js` to require documented videos only and no conditional text for mapped scenes. Verification: `npm test -- test/videoMap.test.js --run` 4 passed; mapping audit issues 0; `npm test -- --run` 85 passed; `npm run build` passed. Browser plugin `iab` unavailable; dev server started at `127.0.0.1:5173/hueman/`.
+- 21:51 KST | Codex | Enforced video/dialog consistency: added `test/videoMap.test.js` to require existing mapped scenes/files and no duplicate `file#start-end` clips; split reused video clips in `src/videoMap.js`; adjusted 소개팅/첫사랑 path text in `content/story.json` to match available clips. Verification: `npm test -- test/videoMap.test.js --run` passed; `npm test -- --run` 83 passed; `npm run build` passed; duplicate clip script returned none.
+- 21:34 KST | Codex | Bug hunt: checked tests/build, story graph reachability, video map file existence, and ffprobe durations. Findings: current tests pass after `test/emotionMapping.test.js` was updated in the working tree; active issues are overlong video segment end times and possible result-screen video cleanup. Verification: `npm test -- --run` 81 passed; `npm run build` passed; story traversal no loops/dangling targets; video files all present.
+
+## 2026-06-13
+
+- 01:53 KST | Codex | Regenerated `video/영상_장면_설명.txt` for replaced `video/` contents: 60 current mp4/MOV files, scene descriptions and approximate time ranges. Verification: video count 60, document entries 60, read generated txt.
+
+## 2026-06-12
+
+- 14:54 KST | Codex | Updated `video/영상_장면_설명.txt` with approximate start/end timestamps for each scene segment across all 11 videos. Verification: read generated txt; lock taken+released.
+- 14:30 KST | Codex | Created `video/영상_장면_설명.txt` describing all 11 mp4 scenes in `video/` using extracted representative frames plus `content/story.json` context. Verification: read generated txt; lock taken+released.
+
 ## 2026-06-11
 
 - 20:20 KST | Claude Code | 결과 화면 3기능 구현(TDD) — ① 선택 경로 영수증: `engine.path` 기록 + `receipts()`, story.json 전 선택지(21개)에 `receipt` 문구, 결과 화면 `.receipt` + 결과 카드에 출력. ② 오늘의 감정 통계: `src/dailyStats.js`(일별 익명 카운트, localStorage, 날짜 롤오버) + `statsLine()` → 결과 화면 `.daily-stats` "N번의 인생 중…". ③ 모자이크 타임랩스: `src/mosaicReveal.js`(결정적 셔플 `revealOrder`, 프레임 분할 `revealBatches`, `createReveal`) — 타일이 차오르는 리빌, 저장/카드는 항상 완성본(full) 사용. Verification: `npm test` 80 passed (17 files, +22); `npm run build` exit 0; Playwright 스모크 — 카메라 없이 2회 완주, 영수증 5건 표시, 통계 1회차 "첫 번째 인생"→2회차 누적, 콘솔 에러 0. Lock taken+released.

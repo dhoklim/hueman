@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { renderIntro, renderScene, showResult } from '../src/ui.js';
 
 describe('ui.renderIntro', () => {
@@ -15,13 +15,43 @@ describe('ui.renderIntro', () => {
     root.querySelector('.intro-start-plain').click();
     expect(onStart).toHaveBeenCalledWith(false);
   });
+
+  it('shows a red photo capture button when camera is ready', () => {
+    const root = document.createElement('div');
+    const onCapture = vi.fn();
+    const intro = renderIntro(root, { onStart: vi.fn() });
+
+    intro.setCaptureReady(onCapture);
+
+    const button = root.querySelector('.photo-capture-btn');
+    expect(button).toBeTruthy();
+    expect(button.textContent).toContain('사진 찍기');
+    button.click();
+    expect(onCapture).toHaveBeenCalled();
+  });
 });
 
 describe('ui.renderScene', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('renders narration text for a scene', () => {
     const root = document.createElement('div');
     renderScene(root, { type: 'scene', text: '안녕', emotion: 'joy' }, {});
     expect(root.textContent).toContain('안녕');
+  });
+
+  it('keeps mapped video scenes unobstructed by the tint overlay', () => {
+    vi.spyOn(window.HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
+    vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+    const root = document.createElement('div');
+
+    renderScene(root, { id: 'opening', type: 'scene', text: '안녕', emotion: 'joy' }, {});
+
+    const tint = document.getElementById('tint');
+    expect(tint.style.background).toBe('transparent');
+    expect(tint.style.opacity).toBe('0');
   });
 
   it('renders two buttons for a choice and fires onChoice', () => {
@@ -60,6 +90,20 @@ describe('ui.showResult', () => {
     expect(root.querySelectorAll('.timeline-segment')).toHaveLength(2);
     expect(root.textContent).toContain('결과 카드 저장');
     expect(root.textContent).toContain('갤러리에 남기기');
+  });
+
+  it('opens a zoom overlay for the completed mosaic', () => {
+    const root = document.createElement('div');
+    const canvas = document.createElement('canvas');
+    showResult(root, { topCategory: 'joy', isComposite: false, message: '메시지다' }, canvas);
+
+    const zoom = [...root.querySelectorAll('button')]
+      .find((button) => button.textContent === '크게 보기');
+    zoom.click();
+
+    const overlay = document.querySelector('.mosaic-zoom-overlay');
+    expect(overlay).toBeTruthy();
+    expect(overlay.querySelector('canvas')).not.toBe(canvas);
   });
 
   it('shows the path receipt when choices were recorded', () => {

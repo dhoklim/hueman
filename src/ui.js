@@ -1,4 +1,3 @@
-import { gradientFor } from './emotionColor.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
 import { browserGalleryStore } from './gallery.js';
 import { createResultCardCanvas, resultFilename, receiptLine } from './resultCard.js';
@@ -8,24 +7,29 @@ let keyHandler = null;
 let bgVideoEl = null;
 let currentVideoFile = null;
 let bgTimer = null; // 구간 타이머 — 장면 전환 시 항상 취소
+let pendingCanplay = null; // 로드 대기 중인 canplay 핸들러 — 장면 전환 시 함께 해제
 
-// 진행 중인 구간 타이머와 ended 핸들러를 모두 해제
+// 진행 중인 구간 타이머·ended 핸들러·대기 중 canplay 리스너를 모두 해제
 function clearBgTimer() {
   if (bgTimer !== null) { clearTimeout(bgTimer); bgTimer = null; }
-  if (bgVideoEl) bgVideoEl.onended = null;
+  if (bgVideoEl) {
+    bgVideoEl.onended = null;
+    if (pendingCanplay) { bgVideoEl.removeEventListener('canplay', pendingCanplay); pendingCanplay = null; }
+  }
 }
 
 // videoConfig: { file, start, end } | null
-// opts.loop   = true  → 구간 끝에서 구간 처음으로 반복 (선택지 장면)
+// opts.freeze  = true → 구간 끝에서 마지막 프레임 정지 (선택지 장면)
+// opts.loop    = true → 구간 끝에서 구간 처음으로 반복
 // opts.onEnded = fn   → 구간 1회 재생 후 자동 호출 (나레이션 장면 자동 진행)
 function setBgVideo(videoConfig, opts = {}) {
-  const { loop = false, onEnded = null } = opts;
+  const { loop = false, freeze = false, onEnded = null } = opts;
   clearBgTimer();
 
   if (!videoConfig) {
     currentVideoFile = null;
     if (bgVideoEl) { bgVideoEl.style.display = 'none'; bgVideoEl.src = ''; }
-    if (tintEl) tintEl.style.opacity = '1';
+    if (tintEl) tintEl.style.opacity = '0';
     return;
   }
 
@@ -43,7 +47,7 @@ function setBgVideo(videoConfig, opts = {}) {
 
   bgVideoEl.loop = false; // 구간 루프는 bgTimer로 직접 관리
   bgVideoEl.style.display = 'block';
-  if (tintEl) tintEl.style.opacity = '0.55';
+  if (tintEl) tintEl.style.opacity = '0';
 
   // 구간 시작 + 타이머 설정
   const beginSegment = () => {
@@ -60,6 +64,8 @@ function setBgVideo(videoConfig, opts = {}) {
             bgVideoEl.currentTime = start;
             bgVideoEl.play().catch(() => {});
             scheduleNext();
+          } else if (freeze) {
+            bgVideoEl.pause(); // 마지막 프레임에서 정지
           } else {
             onEnded?.();
           }
@@ -78,6 +84,7 @@ function setBgVideo(videoConfig, opts = {}) {
     currentVideoFile = file;
     bgVideoEl.src = `${import.meta.env.BASE_URL}video/${file}`;
     bgVideoEl.load();
+    pendingCanplay = beginSegment;
     bgVideoEl.addEventListener('canplay', beginSegment, { once: true });
   } else {
     beginSegment();
@@ -91,18 +98,16 @@ function clearKeys() {
   }
 }
 
-// 모든 감정 색을 띠처럼 깐 인트로 배경
-const INTRO_BG = 'radial-gradient(circle at 50% 35%, #2b2b3a 0%, #0e0e14 72%)';
-
-// 항상 떠 있는 전체화면 틴트 레이어. System B 가 실시간 감정 색으로 매 틱 갱신한다.
+// 틴트 레이어는 호환성상 유지하지만, 영상/화면은 원본 색으로 보이도록 항상 투명하게 둔다.
 let tintEl = null;
-export function setTint(background) {
+export function setTint() {
   if (!tintEl) {
     tintEl = document.getElementById('tint') || document.createElement('div');
     tintEl.id = 'tint';
     if (!tintEl.parentNode) document.body.insertBefore(tintEl, document.body.firstChild);
   }
-  tintEl.style.background = background;
+  tintEl.style.background = 'transparent';
+  tintEl.style.opacity = '0';
 }
 
 function mount(root, sceneEl) {
@@ -150,9 +155,9 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
       wrap.appendChild(btn);
     });
     el.appendChild(wrap);
-    setTint(gradientFor(scene.emotion));
-    // 선택지: 구간 반복, 대사 → 버튼 순서로 페이드인
-    setBgVideo(videoConfig, { loop: true });
+    setTint();
+    // 선택지: 구간 1회 재생 후 마지막 프레임 정지, 대사 → 버튼 순서로 페이드인
+    setBgVideo(videoConfig, { freeze: true });
     mount(root, el);
     if (videoConfig) {
       delayedFadeIn(text, textDelay);
@@ -168,6 +173,9 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     document.addEventListener('keydown', keyHandler);
   } else {
     // 나레이션: 구간이 끝나면 자동 진행, 클릭/키도 여전히 동작
+    // 클릭·키·영상 onEnded 세 경로가 같은 onAdvance 를 부르므로 한 번만 실행되도록 가드
+    let advanced = false;
+    const advanceOnce = () => { if (advanced) return; advanced = true; onAdvance && onAdvance(); };
     const hasVideo = !!videoConfig;
     if (!hasVideo) {
       const hint = document.createElement('div');
@@ -175,14 +183,14 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
       hint.textContent = '클릭 · Space · Enter 로 계속';
       el.appendChild(hint);
     }
-    el.addEventListener('click', () => onAdvance && onAdvance());
-    setTint(gradientFor(scene.emotion));
-    setBgVideo(videoConfig, { onEnded: hasVideo ? () => onAdvance?.() : null });
+    el.addEventListener('click', advanceOnce);
+    setTint();
+    setBgVideo(videoConfig, { onEnded: hasVideo ? advanceOnce : null });
     mount(root, el);
     if (hasVideo) delayedFadeIn(text, textDelay);
 
     keyHandler = (e) => {
-      if (e.key === ' ' || e.key === 'Enter') onAdvance && onAdvance();
+      if (e.key === ' ' || e.key === 'Enter') advanceOnce();
     };
     document.addEventListener('keydown', keyHandler);
   }
@@ -225,6 +233,12 @@ export function showResult(root, result, mosaicCanvas) {
     mosaic.canvas.className = 'mosaic-canvas';
     slot.appendChild(mosaic.canvas);
 
+    const zoom = document.createElement('button');
+    zoom.className = 'choice-btn save-btn';
+    zoom.textContent = '크게 보기';
+    zoom.addEventListener('click', () => openMosaicZoom(mosaic.full));
+    actions.appendChild(zoom);
+
     const saveCard = document.createElement('button');
     saveCard.className = 'choice-btn save-btn';
     saveCard.textContent = '결과 카드 저장';
@@ -264,10 +278,46 @@ export function showResult(root, result, mosaicCanvas) {
   statement.addEventListener('click', () => openStatement());
   actions.appendChild(statement);
 
-  setTint(gradientFor(result.isComposite ? 'sad' : result.topCategory));
+  setTint();
   setBgVideo(null); // 결과 화면에서는 배경 영상 없음
   mount(root, el);
   if (mosaic && mosaic.play) requestAnimationFrame(() => mosaic.play());
+}
+
+function cloneCanvas(canvas) {
+  const copy = document.createElement('canvas');
+  copy.width = canvas.width;
+  copy.height = canvas.height;
+  if (typeof navigator !== 'undefined' && navigator.userAgent.includes('jsdom')) return copy;
+  const ctx = copy.getContext('2d');
+  if (ctx) ctx.drawImage(canvas, 0, 0);
+  return copy;
+}
+
+function openMosaicZoom(canvas) {
+  const existing = document.querySelector('.mosaic-zoom-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'mosaic-zoom-overlay';
+  overlay.innerHTML = `
+    <button class="statement-close mosaic-zoom-close" aria-label="닫기">✕</button>
+    <div class="mosaic-zoom-frame"></div>
+  `;
+  const zoomCanvas = cloneCanvas(canvas);
+  zoomCanvas.className = 'mosaic-zoom-canvas';
+  overlay.querySelector('.mosaic-zoom-frame').appendChild(zoomCanvas);
+
+  const close = () => {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+  };
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  overlay.querySelector('.mosaic-zoom-close').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(overlay);
+  return overlay;
 }
 
 const TIMELINE_COLORS = {
@@ -326,7 +376,7 @@ const ARTIST_STATEMENT = `
 
   <h3>무엇을 만들었나</h3>
   <p>hueman은 관람자가 한 인간의 일생(탄생→죽음)을 자신의 선택으로 따라가는
-  인터랙티브 감정 체험입니다. 매 순간의 감정이 화면의 색이 되고,
+  인터랙티브 감정 체험입니다. 영상은 원본 그대로 흐르고,
   여정의 끝에서 ‘당신을 가장 많이 채운 감정’과 위로의 말을 마주합니다.</p>
 
   <h3>어떻게 플레이하나</h3>
@@ -383,7 +433,7 @@ export function renderIntro(root, { onStart } = {}) {
     <div class="intro-title">hueman</div>
     <div class="intro-sub">hue + human · 모든 감정의 색</div>
     <div class="intro-desc">한 사람의 일생을 당신의 선택으로 따라갑니다.
-매 순간의 감정이 화면의 색으로 물들고,
+영상은 원본 그대로 흐르고,
 여정의 끝에서 당신을 가장 많이 채운 감정과 마주합니다.</div>
     <div class="privacy-note">카메라를 켜면 얼굴 표정은 이 브라우저 안에서만 임시로 쓰입니다.
 결과 저장이나 갤러리 남기기는 마지막에 직접 선택할 수 있습니다.</div>
@@ -393,22 +443,59 @@ export function renderIntro(root, { onStart } = {}) {
       <button class="choice-btn intro-start-cam">카메라 켜고 시작</button>
       <button class="text-link intro-start-plain">카메라 없이 시작</button>
     </div>
+    <div class="intro-loading" hidden></div>
+    <button class="photo-capture-btn" hidden>사진 찍기</button>
     <button class="text-link intro-gallery">감정 갤러리 보기</button>
     <button class="text-link intro-statement">작가 노트 · Artist Statement</button>
-    <div class="intro-test">테스트 버전 · 카메라를 켜면 당신의 표정이 실시간으로 화면 색을 물들입니다 · 우측 상단 패널(D 키)에서 내부 상태 확인</div>
+    <div class="intro-test">테스트 버전 · 카메라를 켜면 표정은 결과 기록과 모자이크 재료로만 사용됩니다 · 우측 상단 패널(D 키)에서 내부 상태 확인</div>
   `;
-  el.querySelector('.intro-start-cam').addEventListener('click', () => onStart && onStart(true));
-  el.querySelector('.intro-start-plain').addEventListener('click', () => onStart && onStart(false));
+
+  const camBtn = el.querySelector('.intro-start-cam');
+  const plainBtn = el.querySelector('.intro-start-plain');
+  const loadingEl = el.querySelector('.intro-loading');
+  const captureBtn = el.querySelector('.photo-capture-btn');
+
+  function setLoading(msg) {
+    if (msg) {
+      camBtn.disabled = true;
+      plainBtn.disabled = true;
+      captureBtn.disabled = true;
+      loadingEl.textContent = msg;
+      loadingEl.removeAttribute('hidden');
+    } else {
+      camBtn.disabled = false;
+      plainBtn.disabled = false;
+      captureBtn.disabled = false;
+      loadingEl.textContent = '';
+      loadingEl.setAttribute('hidden', '');
+    }
+  }
+
+  function setCaptureReady(onCapture) {
+    setLoading(null);
+    camBtn.disabled = true;
+    plainBtn.disabled = true;
+    captureBtn.hidden = false;
+    captureBtn.disabled = false;
+    captureBtn.onclick = () => onCapture && onCapture();
+  }
+
+  camBtn.addEventListener('click', () => onStart && onStart(true));
+  plainBtn.addEventListener('click', () => onStart && onStart(false));
   el.querySelector('.intro-gallery').addEventListener('click', () => openGallery());
   el.querySelector('.intro-statement').addEventListener('click', () => openStatement());
-  setTint(INTRO_BG);
+  setTint();
   setBgVideo(null);
   mount(root, el);
 
   keyHandler = (e) => {
+    // 로딩 중(버튼 비활성)에는 키보드로도 재시작되지 않도록 가드
+    if (camBtn.disabled) return;
     if (e.key === ' ' || e.key === 'Enter') onStart && onStart(true);
   };
   document.addEventListener('keydown', keyHandler);
+
+  return { setLoading, setCaptureReady };
 }
 
 export function openGallery(host) {

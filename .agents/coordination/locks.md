@@ -1,6 +1,6 @@
 # Locks
 
-Last updated: 2026-06-11 20:20 KST by Claude Code
+Last updated: 2026-06-14 22:50 KST by Codex
 
 ## Active Locks
 
