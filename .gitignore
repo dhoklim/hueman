@@ -7,3 +7,7 @@ coverage/
 .vite/
 .superpowers/
 *.log
+
+# 원본 영상 모음·설계 문서 (앱은 public/video/ 만 사용)
+/video/
+*.docx
