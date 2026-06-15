@@ -11,12 +11,15 @@ let currentVideoFile = null;
 let bgTimer = null;        // 구간 타이머 — 장면 전환 시 항상 취소
 let pendingCanplay = null; // { el, fn } — 로드 대기 중인 canplay 핸들러
 let fadeTimer = null;      // 크로스페이드 후 이전 버퍼 정지용 타이머
+let loadWatchdog = null;   // canplay 미발생(로드 실패) 대비 강제 표시 타이머
 
-const FADE_MS = 450; // styles/main.css의 .bg-video transition과 동일하게 유지
+const FADE_MS = 450;       // styles/main.css의 .bg-video transition과 동일하게 유지
+const LOAD_TIMEOUT_MS = 2500; // 이 시간 안에 canplay 없으면 대사라도 띄운다
 
 // 진행 중인 구간 타이머·ended 핸들러·대기 중 canplay 리스너를 모두 해제
 function clearBgTimer() {
   if (bgTimer !== null) { clearTimeout(bgTimer); bgTimer = null; }
+  if (loadWatchdog !== null) { clearTimeout(loadWatchdog); loadWatchdog = null; }
   if (pendingCanplay) {
     pendingCanplay.el.removeEventListener('canplay', pendingCanplay.fn);
     pendingCanplay = null;
@@ -43,8 +46,9 @@ function ensureBgEls() {
 // opts.freeze  = true → 구간 끝에서 마지막 프레임 정지 (선택지 장면)
 // opts.loop    = true → 구간 끝에서 구간 처음으로 반복
 // opts.onEnded = fn   → 구간 1회 재생 후 자동 호출 (나레이션 장면 자동 진행)
+// opts.onShown = fn   → 영상이 실제로 화면에 나타나는 순간 호출 (대사 페이드인 동기화)
 function setBgVideo(videoConfig, opts = {}) {
-  const { loop = false, freeze = false, onEnded = null } = opts;
+  const { loop = false, freeze = false, onEnded = null, onShown = null } = opts;
   clearBgTimer();
 
   if (!videoConfig) {
@@ -93,6 +97,7 @@ function setBgVideo(videoConfig, opts = {}) {
   // 같은 파일 → 보이는 버퍼에서 구간만 이동 (재로딩·검은 화면 없음)
   if (file === currentVideoFile && activeEl) {
     runSegment(activeEl);
+    onShown?.(); // 이미 보이는 영상이므로 대사 즉시 동기화
     return;
   }
 
@@ -103,7 +108,12 @@ function setBgVideo(videoConfig, opts = {}) {
   const outgoing = activeEl;
   if (fadeTimer !== null) { clearTimeout(fadeTimer); fadeTimer = null; }
 
+  let shown = false;
   const onReady = () => {
+    if (shown) return; // canplay·워치독 중복 진입 방지
+    shown = true;
+    if (loadWatchdog !== null) { clearTimeout(loadWatchdog); loadWatchdog = null; }
+    incoming.removeEventListener('canplay', onReady);
     pendingCanplay = null;
     incoming.style.zIndex = '1';            // 들어오는 영상을 위로
     if (outgoing) outgoing.style.zIndex = '0';
@@ -116,6 +126,7 @@ function setBgVideo(videoConfig, opts = {}) {
         if (activeEl !== outgoing) { outgoing.classList.remove('show'); outgoing.pause(); }
       }, FADE_MS + 40);
     }
+    onShown?.(); // 새 영상이 화면에 뜨는 순간 대사 페이드인
   };
 
   incoming.classList.remove('show');        // 투명 상태로 로드(검은 bg 안 보임)
@@ -123,6 +134,7 @@ function setBgVideo(videoConfig, opts = {}) {
   incoming.load();
   pendingCanplay = { el: incoming, fn: onReady };
   incoming.addEventListener('canplay', onReady, { once: true });
+  loadWatchdog = setTimeout(onReady, LOAD_TIMEOUT_MS); // 로드 실패해도 대사는 띄움
 }
 
 function clearKeys() {
@@ -167,12 +179,6 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
   const el = document.createElement('div');
   const videoConfig = SCENE_VIDEOS[scene.id] || null;
 
-  // 구간 길이(ms)에 따라 텍스트 페이드인 딜레이 계산
-  const segMs = videoConfig && videoConfig.end != null
-    ? (videoConfig.end - videoConfig.start) * 1000
-    : Infinity;
-  const textDelay = segMs < 5000 ? 600 : segMs < 10000 ? 1000 : 1500;
-
   const text = document.createElement('div');
   text.className = 'scene-text';
   text.textContent = scene.text;
@@ -190,13 +196,13 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     });
     el.appendChild(wrap);
     setTint();
-    // 선택지: 구간 1회 재생 후 마지막 프레임 정지, 대사 → 버튼 순서로 페이드인
-    setBgVideo(videoConfig, { freeze: true });
+    // 선택지: 구간 1회 재생 후 마지막 프레임 정지, 영상이 뜨면 대사 → 버튼 순서로 페이드인
+    if (videoConfig) { text.style.opacity = '0'; wrap.style.opacity = '0'; }
     mount(root, el);
-    if (videoConfig) {
-      delayedFadeIn(text, textDelay);
-      delayedFadeIn(wrap, textDelay + 700);
-    }
+    setBgVideo(videoConfig, {
+      freeze: true,
+      onShown: videoConfig ? () => { delayedFadeIn(text, 200); delayedFadeIn(wrap, 900); } : null,
+    });
 
     keyHandler = (e) => {
       const n = parseInt(e.key, 10);
@@ -219,9 +225,13 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
     }
     el.addEventListener('click', advanceOnce);
     setTint();
-    setBgVideo(videoConfig, { onEnded: hasVideo ? advanceOnce : null });
+    if (hasVideo) text.style.opacity = '0';
     mount(root, el);
-    if (hasVideo) delayedFadeIn(text, textDelay);
+    // 나레이션: 영상이 화면에 뜨는 순간 대사 페이드인 → 이전 영상 위에 새 대사가 겹치지 않음
+    setBgVideo(videoConfig, {
+      onEnded: hasVideo ? advanceOnce : null,
+      onShown: hasVideo ? () => delayedFadeIn(text, 200) : null,
+    });
 
     keyHandler = (e) => {
       if (e.key === ' ' || e.key === 'Enter') advanceOnce();
