@@ -55,8 +55,8 @@ export const SCENE_VIDEOS = {
   study_1:       { file: '담배 권유 NO- 모의고사공부.mp4',   start: 0,    end: 2.15 }, // 공부
   study_2:       { file: '담배 권유 NO- 모의고사공부.mp4',   start: 2.15, end: 4.33 }, // 모의고사 공부 이어감
   study_3:       { file: '담배 권유 NO- 정시상담.mp4',       start: 0, end: 2  }, // 정시 상담
-  study_4:       { file: '담배 권유 NO- 수능.mp4',           start: 0,    end: 0.74 }, // 수능 시험
-  study_5:       { file: '담배 권유 NO- 수능.mp4',           start: 0.74, end: 1.48 }, // 수능 마무리
+  study_4:       { file: '담배 권유 NO- 수능.mp4',           start: 0,    end: 2    }, // 수능 시험
+  study_5:       { file: '담배 권유 NO- 수능.mp4',           start: 0.74, end: 2.74 }, // 수능 마무리
   study_6:       { file: '담배 권유 NO- 합격자발표.mp4',     start: 0, end: 10 }, // 합격 확인
   study_7:       { file: '담배 권유 NO-1월1일.mp4',          start: 0, end: 3  }, // 합격 건배
   study_8:       { file: '담배 권유 NO-입학식.mp4',          start: 0, end: 2  }, // 대학 입학식
