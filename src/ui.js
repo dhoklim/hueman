@@ -256,6 +256,7 @@ export function showResult(root, result, mosaicCanvas) {
     <div class="timeline" aria-label="감정 타임라인"></div>
     <div class="mosaic-slot"></div>
     <div class="result-actions"></div>
+    <div class="result-closing">당신이 느낀 모든 감정은, 당신이 살아있었다는 증거입니다.</div>
   `;
   if (result.receipts && result.receipts.length) {
     const receipt = document.createElement('div');
