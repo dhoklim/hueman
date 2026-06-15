@@ -196,7 +196,6 @@ body {
 .camera-shutter:hover { transform: translateY(-2px); }
 .camera-shutter:disabled { opacity: .45; cursor: wait; transform: none; }
 .capture-confirm { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.intro-test { margin-top: 24px; font-size: 12px; opacity: .55; max-width: 540px; line-height: 1.55; }
 
 /* 텍스트 링크 버튼 (작가 노트 등) */
 .text-link {
@@ -262,7 +261,6 @@ body {
   #cam-preview { width: 104px; height: 78px; }
   .hint { display: none; }
   .intro-how { display: none; }
-  .intro-test { display: none; }
   .scene-text { font-size: clamp(18px, 4.8vw, 28px); }
   .result .message { font-size: clamp(15px, 4vw, 22px); }
 }
