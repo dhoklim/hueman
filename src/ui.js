@@ -3,6 +3,7 @@ import { browserGalleryStore } from './gallery.js';
 import { createResultCardCanvas, resultFilename, receiptLine } from './resultCard.js';
 import { SCENE_VIDEOS } from './videoMap.js';
 import { grabTargetCanvas } from './snapshots.js';
+import { tintBackground } from './emotionColor.js';
 
 let keyHandler = null;
 let bgEls = [];            // 두 개의 <video> 버퍼 (더블 버퍼링)
@@ -55,13 +56,11 @@ function setBgVideo(videoConfig, opts = {}) {
     currentVideoFile = null;
     activeEl = null;
     bgEls.forEach((v) => { v.classList.remove('show'); v.pause?.(); v.removeAttribute('src'); v.load?.(); });
-    if (tintEl) tintEl.style.opacity = '0';
     return;
   }
 
   ensureBgEls();
   const { file, start = 0, end = null } = videoConfig;
-  if (tintEl) tintEl.style.opacity = '0';
 
   // 지정 버퍼에서 구간 재생 + 끝 감지 타이머 설정
   const runSegment = (el) => {
@@ -144,16 +143,34 @@ function clearKeys() {
   }
 }
 
-// 틴트 레이어는 호환성상 유지하지만, 영상/화면은 원본 색으로 보이도록 항상 투명하게 둔다.
+// 감정 색 오버레이(#tint). 영상은 원본 색을 유지하되, 이 정도 opacity 로 은은하게 감정 색이 묻어난다.
+const TINT_OPACITY = 0.28; // 요구: 0.22~0.35 — 영상 내용은 보이되 감정 색이 인지될 정도
 let tintEl = null;
-export function setTint() {
-  if (!tintEl) {
-    tintEl = document.getElementById('tint') || document.createElement('div');
+
+function ensureTintEl() {
+  // 모듈 캐시가 화면에서 떨어져 나갔으면(테스트·재마운트) 다시 붙인다.
+  if (!tintEl || !tintEl.isConnected) {
+    tintEl = document.getElementById('tint') || tintEl || document.createElement('div');
     tintEl.id = 'tint';
-    if (!tintEl.parentNode) document.body.insertBefore(tintEl, document.body.firstChild);
+    if (!tintEl.isConnected) document.body.insertBefore(tintEl, document.body.firstChild);
   }
-  tintEl.style.background = 'transparent';
-  tintEl.style.opacity = '0';
+  return tintEl;
+}
+
+// 화면 감정 틴트 갱신.
+//   setTint() / setTint(null) → 틴트 끔(투명).
+//   setTint('anger')          → 단일 감정 색 오버레이.
+//   setTint(['joy','sad'])     → 두 감정을 섞은 그라디언트.
+export function setTint(emotions) {
+  const el = ensureTintEl();
+  const bg = tintBackground(emotions);
+  if (!bg) {
+    el.style.background = 'transparent';
+    el.style.opacity = '0';
+    return;
+  }
+  el.style.background = bg;
+  el.style.opacity = String(TINT_OPACITY);
 }
 
 function mount(root, sceneEl) {
@@ -195,7 +212,7 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
       wrap.appendChild(btn);
     });
     el.appendChild(wrap);
-    setTint();
+    // 화면 틴트는 웹캠 감정(main.handleEmotion)이 갱신한다 — 장면 전환은 색을 건드리지 않아 깜빡임이 없다.
     // 선택지: 구간 1회 재생 후 마지막 프레임 정지, 영상이 뜨면 대사 → 버튼 순서로 페이드인
     if (videoConfig) { text.style.opacity = '0'; wrap.style.opacity = '0'; }
     mount(root, el);
@@ -224,7 +241,7 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
       el.appendChild(hint);
     }
     el.addEventListener('click', advanceOnce);
-    setTint();
+    // 틴트는 웹캠 감정이 갱신 — 나레이션 전환에서도 색을 그대로 유지한다.
     if (hasVideo) text.style.opacity = '0';
     mount(root, el);
     // 나레이션: 영상이 화면에 뜨는 순간 대사 페이드인 → 이전 영상 위에 새 대사가 겹치지 않음

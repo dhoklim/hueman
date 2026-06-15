@@ -1,6 +1,38 @@
 // @vitest-environment jsdom
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { renderIntro, renderScene, showResult, renderCameraCapture } from '../src/ui.js';
+import { renderIntro, renderScene, showResult, renderCameraCapture, setTint } from '../src/ui.js';
+
+describe('ui.setTint (실시간 감정 화면 틴트)', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('clears the tint when called with no emotion', () => {
+    setTint('anger');
+    setTint();
+    const tint = document.getElementById('tint');
+    expect(tint.style.background).toBe('transparent');
+    expect(tint.style.opacity).toBe('0');
+  });
+
+  it('paints a subtle single-color overlay for one emotion', () => {
+    setTint('anger');
+    const tint = document.getElementById('tint');
+    expect(tint.style.background).toContain('rgb(224, 49, 49)'); // anger #E03131
+    const opacity = Number(tint.style.opacity);
+    expect(opacity).toBeGreaterThanOrEqual(0.22);
+    expect(opacity).toBeLessThanOrEqual(0.35);
+  });
+
+  it('blends two colors into a gradient overlay for two emotions', () => {
+    setTint(['joy', 'sad']);
+    const tint = document.getElementById('tint');
+    expect(tint.style.background).toContain('linear-gradient');
+    expect(tint.style.background).toContain('rgb(255, 210, 63)'); // joy
+    expect(tint.style.background).toContain('rgb(59, 125, 216)'); // sad
+    expect(Number(tint.style.opacity)).toBeGreaterThan(0);
+  });
+});
 
 describe('ui.renderIntro', () => {
   it('shows description and fires onStart with camera flag from each button', () => {
@@ -76,16 +108,22 @@ describe('ui.renderScene', () => {
     expect(root.textContent).toContain('안녕');
   });
 
-  it('keeps mapped video scenes unobstructed by the tint overlay', () => {
+  it('does not reset the live emotion tint when rendering a scene (no flicker)', () => {
     vi.spyOn(window.HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
     vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
-    const root = document.createElement('div');
+    // 웹캠이 이미 칠해 둔 실시간 틴트를 흉내낸다
+    const tint = document.createElement('div');
+    tint.id = 'tint';
+    tint.style.background = 'rgb(224, 49, 49)';
+    tint.style.opacity = '0.28';
+    document.body.appendChild(tint);
 
+    const root = document.createElement('div');
     renderScene(root, { id: 'opening', type: 'scene', text: '안녕', emotion: 'joy' }, {});
 
-    const tint = document.getElementById('tint');
-    expect(tint.style.background).toBe('transparent');
-    expect(tint.style.opacity).toBe('0');
+    // 장면 전환이 틴트를 지우면 색이 깜빡인다 — 웹캠이 칠한 색을 그대로 둬야 한다
+    expect(tint.style.background).toBe('rgb(224, 49, 49)');
+    expect(tint.style.opacity).toBe('0.28');
   });
 
   it('renders two buttons for a choice and fires onChoice', () => {

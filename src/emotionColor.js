@@ -27,3 +27,34 @@ export function gradientFor(emotion) {
   const hex = hexFor(emotion);
   return `radial-gradient(circle at 50% 40%, ${hex} 0%, ${shade(hex, -70)} 60%, ${shade(hex, -120)} 100%)`;
 }
+
+// 실시간 화면 틴트(#tint)용 background 문자열.
+// 감정 1개 → 단일 색, 2개 → 두 색을 섞은 linear-gradient, 없음 → null.
+// 색 자체는 진하게 두고, 은은함은 #tint 의 opacity 로 조절한다(ui.setTint).
+export function tintBackground(emotions) {
+  const list = (Array.isArray(emotions) ? emotions : [emotions]).filter(Boolean);
+  if (list.length === 0) return null;
+  if (list.length === 1) return hexFor(list[0]);
+  const [a, b] = list;
+  return `linear-gradient(135deg, ${hexFor(a)} 0%, ${hexFor(b)} 100%)`;
+}
+
+// 비슷하게 감지된 정도 — 2위 빈도가 1위의 이 비율 이상이면 두 감정을 섞는다.
+const TINT_BLEND_RATIO = 0.6;
+
+// 최근 감정 표본(배열, falsy 포함 가능) → 화면 틴트용 감정 1~2개.
+// 상위 2개가 비슷하게 감지되면 둘 다, 아니면 1위만, 표본이 없으면 [].
+// experienceLog.aggregate()의 복합 로직은 결과 메시지용이므로, 실시간 화면용은 이 helper를 쓴다.
+export function tintEmotionsFromHistory(history, ratio = TINT_BLEND_RATIO) {
+  const counts = {};
+  for (const e of history || []) {
+    if (!e) continue;
+    counts[e] = (counts[e] || 0) + 1;
+  }
+  const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  if (ranked.length === 0) return [];
+  const [top, topN] = ranked[0];
+  const second = ranked[1];
+  if (second && second[1] / topN >= ratio) return [top, second[0]];
+  return [top];
+}

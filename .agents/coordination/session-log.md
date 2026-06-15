@@ -1,5 +1,9 @@
 # Session Log
 
+## 2026-06-15
+
+- 19:08 KST | Claude Code | 발표 대본("선택하는 동안 화면 색이 바뀌었습니다", "표정이 색이 되어 화면에 기록", "두 감정이 섞여 화면을 물들입니다")에 맞춰 실시간 감정 화면 틴트를 복원(2026-06-14 Codex의 "틴트 항상 투명" 반전). `src/emotionColor.js`에 실시간용 `tintBackground(emotions)`(단일 색/2색 linear-gradient/null) + `tintEmotionsFromHistory(history)`(상위 1~2 감정, 2위/1위≥0.6이면 혼합) 추가 — experienceLog.aggregate의 복합 로직은 결과 메시지용이라 분리. `src/ui.js` `setTint(emotions)`가 #tint background/opacity(0.28)를 실제 적용, `setBgVideo`·`renderScene`의 틴트 강제투명 제거(웹캠 틴트가 장면 전환에도 유지 → 깜빡임 없음); 인트로·사진 촬영·결과 화면은 `setTint()`로 끔. `src/main.js` `handleEmotion`이 gameStarted 이후 최근 6표본으로 #tint 갱신. 영상-대사 매칭/사진 버튼/모자이크/확대/타임라인 미변경. TDD. Verification: `npm test -- --run` 107 passed (20 files); `npm run build` exit 0(기존 chunk-size 경고만); 개발 서버 5179 boot OK, `/`·`src/*`·`styles/main.css` 200. 실제 웹캠→색 변화는 카메라+브라우저 자동화가 이 세션에 없어 미검증 — 전시 환경 수동 QA 권장.
+
 ## 2026-06-14
 
 - 22:50 KST | Codex | Changed mosaic target capture from automatic camera-ready capture to manual red `사진 찍기` button capture before the first scene. The game waits on the intro screen until the button is pressed. Verification: `npm test -- test/mainLiveEmotion.test.js --run` 2 passed; `npm test -- test/ui.test.js --run` 12 passed; `npm test -- --run` 92 passed; `npm run build` passed (existing chunk-size warning).

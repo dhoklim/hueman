@@ -51,7 +51,7 @@ describe('live emotion display', () => {
     expect(document.querySelector('.camera-shutter')).toBeTruthy();
   });
 
-  it('does not recolor the screen with the viewer current emotion', async () => {
+  it('does not tint the screen before the game starts (camera capture screen)', async () => {
     document.body.innerHTML = '<div id="app"></div>';
 
     await import('../src/main.js');
@@ -59,14 +59,49 @@ describe('live emotion display', () => {
     await vi.waitFor(() => expect(liveCallback).toBeTypeOf('function'));
 
     const tint = document.getElementById('tint');
-    const sceneTint = tint.style.background;
-    expect(sceneTint).toBe('transparent');
     expect(tint.style.opacity).toBe('0');
 
+    // 아직 사진 촬영 화면 — 게임 시작 전이므로 감정이 들어와도 화면을 칠하지 않는다
     liveCallback({ emotion: 'anger', detected: 'anger', faceFound: true });
 
-    expect(tint.style.background).toBe(sceneTint);
     expect(tint.style.opacity).toBe('0');
     expect(tint.style.background).not.toContain('rgb(224, 49, 49)');
+  });
+
+  it('tints the screen with the live emotion once the game has started', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+
+    await import('../src/main.js');
+    document.querySelector('.intro-start-cam').click();
+    await vi.waitFor(() => expect(liveCallback).toBeTypeOf('function'));
+
+    // 사진 촬영 화면에서 "이대로 시작" → 게임 시작
+    document.querySelector('.confirm-start').click();
+    await vi.waitFor(() => expect(document.querySelector('.scene')).toBeTruthy());
+
+    const tint = document.getElementById('tint');
+    liveCallback({ emotion: 'anger', detected: 'anger', faceFound: true });
+
+    expect(Number(tint.style.opacity)).toBeGreaterThan(0);
+    expect(tint.style.background).toContain('rgb(224, 49, 49)'); // anger #E03131
+  });
+
+  it('blends two colors when two emotions are detected similarly', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+
+    await import('../src/main.js');
+    document.querySelector('.intro-start-cam').click();
+    await vi.waitFor(() => expect(liveCallback).toBeTypeOf('function'));
+    document.querySelector('.confirm-start').click();
+    await vi.waitFor(() => expect(document.querySelector('.scene')).toBeTruthy());
+
+    const tint = document.getElementById('tint');
+    for (const emotion of ['joy', 'sad', 'joy', 'sad']) {
+      liveCallback({ emotion, detected: emotion, faceFound: true });
+    }
+
+    expect(tint.style.background).toContain('linear-gradient');
+    expect(tint.style.background).toContain('rgb(255, 210, 63)'); // joy
+    expect(tint.style.background).toContain('rgb(59, 125, 216)'); // sad
   });
 });

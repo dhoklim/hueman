@@ -1,6 +1,7 @@
 import story from '../content/story.json';
 import { createEngine, current, choose, advance, isEnding, receipts } from './engine.js';
-import { renderIntro, renderScene, showResult, renderCameraCapture } from './ui.js';
+import { renderIntro, renderScene, showResult, renderCameraCapture, setTint } from './ui.js';
+import { tintEmotionsFromHistory } from './emotionColor.js';
 import { createLog, record, aggregate, emotionTimeline } from './experienceLog.js';
 import { browserDailyStats, statsLine } from './dailyStats.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
@@ -38,6 +39,8 @@ function setCamPreviewHidden(hidden) {
 }
 
 const WEBCAM_TICK_MS = 700;
+const TINT_HISTORY = 6; // 화면 틴트 산출용 최근 감정 표본 수
+let liveTintHistory = [];
 
 function logCurrent() {
   // 웹캠 ON 이면 실시간 감정 이벤트(handleEmotion)로 집계 → 장면 이벤트는 기록하지 않음
@@ -54,7 +57,8 @@ function logCurrent() {
   enteredAt = now;
 }
 
-// 웹캠 감지 콜백: 실제 감정 기록 + 모자이크 재료 수집. 화면 영상은 원본 색으로 유지한다.
+// 웹캠 감지 콜백: 실제 감정 기록 + 모자이크 재료 수집 + 화면 감정 틴트 갱신.
+// 게임 시작 전(인트로·사진 촬영 화면)에는 틴트를 칠하지 않는다.
 function handleEmotion(info) {
   if (!gameStarted) {
     live = { active: true, ...info, tiles: getTiles().length, hasTarget: !!getTarget() };
@@ -74,6 +78,12 @@ function handleEmotion(info) {
     if (getTarget()) addTile(camVideo, info.emotion);
     tickCount++;
   }
+
+  // 표정이 색이 되어 화면에 기록된다 — 최근 감정 표본으로 #tint 를 갱신.
+  // 상위 두 감정이 비슷하면 두 색이 섞인 그라디언트로 물든다.
+  liveTintHistory.push(info.emotion);
+  if (liveTintHistory.length > TINT_HISTORY) liveTintHistory.shift();
+  setTint(tintEmotionsFromHistory(liveTintHistory));
 
   live = { active: true, ...info, tiles: getTiles().length, hasTarget: !!getTarget() };
 }
