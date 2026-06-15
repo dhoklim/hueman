@@ -5,17 +5,37 @@ import { SCENE_VIDEOS } from './videoMap.js';
 import { grabTargetCanvas } from './snapshots.js';
 
 let keyHandler = null;
-let bgVideoEl = null;
+let bgEls = [];            // 두 개의 <video> 버퍼 (더블 버퍼링)
+let activeEl = null;       // 현재 화면에 보이는 버퍼
 let currentVideoFile = null;
-let bgTimer = null; // 구간 타이머 — 장면 전환 시 항상 취소
-let pendingCanplay = null; // 로드 대기 중인 canplay 핸들러 — 장면 전환 시 함께 해제
+let bgTimer = null;        // 구간 타이머 — 장면 전환 시 항상 취소
+let pendingCanplay = null; // { el, fn } — 로드 대기 중인 canplay 핸들러
+let fadeTimer = null;      // 크로스페이드 후 이전 버퍼 정지용 타이머
+
+const FADE_MS = 450; // styles/main.css의 .bg-video transition과 동일하게 유지
 
 // 진행 중인 구간 타이머·ended 핸들러·대기 중 canplay 리스너를 모두 해제
 function clearBgTimer() {
   if (bgTimer !== null) { clearTimeout(bgTimer); bgTimer = null; }
-  if (bgVideoEl) {
-    bgVideoEl.onended = null;
-    if (pendingCanplay) { bgVideoEl.removeEventListener('canplay', pendingCanplay); pendingCanplay = null; }
+  if (pendingCanplay) {
+    pendingCanplay.el.removeEventListener('canplay', pendingCanplay.fn);
+    pendingCanplay = null;
+  }
+  if (activeEl) activeEl.onended = null;
+}
+
+function ensureBgEls() {
+  if (bgEls.length) return;
+  const tint = document.getElementById('tint');
+  for (let i = 0; i < 2; i++) {
+    const v = document.createElement('video');
+    v.className = 'bg-video';
+    v.muted = true;
+    v.loop = false; // 구간 루프는 bgTimer로 직접 관리
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    document.body.insertBefore(v, tint || document.body.firstChild);
+    bgEls.push(v);
   }
 }
 
@@ -29,44 +49,33 @@ function setBgVideo(videoConfig, opts = {}) {
 
   if (!videoConfig) {
     currentVideoFile = null;
-    if (bgVideoEl) { bgVideoEl.style.display = 'none'; bgVideoEl.src = ''; }
+    activeEl = null;
+    bgEls.forEach((v) => { v.classList.remove('show'); v.pause?.(); v.removeAttribute('src'); v.load?.(); });
     if (tintEl) tintEl.style.opacity = '0';
     return;
   }
 
+  ensureBgEls();
   const { file, start = 0, end = null } = videoConfig;
-
-  if (!bgVideoEl) {
-    bgVideoEl = document.createElement('video');
-    bgVideoEl.id = 'bg-video';
-    bgVideoEl.muted = true;
-    bgVideoEl.setAttribute('playsinline', '');
-    bgVideoEl.setAttribute('webkit-playsinline', '');
-    const tint = document.getElementById('tint');
-    document.body.insertBefore(bgVideoEl, tint || document.body.firstChild);
-  }
-
-  bgVideoEl.loop = false; // 구간 루프는 bgTimer로 직접 관리
-  bgVideoEl.style.display = 'block';
   if (tintEl) tintEl.style.opacity = '0';
 
-  // 구간 시작 + 타이머 설정
-  const beginSegment = () => {
-    bgVideoEl.currentTime = start;
-    bgVideoEl.play().catch(() => {});
+  // 지정 버퍼에서 구간 재생 + 끝 감지 타이머 설정
+  const runSegment = (el) => {
+    el.currentTime = start;
+    el.play().catch(() => {});
 
     if (end !== null) {
       // setTimeout으로 구간 끝 감지 (timeupdate보다 정밀)
       const scheduleNext = () => {
-        const remaining = Math.max(0, (end - bgVideoEl.currentTime) * 1000);
+        const remaining = Math.max(0, (end - el.currentTime) * 1000);
         bgTimer = setTimeout(() => {
           bgTimer = null;
           if (loop) {
-            bgVideoEl.currentTime = start;
-            bgVideoEl.play().catch(() => {});
+            el.currentTime = start;
+            el.play().catch(() => {});
             scheduleNext();
           } else if (freeze) {
-            bgVideoEl.pause(); // 마지막 프레임에서 정지
+            el.pause(); // 마지막 프레임에서 정지
           } else {
             onEnded?.();
           }
@@ -75,21 +84,45 @@ function setBgVideo(videoConfig, opts = {}) {
       scheduleNext();
     } else {
       // end 없음: 파일 전체 끝날 때
-      bgVideoEl.onended = loop
-        ? () => { bgVideoEl.currentTime = 0; bgVideoEl.play().catch(() => {}); }
+      el.onended = loop
+        ? () => { el.currentTime = 0; el.play().catch(() => {}); }
         : onEnded;
     }
   };
 
-  if (file !== currentVideoFile) {
-    currentVideoFile = file;
-    bgVideoEl.src = `${import.meta.env.BASE_URL}video/${file}`;
-    bgVideoEl.load();
-    pendingCanplay = beginSegment;
-    bgVideoEl.addEventListener('canplay', beginSegment, { once: true });
-  } else {
-    beginSegment();
+  // 같은 파일 → 보이는 버퍼에서 구간만 이동 (재로딩·검은 화면 없음)
+  if (file === currentVideoFile && activeEl) {
+    runSegment(activeEl);
+    return;
   }
+
+  // 다른 파일 → 숨은 버퍼에 미리 로드. 준비되면 위로 올려 페이드인하고
+  // 이전 버퍼는 마지막 프레임을 유지하다 페이드 후 정지 → 검은 공백 없음.
+  currentVideoFile = file;
+  const incoming = bgEls.find((v) => v !== activeEl) || bgEls[0];
+  const outgoing = activeEl;
+  if (fadeTimer !== null) { clearTimeout(fadeTimer); fadeTimer = null; }
+
+  const onReady = () => {
+    pendingCanplay = null;
+    incoming.style.zIndex = '1';            // 들어오는 영상을 위로
+    if (outgoing) outgoing.style.zIndex = '0';
+    runSegment(incoming);
+    incoming.classList.add('show');         // opacity 0→1 (CSS transition)
+    activeEl = incoming;
+    if (outgoing) {
+      fadeTimer = setTimeout(() => {
+        fadeTimer = null;
+        if (activeEl !== outgoing) { outgoing.classList.remove('show'); outgoing.pause(); }
+      }, FADE_MS + 40);
+    }
+  };
+
+  incoming.classList.remove('show');        // 투명 상태로 로드(검은 bg 안 보임)
+  incoming.src = `${import.meta.env.BASE_URL}video/${file}`;
+  incoming.load();
+  pendingCanplay = { el: incoming, fn: onReady };
+  incoming.addEventListener('canplay', onReady, { once: true });
 }
 
 function clearKeys() {
