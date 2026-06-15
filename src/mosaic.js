@@ -1,8 +1,10 @@
 // 포토 모자이크 합성. (System C)
 
-// 칸 한 변의 픽셀 수. 기본 32 → 44×44 칸 기준 출력 1408×1408 (이전 16px·704²의 4배 픽셀).
-// 리빌(mosaicReveal)도 칸 경계를 맞추기 위해 이 값을 함께 사용한다.
-export const CELL_PX = 32;
+// 모자이크 격자: 한 변 GRID칸 × 칸당 CELL_PX 픽셀.
+// 88×88=7744칸(이전 44×44의 4배로 더 촘촘 → 얼굴이 또렷)이고,
+// 칸 16px로 출력은 88×16=1408×1408 유지. 리빌(mosaicReveal)도 CELL_PX로 칸 경계를 맞춘다.
+export const GRID = 88;
+export const CELL_PX = 16;
 
 // 표준 휘도 (0..255)
 export function luminance(r, g, b) {
@@ -60,8 +62,8 @@ export function pickClosestTile(targetColor, tiles, cellIndex = 0) {
 
 // target(캔버스) + tiles([{canvas, emotion}]) → 모자이크 캔버스
 export function buildMosaic(target, tiles, opts = {}) {
-  const cols = opts.cols || 44;
-  const rows = opts.rows || 44;
+  const cols = opts.cols || GRID;
+  const rows = opts.rows || GRID;
   const cellPx = opts.cellPx || CELL_PX;
 
   const out = document.createElement('canvas');

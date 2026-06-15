@@ -4,7 +4,7 @@ import { hexFor } from './emotionColor.js';
 
 const TARGET_SIZE = 480; // 타깃(얼굴) 해상도
 const TILE_SAMPLE = 72;  // 타일 캡처 크기
-const MAX_TILES = 120;
+const MAX_TILES = 240;   // 촘촘한 격자(88×88)에 맞춰 사진 다양성 확보
 const MIN_TILES = 6;
 
 let target = null;
