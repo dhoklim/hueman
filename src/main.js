@@ -1,6 +1,6 @@
 import story from '../content/story.json';
 import { createEngine, current, choose, advance, isEnding, receipts } from './engine.js';
-import { renderIntro, renderScene, showResult } from './ui.js';
+import { renderIntro, renderScene, showResult, renderCameraCapture } from './ui.js';
 import { createLog, record, aggregate, emotionTimeline } from './experienceLog.js';
 import { browserDailyStats, statsLine } from './dailyStats.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
@@ -8,7 +8,7 @@ import { createReveal } from './mosaicReveal.js';
 import { startLiveEmotion, stopLiveEmotion, setFallback } from './liveEmotion.js';
 import {
   captureTargetFrom,
-  captureTargetWhenReady,
+  setTarget,
   addTile,
   getTarget,
   getTiles,
@@ -29,9 +29,14 @@ let camVideo = null;
 let tickCount = 0;
 let live = { active: false, emotion: null, detected: null, faceFound: false, tiles: 0, hasTarget: false };
 let introSetLoading = null;
-let introSetCaptureReady = null;
 let starting = false; // begin() 재진입 가드 — 로딩 중 중복 시작 방지
 let gameStarted = false;
+
+// 게임 중 코너 썸네일(#cam-preview)을 카메라 화면 동안엔 숨겼다 다시 보인다
+function setCamPreviewHidden(hidden) {
+  const v = document.getElementById('cam-preview');
+  if (v) v.style.visibility = hidden ? 'hidden' : 'visible';
+}
 
 const WEBCAM_TICK_MS = 700;
 
@@ -121,15 +126,20 @@ async function begin(withCamera) {
       camVideo = await startLiveEmotion({ onEmotion: handleEmotion });
       webcamActive = true;
       live = { ...live, active: true, hasTarget: !!getTarget() };
-      introSetCaptureReady?.(async () => {
-        introSetLoading?.('사진을 찍는 중…');
-        const captured = await captureTargetWhenReady(camVideo);
-        if (!captured) console.warn('모자이크 기준 사진을 아직 찍지 못했습니다. 체험 중 다시 시도합니다.');
-        live = { ...live, hasTarget: !!getTarget() };
-        gameStarted = true;
-        enteredAt = Date.now();
-        show();
-        starting = false;
+      introSetLoading?.(null);
+      setCamPreviewHidden(true); // 카메라 화면 동안 코너 썸네일 숨김
+      // 별도 카메라 화면에서 기준 사진 촬영 → 확정 시 게임 시작
+      renderCameraCapture(root, {
+        stream: camVideo?.srcObject,
+        onConfirm: (canvas) => {
+          setTarget(canvas);
+          setCamPreviewHidden(false);
+          live = { ...live, hasTarget: !!getTarget() };
+          gameStarted = true;
+          enteredAt = Date.now();
+          show();
+          starting = false;
+        },
       });
       return;
     } catch (e) {
@@ -150,6 +160,5 @@ document.addEventListener('keydown', (e) => {
 });
 
 // 인트로(간단한 설명) → 카메라 켜고/없이 시작
-const { setLoading, setCaptureReady } = renderIntro(root, { onStart: begin });
+const { setLoading } = renderIntro(root, { onStart: begin });
 introSetLoading = setLoading;
-introSetCaptureReady = setCaptureReady;

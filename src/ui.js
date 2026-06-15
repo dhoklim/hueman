@@ -2,6 +2,7 @@ import { CATEGORY_LABELS } from './comfortMessages.js';
 import { browserGalleryStore } from './gallery.js';
 import { createResultCardCanvas, resultFilename, receiptLine } from './resultCard.js';
 import { SCENE_VIDEOS } from './videoMap.js';
+import { grabTargetCanvas } from './snapshots.js';
 
 let keyHandler = null;
 let bgVideoEl = null;
@@ -444,7 +445,6 @@ export function renderIntro(root, { onStart } = {}) {
       <button class="text-link intro-start-plain">카메라 없이 시작</button>
     </div>
     <div class="intro-loading" hidden></div>
-    <button class="photo-capture-btn" hidden>사진 찍기</button>
     <button class="text-link intro-gallery">감정 갤러리 보기</button>
     <button class="text-link intro-statement">작가 노트 · Artist Statement</button>
     <div class="intro-test">테스트 버전 · 카메라를 켜면 표정은 결과 기록과 모자이크 재료로만 사용됩니다 · 우측 상단 패널(D 키)에서 내부 상태 확인</div>
@@ -453,31 +453,19 @@ export function renderIntro(root, { onStart } = {}) {
   const camBtn = el.querySelector('.intro-start-cam');
   const plainBtn = el.querySelector('.intro-start-plain');
   const loadingEl = el.querySelector('.intro-loading');
-  const captureBtn = el.querySelector('.photo-capture-btn');
 
   function setLoading(msg) {
     if (msg) {
       camBtn.disabled = true;
       plainBtn.disabled = true;
-      captureBtn.disabled = true;
       loadingEl.textContent = msg;
       loadingEl.removeAttribute('hidden');
     } else {
       camBtn.disabled = false;
       plainBtn.disabled = false;
-      captureBtn.disabled = false;
       loadingEl.textContent = '';
       loadingEl.setAttribute('hidden', '');
     }
-  }
-
-  function setCaptureReady(onCapture) {
-    setLoading(null);
-    camBtn.disabled = true;
-    plainBtn.disabled = true;
-    captureBtn.hidden = false;
-    captureBtn.disabled = false;
-    captureBtn.onclick = () => onCapture && onCapture();
   }
 
   camBtn.addEventListener('click', () => onStart && onStart(true));
@@ -495,7 +483,117 @@ export function renderIntro(root, { onStart } = {}) {
   };
   document.addEventListener('keydown', keyHandler);
 
-  return { setLoading, setCaptureReady };
+  return { setLoading };
+}
+
+// 별도 카메라 화면: 라이브 미리보기(거울) + 원형 가이드 + 셔터 → 3·2·1 카운트다운 →
+// 그 프레임 캡처 → 확인/다시찍기. "이대로 시작" 시 onConfirm(캡처 캔버스) 호출.
+const COUNTDOWN_MS = 700;
+export function renderCameraCapture(root, { stream, onConfirm } = {}) {
+  const el = document.createElement('div');
+  el.className = 'scene camera-screen';
+  el.innerHTML = `
+    <div class="camera-stage">
+      <video class="camera-preview" muted playsinline webkit-playsinline></video>
+      <div class="face-guide" aria-hidden="true"></div>
+      <div class="camera-countdown" hidden></div>
+      <div class="capture-shot" hidden></div>
+    </div>
+    <div class="camera-hint">얼굴을 원 안에 맞춰 주세요</div>
+    <button class="camera-shutter" aria-label="사진 찍기"></button>
+    <div class="capture-confirm" hidden>
+      <button class="choice-btn confirm-start">이대로 시작</button>
+      <button class="text-link confirm-retake">다시 찍기</button>
+    </div>
+  `;
+
+  const previewVideo = el.querySelector('.camera-preview');
+  const guide = el.querySelector('.face-guide');
+  const countdownEl = el.querySelector('.camera-countdown');
+  const shotSlot = el.querySelector('.capture-shot');
+  const hint = el.querySelector('.camera-hint');
+  const shutter = el.querySelector('.camera-shutter');
+  const confirmBox = el.querySelector('.capture-confirm');
+  const startBtn = el.querySelector('.confirm-start');
+  const retakeBtn = el.querySelector('.confirm-retake');
+
+  let shot = null;
+  let timer = null;
+  let counting = false;
+
+  // muted/playsInline 을 프로퍼티로 확실히 지정해야 자동재생이 막히지 않는다(HTML 속성만으론 불안정)
+  previewVideo.muted = true;
+  previewVideo.autoplay = true;
+  previewVideo.playsInline = true;
+  const safePlay = () => { try { const p = previewVideo.play?.(); if (p && p.catch) p.catch(() => {}); } catch {} };
+
+  function showLive() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    counting = false;
+    shot = null;
+    shotSlot.hidden = true;
+    shotSlot.innerHTML = '';
+    countdownEl.hidden = true;
+    confirmBox.hidden = true;
+    guide.hidden = false;
+    hint.hidden = false;
+    shutter.hidden = false;
+    shutter.disabled = false;
+    previewVideo.style.visibility = 'visible';
+    safePlay();
+  }
+
+  function snap() {
+    shot = grabTargetCanvas(previewVideo);
+    countdownEl.hidden = true;
+    shutter.hidden = true;
+    guide.hidden = true;
+    hint.hidden = true;
+    previewVideo.style.visibility = 'hidden';
+    shot.className = 'shot-canvas';
+    shotSlot.innerHTML = '';
+    shotSlot.appendChild(shot);
+    shotSlot.hidden = false;
+    confirmBox.hidden = false;
+    counting = false;
+  }
+
+  function startCountdown() {
+    if (counting) return;
+    counting = true;
+    shutter.disabled = true;
+    let n = 3;
+    countdownEl.textContent = String(n);
+    countdownEl.hidden = false;
+    const step = () => {
+      n -= 1;
+      if (n >= 1) { countdownEl.textContent = String(n); timer = setTimeout(step, COUNTDOWN_MS); }
+      else { timer = null; snap(); }
+    };
+    timer = setTimeout(step, COUNTDOWN_MS);
+  }
+
+  shutter.addEventListener('click', startCountdown);
+  retakeBtn.addEventListener('click', showLive);
+  startBtn.addEventListener('click', () => {
+    if (timer) { clearTimeout(timer); timer = null; }
+    previewVideo.srcObject = null; // 미리보기 비디오만 분리(스트림은 감지용으로 계속 사용)
+    onConfirm && onConfirm(shot);
+  });
+
+  if (stream) previewVideo.srcObject = stream;
+  // 메타데이터가 준비되면 재생 보장(스트림 부착 직후 play 가 무시되는 경우 대비)
+  previewVideo.addEventListener('loadedmetadata', safePlay);
+  setTint();
+  setBgVideo(null);
+  mount(root, el);
+  safePlay();
+
+  keyHandler = (e) => {
+    if (!confirmBox.hidden) { if (e.key === 'Enter') startBtn.click(); return; }
+    if (!counting && (e.key === ' ' || e.key === 'Enter')) startCountdown();
+  };
+  document.addEventListener('keydown', keyHandler);
 }
 
 export function openGallery(host) {

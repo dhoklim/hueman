@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { renderIntro, renderScene, showResult } from '../src/ui.js';
+import { renderIntro, renderScene, showResult, renderCameraCapture } from '../src/ui.js';
 
 describe('ui.renderIntro', () => {
   it('shows description and fires onStart with camera flag from each button', () => {
@@ -16,18 +16,52 @@ describe('ui.renderIntro', () => {
     expect(onStart).toHaveBeenCalledWith(false);
   });
 
-  it('shows a red photo capture button when camera is ready', () => {
+  it('returns only setLoading (no intro capture button)', () => {
     const root = document.createElement('div');
-    const onCapture = vi.fn();
     const intro = renderIntro(root, { onStart: vi.fn() });
+    expect(typeof intro.setLoading).toBe('function');
+    expect(intro.setCaptureReady).toBeUndefined();
+    expect(root.querySelector('.photo-capture-btn')).toBeNull();
+  });
+});
 
-    intro.setCaptureReady(onCapture);
+describe('ui.renderCameraCapture', () => {
+  it('shutter → 3·2·1 countdown → confirm preview → onConfirm(canvas)', () => {
+    vi.useFakeTimers();
+    const root = document.createElement('div');
+    const onConfirm = vi.fn();
+    renderCameraCapture(root, { stream: null, onConfirm });
 
-    const button = root.querySelector('.photo-capture-btn');
-    expect(button).toBeTruthy();
-    expect(button.textContent).toContain('사진 찍기');
-    button.click();
-    expect(onCapture).toHaveBeenCalled();
+    expect(root.querySelector('.camera-preview')).toBeTruthy();
+    expect(root.querySelector('.face-guide')).toBeTruthy();
+    const shutter = root.querySelector('.camera-shutter');
+    expect(shutter).toBeTruthy();
+
+    shutter.click();
+    vi.advanceTimersByTime(2100); // 3 ticks × 700ms → 촬영
+
+    const confirm = root.querySelector('.capture-confirm');
+    expect(confirm.hidden).toBe(false);
+    expect(root.querySelector('.capture-shot canvas')).toBeTruthy();
+
+    root.querySelector('.confirm-start').click();
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onConfirm.mock.calls[0][0]).toBeInstanceOf(window.HTMLCanvasElement);
+    vi.useRealTimers();
+  });
+
+  it('retake returns to the live view', () => {
+    vi.useFakeTimers();
+    const root = document.createElement('div');
+    renderCameraCapture(root, { stream: null, onConfirm: vi.fn() });
+    root.querySelector('.camera-shutter').click();
+    vi.advanceTimersByTime(2100);
+    expect(root.querySelector('.capture-confirm').hidden).toBe(false);
+
+    root.querySelector('.confirm-retake').click();
+    expect(root.querySelector('.capture-confirm').hidden).toBe(true);
+    expect(root.querySelector('.camera-shutter').hidden).toBe(false);
+    vi.useRealTimers();
   });
 });
 

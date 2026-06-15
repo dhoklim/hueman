@@ -43,6 +43,24 @@ export function captureTargetFrom(video) {
   return true;
 }
 
+// 비저장: 지금 프레임을 타깃 해상도 거울 정사각 캔버스로 즉시 캡처해 반환.
+// (확인/다시찍기 흐름 — 확정 전까지 target 에 넣지 않는다. 프레임이 없으면 빈 캔버스.)
+export function grabTargetCanvas(video) {
+  return captureSquare(video, TARGET_SIZE) || blankCanvas(TARGET_SIZE);
+}
+
+function blankCanvas(size) {
+  const c = document.createElement('canvas');
+  c.width = size;
+  c.height = size;
+  return c;
+}
+
+// 외부(카메라 화면)에서 만든 캔버스를 모자이크 타깃으로 확정
+export function setTarget(canvas) {
+  if (canvas) target = canvas;
+}
+
 export async function captureTargetWhenReady(video, attempts = 24) {
   for (let i = 0; i < attempts; i++) {
     if (captureTargetFrom(video)) return true;

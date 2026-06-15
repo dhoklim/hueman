@@ -6,8 +6,8 @@ let startedVideo = null;
 
 const snapshotMock = vi.hoisted(() => ({
   captureTargetFrom: vi.fn(() => true),
-  captureTargetWhenReady: vi.fn(async () => true),
-  setTargetFrom: vi.fn(),
+  grabTargetCanvas: vi.fn(() => document.createElement('canvas')),
+  setTarget: vi.fn(),
   addTile: vi.fn(),
   getTarget: vi.fn(() => ({})),
   getTiles: vi.fn(() => []),
@@ -40,20 +40,16 @@ describe('live emotion display', () => {
     vi.resetModules();
   });
 
-  it('captures the mosaic target photo only after the red photo button is clicked', async () => {
+  it('opens a separate camera capture screen instead of capturing on the intro', async () => {
     document.body.innerHTML = '<div id="app"></div>';
 
     await import('../src/main.js');
     document.querySelector('.intro-start-cam').click();
 
-    await vi.waitFor(() => expect(document.querySelector('.photo-capture-btn')).toBeTruthy());
-    expect(snapshotMock.captureTargetWhenReady).not.toHaveBeenCalled();
-    expect(document.querySelector('.intro')).toBeTruthy();
-
-    document.querySelector('.photo-capture-btn').click();
-
-    await vi.waitFor(() => expect(snapshotMock.captureTargetWhenReady).toHaveBeenCalledWith(startedVideo));
+    await vi.waitFor(() => expect(document.querySelector('.camera-screen')).toBeTruthy());
+    expect(snapshotMock.setTarget).not.toHaveBeenCalled();
     expect(document.querySelector('.intro')).toBeNull();
+    expect(document.querySelector('.camera-shutter')).toBeTruthy();
   });
 
   it('does not recolor the screen with the viewer current emotion', async () => {
