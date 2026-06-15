@@ -1,5 +1,6 @@
 // 모자이크 타임랩스 리빌 — 완성된 모자이크를 빈 캔버스에 타일 단위로 차오르게 그린다.
 // "내가 느낀 감정들이 모여 내 얼굴이 된다"를 시각 그 자체로 보여주는 연출.
+import { CELL_PX } from './mosaic.js';
 
 // 칸이 흩어져 나타나도록 결정적(LCG) 셔플 순열을 만든다.
 export function revealOrder(count, seed = 7) {
@@ -27,7 +28,7 @@ export function revealBatches(total, frames) {
 // 완성 모자이크(full) → { canvas(점점 채워짐), play(onDone), stop }.
 // 저장/결과 카드는 항상 full 캔버스를 쓰므로 애니메이션 도중에도 완성본이 보장된다.
 export function createReveal(full, opts = {}) {
-  const cellPx = opts.cellPx || 16;
+  const cellPx = opts.cellPx || CELL_PX;
   const durationMs = opts.durationMs || 2800;
   const fps = opts.fps || 30;
 
