@@ -38,8 +38,8 @@ function setCamPreviewHidden(hidden) {
   if (v) v.style.visibility = hidden ? 'hidden' : 'visible';
 }
 
-const WEBCAM_TICK_MS = 700;
-const TINT_HISTORY = 6; // 화면 틴트 산출용 최근 감정 표본 수
+const WEBCAM_TICK_MS = 300;
+const TINT_HISTORY = 2; // 화면 반응은 즉각적으로, 두 감정 혼합은 최근 2표본으로만 판단
 let liveTintHistory = [];
 
 function logCurrent() {
@@ -79,9 +79,9 @@ function handleEmotion(info) {
     tickCount++;
   }
 
-  // 표정이 색이 되어 화면에 기록된다 — 최근 감정 표본으로 #tint 를 갱신.
+  // 표정이 색이 되어 화면에 기록된다 — 화면은 raw detected 값을 우선해 빠르게 반응한다.
   // 상위 두 감정이 비슷하면 두 색이 섞인 그라디언트로 물든다.
-  liveTintHistory.push(info.emotion);
+  liveTintHistory.push(info.detected || info.emotion);
   if (liveTintHistory.length > TINT_HISTORY) liveTintHistory.shift();
   setTint(tintEmotionsFromHistory(liveTintHistory));
 

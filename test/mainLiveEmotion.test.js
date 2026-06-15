@@ -86,6 +86,22 @@ describe('live emotion display', () => {
     expect(tint.style.background).toContain('rgb(224, 49, 49)'); // anger #E03131
   });
 
+  it('uses the latest detected expression for tint instead of waiting for smoothed emotion', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+
+    await import('../src/main.js');
+    document.querySelector('.intro-start-cam').click();
+    await vi.waitFor(() => expect(liveCallback).toBeTypeOf('function'));
+    document.querySelector('.confirm-start').click();
+    await vi.waitFor(() => expect(document.querySelector('.scene')).toBeTruthy());
+
+    const tint = document.getElementById('tint');
+    liveCallback({ emotion: 'joy', detected: 'sad', faceFound: true });
+
+    expect(tint.style.background).toContain('rgb(59, 125, 216)'); // sad #3B7DD8
+    expect(tint.style.background).not.toContain('rgb(255, 210, 63)'); // joy #FFD23F
+  });
+
   it('blends two colors when two emotions are detected similarly', async () => {
     document.body.innerHTML = '<div id="app"></div>';
 

@@ -3,7 +3,7 @@
 import { loadModels, startCamera, detectExpressions } from './faceEmotion.js';
 import { expressionToEmotion, smooth } from './emotionMapping.js';
 
-const TICK_MS = 600;
+const TICK_MS = 300;
 const HISTORY = 4;
 
 let timer = null;
@@ -12,6 +12,7 @@ let video = null;
 let history = [];
 let fallback = 'numb';
 let onEmotionCb = null;
+let detecting = false;
 
 export function setFallback(emotion) {
   fallback = emotion || 'numb';
@@ -38,17 +39,22 @@ export async function startLiveEmotion({ onEmotion } = {}) {
   }
 
   history = [];
+  detecting = false;
   timer = setInterval(tick, TICK_MS);
   return video;
 }
 
 async function tick() {
+  if (detecting) return;
+  detecting = true;
   let detected = null;
   try {
     const expr = await detectExpressions(video);
     detected = expressionToEmotion(expr);
   } catch {
     detected = null;
+  } finally {
+    detecting = false;
   }
   history.push(detected);
   if (history.length > HISTORY) history.shift();
@@ -67,4 +73,5 @@ export function stopLiveEmotion() {
   if (video && video.parentNode) video.parentNode.removeChild(video);
   video = null;
   history = [];
+  detecting = false;
 }
