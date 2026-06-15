@@ -248,15 +248,12 @@ export function showResult(root, result, mosaicCanvas) {
     : null;
   const el = document.createElement('div');
   el.className = 'scene result';
-  const label = result.isComposite ? CATEGORY_LABELS.composite : (CATEGORY_LABELS[result.topCategory] || '감정');
   el.innerHTML = `
-    <div class="label">당신의 인생을 가장 많이 채운 감정</div>
-    <div class="top">${label}</div>
+    <div class="result-headline">당신이 느낀 모든 감정은,<br>당신이 살아있었다는 증거입니다.</div>
     <div class="message">${result.message}</div>
     <div class="timeline" aria-label="감정 타임라인"></div>
     <div class="mosaic-slot"></div>
     <div class="result-actions"></div>
-    <div class="result-closing">당신이 느낀 모든 감정은, 당신이 살아있었다는 증거입니다.</div>
   `;
   if (result.receipts && result.receipts.length) {
     const receipt = document.createElement('div');

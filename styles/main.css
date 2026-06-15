@@ -67,20 +67,16 @@ body {
   justify-content: flex-start; max-height: 100%;
   padding-top: max(32px, 6vh); padding-bottom: max(32px, 6vh);
 }
-.result .label { font-size: 14px; letter-spacing: .12em; opacity: .8; }
-.result .top { font-size: clamp(28px, 5vw, 52px); font-weight: 800; margin: 6px 0 14px; }
 .result .message { font-size: clamp(16px, 2.4vw, 24px); line-height: 1.7; max-width: 640px; }
 .result .receipt {
   font-size: clamp(13px, 1.8vw, 17px); line-height: 1.8;
   max-width: 640px; margin-top: 12px; opacity: .8;
 }
 .result .daily-stats { font-size: clamp(12px, 1.6vw, 15px); margin-top: 10px; opacity: .65; }
-.result .result-closing {
-  margin-top: 30px; padding-top: 22px;
-  border-top: 1px solid rgba(255,255,255,.16);
-  max-width: 600px;
-  font-size: clamp(15px, 2.2vw, 21px); line-height: 1.85; font-weight: 500;
-  opacity: .92; letter-spacing: .01em;
+.result .result-headline {
+  max-width: 620px; margin: 8px 0 20px;
+  font-size: clamp(22px, 3.6vw, 36px); font-weight: 800;
+  line-height: 1.55; letter-spacing: -.01em;
 }
 .result .mosaic-placeholder {
   margin-top: 26px; border: 1px dashed rgba(255,255,255,.7);

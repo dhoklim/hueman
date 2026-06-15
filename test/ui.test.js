@@ -103,10 +103,10 @@ describe('ui.renderScene', () => {
 });
 
 describe('ui.showResult', () => {
-  it('shows the dominant label, message, and mosaic placeholder', () => {
+  it('shows the closing headline, message, and mosaic placeholder', () => {
     const root = document.createElement('div');
     showResult(root, { topCategory: 'joy', isComposite: false, message: '메시지다' });
-    expect(root.textContent).toContain('기쁨');
+    expect(root.textContent).toContain('살아있었다는 증거');
     expect(root.textContent).toContain('메시지다');
     expect(root.textContent).toContain('모자이크');
   });
