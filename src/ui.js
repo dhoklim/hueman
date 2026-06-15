@@ -655,6 +655,26 @@ export function renderCameraCapture(root, { stream, onConfirm } = {}) {
   document.addEventListener('keydown', keyHandler);
 }
 
+// 무표정 보정 화면: 사진 촬영 직후, 게임 시작 전. 카운트다운 동안 코너의
+// 카메라 미리보기(#cam-preview)로 자기 얼굴을 보며 무표정을 유지한다.
+// 타이머는 main이 구동하고(renderIntro의 setLoading 패턴), setCount로 숫자만 갱신.
+export function renderCalibration(root, { seconds = 3 } = {}) {
+  const el = document.createElement('div');
+  el.className = 'calibration';
+  el.innerHTML = `
+    <div class="calibration-title">잠깐, 무표정으로 정면을 봐주세요</div>
+    <div class="calibration-sub">정확한 감정 인식을 위해 당신의 기준을 잡고 있어요</div>
+    <div class="calibration-count">${seconds}</div>
+  `;
+  const countEl = el.querySelector('.calibration-count');
+  function setCount(n) { countEl.textContent = String(n); }
+
+  setTint();          // 게임 시작 전이므로 화면은 칠하지 않는다
+  setBgVideo(null);
+  mount(root, el);
+  return { setCount };
+}
+
 export function openGallery(host) {
   const store = browserGalleryStore();
   const items = store ? store.list() : [];

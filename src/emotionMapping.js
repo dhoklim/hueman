@@ -31,6 +31,54 @@ export function expressionToEmotion(expressions, minConfidence = MIN_CONFIDENCE)
   return EXPRESSION_MAP[top] || 'numb';
 }
 
+// ── 개인별 무표정 보정 (calibration) ──────────────────────────────
+// 사람마다 무표정의 기본형이 달라 face-api가 가만히 있는 얼굴을 sad/angry로
+// 잘못 읽는다. 입장 직후 무표정을 모아 '기준값(baseline)'을 잡고, 이후 실시간
+// 표정에서 기준값을 빼고 남은 '변화분'만으로 감정을 판정한다.
+
+export const CALIBRATION_MIN_SAMPLES = 3;
+
+// 표정벡터 배열의 평균 → 기준값. null/객체 아님은 무시. 유효 샘플이
+// minSamples 미만이면 null(보정 미적용).
+export function computeBaseline(samples, minSamples = CALIBRATION_MIN_SAMPLES) {
+  const valid = (samples || []).filter((s) => s && typeof s === 'object');
+  if (valid.length < minSamples) return null;
+
+  const sum = {};
+  for (const s of valid) {
+    for (const [k, v] of Object.entries(s)) {
+      sum[k] = (sum[k] || 0) + (Number(v) || 0);
+    }
+  }
+  const baseline = {};
+  for (const [k, v] of Object.entries(sum)) baseline[k] = v / valid.length;
+  return baseline;
+}
+
+// 실시간 표정에서 기준값을 빼고(0 미만은 0) 재정규화. baseline/expressions가
+// 없으면 입력을 그대로 통과. 변화분이 전혀 없으면 무표정(neutral=1)으로 본다.
+export function applyBaseline(expressions, baseline) {
+  if (!expressions || !baseline) return expressions;
+
+  const adjusted = {};
+  let total = 0;
+  for (const [k, v] of Object.entries(expressions)) {
+    const a = Math.max(0, (Number(v) || 0) - (baseline[k] || 0));
+    adjusted[k] = a;
+    total += a;
+  }
+
+  if (total <= 0) {
+    const flat = {};
+    for (const k of Object.keys(expressions)) flat[k] = 0;
+    flat.neutral = 1;
+    return flat;
+  }
+
+  for (const k of Object.keys(adjusted)) adjusted[k] /= total;
+  return adjusted;
+}
+
 // 최근 감정 history(배열, null 포함 가능) → 평활화. 깜빡임 방지.
 // numb은 60% 이상일 때만 승리 — 나머지 상황에서는 다른 감정 우선.
 export function smooth(history) {

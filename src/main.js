@@ -1,12 +1,12 @@
 import story from '../content/story.json';
 import { createEngine, current, choose, advance, isEnding, receipts } from './engine.js';
-import { renderIntro, renderScene, showResult, renderCameraCapture, setTint } from './ui.js';
+import { renderIntro, renderScene, showResult, renderCameraCapture, renderCalibration, setTint } from './ui.js';
 import { tintEmotionsFromHistory } from './emotionColor.js';
 import { createLog, record, aggregate, emotionRuns } from './experienceLog.js';
 import { browserDailyStats, statsLine } from './dailyStats.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
 import { createReveal } from './mosaicReveal.js';
-import { startLiveEmotion, stopLiveEmotion, setFallback } from './liveEmotion.js';
+import { startLiveEmotion, stopLiveEmotion, setFallback, startCalibration, finishCalibration } from './liveEmotion.js';
 import {
   captureTargetFrom,
   setTarget,
@@ -41,6 +41,23 @@ function setCamPreviewHidden(hidden) {
 const WEBCAM_TICK_MS = 300;
 const TINT_HISTORY = 2; // 화면 반응은 즉각적으로, 두 감정 혼합은 최근 2표본으로만 판단
 let liveTintHistory = [];
+
+const CALIBRATION_SECONDS = 3; // 무표정 보정 카운트다운 길이
+
+// 사진 촬영 후, 게임 시작 전: 무표정을 잠깐 모아 개인 기준값을 잡는다.
+// 카운트다운이 끝나면 보정값을 확정(샘플 부족 시 내부에서 null → 보정 미적용)하고 done().
+function runCalibration(done) {
+  startCalibration();
+  const { setCount } = renderCalibration(root, { seconds: CALIBRATION_SECONDS });
+  let remaining = CALIBRATION_SECONDS;
+  const id = setInterval(() => {
+    remaining -= 1;
+    if (remaining > 0) { setCount(remaining); return; }
+    clearInterval(id);
+    finishCalibration();
+    done();
+  }, 1000);
+}
 
 function logCurrent() {
   // 웹캠 ON 이면 실시간 감정 이벤트(handleEmotion)로 집계 → 장면 이벤트는 기록하지 않음
@@ -140,10 +157,13 @@ async function begin(withCamera) {
           setTarget(canvas);
           setCamPreviewHidden(false);
           live = { ...live, hasTarget: !!getTarget() };
-          gameStarted = true;
-          enteredAt = Date.now();
-          show();
-          starting = false;
+          // 사진 확정 → 무표정 보정 단계 → 보정 끝나면 게임 시작
+          runCalibration(() => {
+            gameStarted = true;
+            enteredAt = Date.now();
+            show();
+            starting = false;
+          });
         },
       });
       return;

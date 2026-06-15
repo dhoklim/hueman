@@ -1,7 +1,7 @@
 // 컨트롤러: 일정 간격으로 표정을 감지해 평활화된 감정을 만들고, 콜백으로 흘려보낸다.
 // 로그 기록/모자이크 수집은 main 이 콜백에서 처리한다(이 모듈은 감지→감정에만 집중).
 import { loadModels, startCamera, detectExpressions } from './faceEmotion.js';
-import { expressionToEmotion, smooth } from './emotionMapping.js';
+import { expressionToEmotion, smooth, computeBaseline, applyBaseline } from './emotionMapping.js';
 
 const TICK_MS = 300;
 const HISTORY = 4;
@@ -14,8 +14,30 @@ let fallback = 'numb';
 let onEmotionCb = null;
 let detecting = false;
 
+// 개인별 무표정 보정
+let baseline = null;          // 적용 중인 기준값(없으면 보정 미적용)
+let calibrating = false;      // 보정 중이면 tick이 원시 표정을 모은다
+let calibrationSamples = [];
+
 export function setFallback(emotion) {
   fallback = emotion || 'numb';
+}
+
+export function setBaseline(b) { baseline = b || null; }
+export function getBaseline() { return baseline; }
+
+// 보정 시작/종료. startCalibration 후 tick이 원시 표정벡터를 모으고,
+// finishCalibration이 기준값을 계산·적용하고 반환한다(샘플 부족 시 null).
+export function startCalibration() {
+  calibrating = true;
+  calibrationSamples = [];
+}
+
+export function finishCalibration() {
+  calibrating = false;
+  baseline = computeBaseline(calibrationSamples);
+  calibrationSamples = [];
+  return baseline;
 }
 
 // 카메라 권한/모델 로드. 성공 시 감지 루프 시작 → 미리보기용 video 반환.
@@ -40,6 +62,9 @@ export async function startLiveEmotion({ onEmotion } = {}) {
 
   history = [];
   detecting = false;
+  baseline = null;
+  calibrating = false;
+  calibrationSamples = [];
   timer = setInterval(tick, TICK_MS);
   return video;
 }
@@ -50,7 +75,8 @@ async function tick() {
   let detected = null;
   try {
     const expr = await detectExpressions(video);
-    detected = expressionToEmotion(expr);
+    if (calibrating && expr) calibrationSamples.push(expr);
+    detected = expressionToEmotion(applyBaseline(expr, baseline));
   } catch {
     detected = null;
   } finally {
