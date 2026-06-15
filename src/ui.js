@@ -395,7 +395,7 @@ function renderTimeline(el, runs) {
   }
   const label = document.createElement('div');
   label.className = 'timeline-label';
-  label.textContent = '감정 흐름 (느낀 순서대로)';
+  label.textContent = '감정 흐름';
   el.before(label);
   const total = list.reduce((s, r) => s + r.durationMs, 0) || 1;
   // 막대 색은 gradient로 직접 그린다 — 비율 그대로(최소폭은 CSS min-width로 보장)
