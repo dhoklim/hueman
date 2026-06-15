@@ -447,7 +447,7 @@ export function renderIntro(root, { onStart } = {}) {
     <div class="intro-loading" hidden></div>
     <button class="text-link intro-gallery">감정 갤러리 보기</button>
     <button class="text-link intro-statement">작가 노트 · Artist Statement</button>
-    <div class="intro-test">테스트 버전 · 카메라를 켜면 표정은 결과 기록과 모자이크 재료로만 사용됩니다 · 우측 상단 패널(D 키)에서 내부 상태 확인</div>
+    <div class="intro-test">카메라를 켜면 표정은 결과 기록과 모자이크 재료로만 사용됩니다</div>
   `;
 
   const camBtn = el.querySelector('.intro-start-cam');

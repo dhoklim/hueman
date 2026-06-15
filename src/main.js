@@ -16,7 +16,6 @@ import {
   reset as resetSnapshots,
 } from './snapshots.js';
 import { buildMosaic } from './mosaic.js';
-import { updateDebug } from './debug.js';
 import { resolveSceneText } from './storyText.js';
 import { enableSound, playEmotionCue } from './sound.js';
 
@@ -59,7 +58,6 @@ function logCurrent() {
 function handleEmotion(info) {
   if (!gameStarted) {
     live = { active: true, ...info, tiles: getTiles().length, hasTarget: !!getTarget() };
-    updateDebug(engine, log, live);
     return;
   }
 
@@ -78,14 +76,12 @@ function handleEmotion(info) {
   }
 
   live = { active: true, ...info, tiles: getTiles().length, hasTarget: !!getTarget() };
-  updateDebug(engine, log, live);
 }
 
 function show() {
   const scene = current(engine);
   setFallback(scene.emotion); // 얼굴 미검출 시 이 장면 색으로 fallback
   playEmotionCue(scene.emotion);
-  updateDebug(engine, log, live);
   const viewScene = { ...scene, text: resolveSceneText(scene, engine.flags) };
 
   if (isEnding(scene)) {
@@ -103,7 +99,6 @@ function show() {
         const full = hasEnough() ? buildMosaic(getTarget(), getTiles()) : null;
         const mosaic = full ? { full, ...createReveal(full) } : null; // 타일이 차오르는 타임랩스 리빌
         showResult(root, result, mosaic);
-        updateDebug(engine, log, live);
       },
     });
     return;

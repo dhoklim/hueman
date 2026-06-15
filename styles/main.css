@@ -249,29 +249,6 @@ body {
   border-radius: 8px; padding: 24px; text-align: center; opacity: .72;
 }
 
-/* 테스트 버전 파라미터 패널 */
-#debug-panel {
-  position: fixed; top: 12px; right: 12px; z-index: 9999;
-  width: 300px; max-width: 44vw;
-  background: rgba(10,10,14,.82); color: #e6e6ea;
-  border: 1px solid rgba(255,255,255,.18); border-radius: 10px;
-  padding: 12px 14px;
-  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-  backdrop-filter: blur(6px); pointer-events: none;
-  box-shadow: 0 6px 24px rgba(0,0,0,.4);
-}
-#debug-panel .dbg-head { font-weight: 700; margin-bottom: 8px; }
-#debug-panel .dbg-row { margin: 3px 0; word-break: break-all; }
-#debug-panel .dbg-k { display: inline-block; min-width: 92px; color: #8a8a99; }
-#debug-panel code { color: #ffd23f; }
-#debug-panel .swatch {
-  display: inline-block; width: 11px; height: 11px; border-radius: 3px;
-  vertical-align: middle; margin-right: 4px; border: 1px solid rgba(255,255,255,.3);
-}
-#debug-panel .flag { display: inline-block; margin-right: 8px; }
-#debug-panel .dim { color: #6a6a78; font-weight: 400; }
-#debug-panel .dbg-trail { color: #99a; font-size: 11px; }
-
 @media (max-height: 760px) {
   .result { padding-top: 24px; padding-bottom: 24px; }
   .mosaic-canvas { width: min(360px, 76vw); }
@@ -282,7 +259,6 @@ body {
 @media (max-width: 520px) {
   .choices { gap: 12px; margin-top: 30px; }
   .choice-btn { width: min(100%, 320px); padding: 14px 20px; }
-  #debug-panel { display: none !important; }
   #cam-preview { width: 104px; height: 78px; }
   .hint { display: none; }
   .intro-how { display: none; }

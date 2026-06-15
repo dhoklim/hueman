@@ -27,7 +27,6 @@ vi.mock('../src/liveEmotion.js', () => ({
 
 vi.mock('../src/snapshots.js', () => snapshotMock);
 
-vi.mock('../src/debug.js', () => ({ updateDebug: vi.fn() }));
 vi.mock('../src/sound.js', () => ({ enableSound: vi.fn(), playEmotionCue: vi.fn() }));
 vi.mock('../src/videoMap.js', () => ({ SCENE_VIDEOS: {} }));
 
