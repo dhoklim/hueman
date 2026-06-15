@@ -127,6 +127,18 @@ describe('ui.renderScene', () => {
     expect(root.textContent).toContain('안녕');
   });
 
+  it('plays story background videos with their original audio enabled', () => {
+    vi.spyOn(window.HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
+    vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+
+    const root = document.createElement('div');
+    renderScene(root, { id: 'opening', type: 'scene', text: '안녕', emotion: 'joy' }, {});
+
+    const videos = [...document.querySelectorAll('.bg-video')];
+    expect(videos.length).toBeGreaterThan(0);
+    expect(videos.every((video) => video.muted === false)).toBe(true);
+  });
+
   it('does not reset the live emotion tint when rendering a scene (no flicker)', () => {
     vi.spyOn(window.HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
     vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());

@@ -34,7 +34,8 @@ function ensureBgEls() {
   for (let i = 0; i < 2; i++) {
     const v = document.createElement('video');
     v.className = 'bg-video';
-    v.muted = true;
+    v.muted = false;
+    v.volume = 1;
     v.loop = false; // 구간 루프는 bgTimer로 직접 관리
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
