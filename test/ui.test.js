@@ -1,6 +1,16 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { renderIntro, renderScene, showResult, renderCameraCapture, setTint } from '../src/ui.js';
+
+const mainCss = readFileSync(join(process.cwd(), 'styles', 'main.css'), 'utf8');
+
+function zIndexFor(selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = mainCss.match(new RegExp(`${escaped}\\s*\\{[^}]*z-index:\\s*(\\d+)`, 's'));
+  return match ? Number(match[1]) : null;
+}
 
 describe('ui.setTint (실시간 감정 화면 틴트)', () => {
   afterEach(() => {
@@ -31,6 +41,15 @@ describe('ui.setTint (실시간 감정 화면 틴트)', () => {
     expect(tint.style.background).toContain('rgb(255, 210, 63)'); // joy
     expect(tint.style.background).toContain('rgb(59, 125, 216)'); // sad
     expect(Number(tint.style.opacity)).toBeGreaterThan(0);
+  });
+});
+
+describe('ui tint layer order', () => {
+  it('keeps the tint above the active background video and below the UI', () => {
+    // setBgVideo raises the visible video buffer to z-index 1, so #tint must be
+    // at least that high. #tint is inserted after videos, keeping it visually above them.
+    expect(zIndexFor('#tint')).toBeGreaterThanOrEqual(1);
+    expect(zIndexFor('#tint')).toBeLessThan(zIndexFor('#app'));
   });
 });
 
