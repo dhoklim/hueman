@@ -285,7 +285,7 @@ export function showResult(root, result, mosaicCanvas) {
     stats.textContent = result.statsText;
     el.querySelector('.timeline').after(stats);
   }
-  renderTimeline(el.querySelector('.timeline'), result.totals || {});
+  renderTimeline(el.querySelector('.timeline'), result.timeline || []);
   const slot = el.querySelector('.mosaic-slot');
   const actions = el.querySelector('.result-actions');
 
@@ -385,35 +385,36 @@ const TIMELINE_COLORS = {
   numb: '#c8c8dc', anxiety: '#FF8C2B', surprise: '#2FB873',
 };
 
-function renderTimeline(el, totals) {
-  const entries = Object.entries(totals).filter(([, v]) => v > 0);
-  if (!entries.length) {
+// runs: 감정을 느낀 순서대로의 구간 배열 [{ category, durationMs }] (experienceLog.emotionRuns).
+// 빈도순으로 정렬하지 않고, 들어온 순서 그대로 왼쪽→오른쪽으로 그린다.
+function renderTimeline(el, runs) {
+  const list = (runs || []).filter((r) => r && (r.durationMs || 0) > 0);
+  if (!list.length) {
     el.innerHTML = '<div class="timeline-empty">감정 타임라인은 체험이 진행되면 채워집니다</div>';
     return;
   }
   const label = document.createElement('div');
   label.className = 'timeline-label';
-  label.textContent = '감정 흐름';
+  label.textContent = '감정 흐름 (느낀 순서대로)';
   el.before(label);
-  const total = entries.reduce((s, [, v]) => s + v, 0);
-  const sorted = [...entries].sort((a, b) => b[1] - a[1]);
-  // Set bar background directly as a gradient — avoids flex-child height quirks
+  const total = list.reduce((s, r) => s + r.durationMs, 0) || 1;
+  // 막대 색은 gradient로 직접 그린다 — 비율 그대로(최소폭은 CSS min-width로 보장)
   let pos = 0;
-  const stops = sorted.flatMap(([cat, dur]) => {
-    const pct = Math.max(4, Math.round((dur / total) * 100));
-    const color = TIMELINE_COLORS[cat] || '#888';
+  const stops = list.flatMap((r) => {
+    const pct = (r.durationMs / total) * 100;
+    const color = TIMELINE_COLORS[r.category] || '#888';
     const start = pos;
     pos = Math.min(pos + pct, 100);
     return [`${color} ${start}%`, `${color} ${pos}%`];
   });
   el.style.background = `linear-gradient(to right, ${stops.join(', ')})`;
-  // Transparent spans kept for DOM structure (tests, tooltips)
-  sorted.forEach(([cat, dur]) => {
-    const pct = Math.max(4, Math.round((dur / total) * 100));
+  // 투명 span은 DOM 구조·툴팁·테스트용으로 순서대로 유지
+  list.forEach((r) => {
+    const pct = (r.durationMs / total) * 100;
     const seg = document.createElement('span');
-    seg.className = `timeline-segment emotion-${cat}`;
+    seg.className = `timeline-segment emotion-${r.category}`;
     seg.style.cssText = `width:${pct}%;background:transparent;`;
-    seg.title = `${CATEGORY_LABELS[cat] || cat} ${pct}%`;
+    seg.title = `${CATEGORY_LABELS[r.category] || r.category} ${Math.round(pct)}%`;
     el.appendChild(seg);
   });
 }

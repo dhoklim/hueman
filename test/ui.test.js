@@ -187,12 +187,38 @@ describe('ui.showResult', () => {
       topCategory: 'sad',
       isComposite: false,
       message: '메시지다',
-      totals: { joy: 4000, sad: 6000 },
+      timeline: [
+        { category: 'joy', durationMs: 4000 },
+        { category: 'sad', durationMs: 6000 },
+      ],
     }, canvas);
 
     expect(root.querySelectorAll('.timeline-segment')).toHaveLength(2);
     expect(root.textContent).toContain('결과 카드 저장');
     expect(root.textContent).toContain('갤러리에 남기기');
+  });
+
+  it('draws the timeline in the order emotions were felt, not sorted by duration', () => {
+    const root = document.createElement('div');
+    showResult(root, {
+      topCategory: 'joy',
+      isComposite: false,
+      message: '메시지다',
+      // 느낀 순서: sad → joy(가장 김) → anger. 빈도순 정렬이면 joy가 맨 앞에 와야 하지만,
+      // 시간순이면 sad가 맨 앞이어야 한다.
+      timeline: [
+        { category: 'sad', durationMs: 1000 },
+        { category: 'joy', durationMs: 5000 },
+        { category: 'anger', durationMs: 1000 },
+      ],
+    });
+
+    const segs = [...root.querySelectorAll('.timeline-segment')];
+    expect(segs.map((s) => s.className.replace('timeline-segment ', ''))).toEqual([
+      'emotion-sad',
+      'emotion-joy',
+      'emotion-anger',
+    ]);
   });
 
   it('opens a zoom overlay for the completed mosaic', () => {

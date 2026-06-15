@@ -2,7 +2,7 @@ import story from '../content/story.json';
 import { createEngine, current, choose, advance, isEnding, receipts } from './engine.js';
 import { renderIntro, renderScene, showResult, renderCameraCapture, setTint } from './ui.js';
 import { tintEmotionsFromHistory } from './emotionColor.js';
-import { createLog, record, aggregate, emotionTimeline } from './experienceLog.js';
+import { createLog, record, aggregate, emotionRuns } from './experienceLog.js';
 import { browserDailyStats, statsLine } from './dailyStats.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
 import { createReveal } from './mosaicReveal.js';
@@ -101,7 +101,7 @@ function show() {
         logCurrent();
         stopLiveEmotion();
         live = { ...live, active: false };
-        const result = { ...aggregate(log), timeline: emotionTimeline(log), receipts: receipts(engine) };
+        const result = { ...aggregate(log), timeline: emotionRuns(log), receipts: receipts(engine) };
         // 오늘의 익명 통계에 이번 인생을 더하고, "N번째 인생" 문구 생성
         const statsCategory = result.isComposite ? 'composite' : result.topCategory;
         const stats = browserDailyStats();

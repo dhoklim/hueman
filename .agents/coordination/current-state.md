@@ -11,6 +11,7 @@ Last updated: 2026-06-15 19:50 KST by Codex
 - **Roadmap upgrade 완료**: 감정 타임라인, 결과 카드 저장, 로컬 opt-in 감정 갤러리, 개선된 모자이크 색상 매칭, 카메라 실패 cleanup, 프라이버시 안내, 선택 기억 문장, 기본 사운드 cue, 전시용 `Shift+R` 리셋, 작은 화면 결과 레이아웃 보강.
 - **hueman 3대 시스템(A 스토리 / B 실시간 감정 기록 / C 포토 모자이크) + 전시 보강 기능 구현 완료.**
 - **결과 화면 3기능 추가 (2026-06-11)**: 선택 경로 영수증(`engine.path`+`receipts()`, story.json 전 선택지 `receipt`, 결과 화면·결과 카드 표시), 오늘의 감정 통계(`src/dailyStats.js`, 일별 익명 카운트, "오늘 N번의 인생 중…"), 모자이크 타임랩스 리빌(`src/mosaicReveal.js`, 타일이 차오르는 연출 — 저장·카드는 완성본 사용).
+- **감정 타임라인 = 시간순 (2026-06-15)**: 결과 화면 `.timeline` 은 빈도순 정렬이 아니라 관람자가 **느낀 순서대로** 그린다. `experienceLog.emotionRuns(log)` 가 시간순 이벤트(`emotionTimeline`)에서 연속 같은 감정을 한 구간으로 병합 → `main.js` 가 `result.timeline` 로 전달 → `ui.renderTimeline` 이 좌→우 순서대로 그라디언트/구간 렌더. (`aggregate().totals` 는 위로 메시지·통계용으로 유지.)
 - Styles: `styles/main.css`. Tests: `test/` (Vitest).
 
 ## Known Repository State
@@ -20,7 +21,7 @@ Last updated: 2026-06-15 19:50 KST by Codex
 
 ## Verification Baseline (2026-06-15)
 
-- `npm test -- --run`: 112 passing in 21 files.
+- `npm test -- --run`: 116 passing in 21 files.
 - `npm run build`: passes. 번들 ~1.36MB (face-api/tfjs 포함, gzip ~344KB; 기존 chunk-size 경고만).
 - 개발 서버 boot OK(`/`, `src/*`, `styles/main.css` 200). 실제 웹캠 감지·화면색 변화는 카메라+브라우저에서만 검증 가능.
 

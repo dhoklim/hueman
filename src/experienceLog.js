@@ -64,3 +64,23 @@ export function emotionTimeline(log) {
     })
     .filter(Boolean);
 }
+
+// 감정을 "느낀 순서대로" 보여주는 타임라인.
+// emotionTimeline(시간순, 비집계 감정 제외)을 받아 연속된 같은 감정을 한 구간으로 병합한다.
+// 결과 화면에서 빈도순 정렬이 아니라 실제 감정 흐름(시간순)으로 그리기 위함.
+export function emotionRuns(log) {
+  const events = emotionTimeline(log);
+  const total = events.reduce((sum, e) => sum + e.durationMs, 0);
+  if (total <= 0) return [];
+
+  const runs = [];
+  for (const e of events) {
+    const last = runs[runs.length - 1];
+    if (last && last.category === e.category) {
+      last.durationMs += e.durationMs;
+    } else {
+      runs.push({ category: e.category, durationMs: e.durationMs });
+    }
+  }
+  return runs.map((r) => ({ ...r, percent: Math.round((r.durationMs / total) * 100) }));
+}
