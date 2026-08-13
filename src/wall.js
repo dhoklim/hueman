@@ -18,10 +18,12 @@ export function mountEmotionWall(
     fetchImpl = typeof fetch === 'undefined' ? null : fetch,
     intervalMs = POLL_MS,
     windowRef = typeof window === 'undefined' ? null : window,
+    variant = 'full',
   } = {},
 ) {
   if (!root) throw new Error('Emotion wall needs a root element');
 
+  const ambient = variant === 'ambient';
   const endpoint = getTransferApiUrl(apiUrl);
   const reducedMotion = Boolean(windowRef?.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   let snapshot = emptySnapshot();
@@ -29,8 +31,12 @@ export function mountEmotionWall(
   let frameId = null;
   let stopped = false;
 
-  root.className = 'emotion-wall';
-  root.innerHTML = `
+  root.className = ambient ? 'emotion-wall emotion-wall--ambient' : 'emotion-wall';
+  root.innerHTML = ambient ? `
+    <section class="wall-frame" aria-label="공동 감정 벽">
+      <canvas class="wall-canvas" aria-hidden="true"></canvas>
+    </section>
+  ` : `
     <section class="wall-frame" aria-labelledby="wall-title">
       <canvas class="wall-canvas" aria-hidden="true"></canvas>
       <div class="wall-copy">
@@ -49,21 +55,24 @@ export function mountEmotionWall(
   const legend = root.querySelector('.wall-legend');
   const statusEl = root.querySelector('[data-wall-status]');
 
-  for (const emotion of WALL_EMOTIONS) {
-    const item = document.createElement('li');
-    item.className = `wall-legend-item emotion-${emotion}`;
-    item.innerHTML = `<span class="wall-swatch" aria-hidden="true"></span><span>${EMOTIONS[emotion].label}</span><strong data-emotion-count="${emotion}">0</strong>`;
-    legend.appendChild(item);
+  if (legend) {
+    for (const emotion of WALL_EMOTIONS) {
+      const item = document.createElement('li');
+      item.className = `wall-legend-item emotion-${emotion}`;
+      item.innerHTML = `<span class="wall-swatch" aria-hidden="true"></span><span>${EMOTIONS[emotion].label}</span><strong data-emotion-count="${emotion}">0</strong>`;
+      legend.appendChild(item);
+    }
   }
 
   function render() {
     root.dataset.state = state;
-    totalEl.textContent = String(snapshot.total);
-    emptyEl.textContent = snapshot.total === 0 ? '아직 첫 감정이 도착하기 전입니다' : '';
+    if (totalEl) totalEl.textContent = String(snapshot.total);
+    if (emptyEl) emptyEl.textContent = snapshot.total === 0 ? '아직 첫 감정이 도착하기 전입니다' : '';
     for (const emotion of WALL_EMOTIONS) {
-      root.querySelector(`[data-emotion-count="${emotion}"]`).textContent = String(snapshot.counts[emotion]);
+      const countEl = root.querySelector(`[data-emotion-count="${emotion}"]`);
+      if (countEl) countEl.textContent = String(snapshot.counts[emotion]);
     }
-    statusEl.textContent = connectionMessage(state, snapshot.day);
+    if (statusEl) statusEl.textContent = connectionMessage(state, snapshot.day);
     drawLandscape(canvas, snapshot, 0, windowRef);
     if (!reducedMotion && frameId === null && !stopped) animate();
   }
@@ -205,6 +214,7 @@ function rgba(hex, alpha) {
 
 const wallRoot = typeof document === 'undefined' ? null : document.getElementById('wall-app');
 if (wallRoot) {
-  const wall = mountEmotionWall(wallRoot);
+  const variant = new URLSearchParams(window.location.search).get('embed') === 'ambient' ? 'ambient' : 'full';
+  const wall = mountEmotionWall(wallRoot, { variant });
   void wall.refresh();
 }

@@ -524,7 +524,7 @@ export function renderAttract(root, { onActivate } = {}) {
   const el = document.createElement('div');
   el.className = 'attract';
   el.innerHTML = `
-    <iframe class="attract-wall" src="${import.meta.env.BASE_URL}wall.html" tabindex="-1" aria-hidden="true"></iframe>
+    <iframe class="attract-wall" src="${import.meta.env.BASE_URL}wall.html?embed=ambient" tabindex="-1" aria-hidden="true"></iframe>
     <div class="attract-shade" aria-hidden="true"></div>
     <div class="attract-copy">
       <p class="attract-kicker">hueman · 모든 감정의 색</p>

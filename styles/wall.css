@@ -11,6 +11,12 @@ body {
 .emotion-wall, .wall-frame {
   min-height: 100dvh;
 }
+.emotion-wall--ambient .wall-frame {
+  padding: 0;
+}
+.emotion-wall--ambient .wall-frame::after {
+  background: radial-gradient(circle at 50% 45%, transparent 8%, rgba(5, 7, 12, .42) 100%);
+}
 .wall-frame {
   position: relative;
   display: grid;

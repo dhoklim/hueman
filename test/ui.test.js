@@ -89,7 +89,7 @@ describe('ui.renderAttract', () => {
     document.body.innerHTML = '';
   });
 
-  it('shows the artwork introduction and a passive emotion-wall preview', () => {
+  it('shows the artwork introduction over a text-free ambient emotion-wall preview', () => {
     const root = document.createElement('div');
     renderAttract(root, { onActivate: vi.fn() });
 
@@ -97,7 +97,7 @@ describe('ui.renderAttract', () => {
     expect(root.textContent).toContain('오늘 전시장에 남은 감정의 빛');
     const wall = root.querySelector('.attract-wall');
     expect(wall).toBeInstanceOf(HTMLIFrameElement);
-    expect(wall.getAttribute('src')).toMatch(/\/wall\.html$/);
+    expect(wall.getAttribute('src')).toMatch(/\/wall\.html\?embed=ambient$/);
     expect(wall.getAttribute('aria-hidden')).toBe('true');
   });
 

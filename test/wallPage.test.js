@@ -56,6 +56,25 @@ afterEach(() => {
 });
 
 describe('mountEmotionWall', () => {
+  it('renders an ambient embed as a text-free background landscape', async () => {
+    const root = document.createElement('main');
+    const handle = mountEmotionWall(root, {
+      apiUrl: API,
+      fetchImpl: vi.fn().mockResolvedValue(response(POPULATED)),
+      variant: 'ambient',
+      windowRef: displayWindow(),
+    });
+
+    await handle.refresh();
+
+    expect(root.classList.contains('emotion-wall--ambient')).toBe(true);
+    expect(root.querySelector('canvas')).toBeTruthy();
+    expect(root.querySelector('.wall-copy')).toBeNull();
+    expect(root.textContent).not.toContain('오늘 전시를 지나간');
+    expect(root.querySelectorAll('[data-emotion-count]')).toHaveLength(0);
+    handle.stop();
+  });
+
   it('renders a quiet empty beginning and five labeled category counts', async () => {
     const root = document.createElement('main');
     const handle = mountEmotionWall(root, {
