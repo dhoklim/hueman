@@ -100,13 +100,27 @@ describe('openQrTransferModal', () => {
 
   it('keeps direct iPad saving available when the Worker address is not configured', async () => {
     const downloadImage = vi.fn();
-    const modal = openQrTransferModal(modalOptions({ apiUrl: null, downloadImage }));
+    const shareImage = vi.fn().mockResolvedValue('unavailable');
+    const modal = openQrTransferModal(modalOptions({ apiUrl: null, downloadImage, shareImage }));
 
     await modal.ready;
     expect(modal.element.dataset.state).toBe('misconfigured');
     expect(modal.element.textContent).toContain('전송 서버가 설정되지 않았습니다');
     modal.element.querySelector('[data-action="download"]').click();
+    await vi.waitFor(() => expect(shareImage).toHaveBeenCalledWith(PNG, 'hueman-result-joy.png'));
     await vi.waitFor(() => expect(downloadImage).toHaveBeenCalledWith(PNG, 'hueman-result-joy.png'));
+  });
+
+  it('prefers iPad Web Share for a direct result-card save', async () => {
+    const shareImage = vi.fn().mockResolvedValue('shared');
+    const downloadImage = vi.fn();
+    const modal = openQrTransferModal(modalOptions({ apiUrl: null, shareImage, downloadImage }));
+
+    await modal.ready;
+    modal.element.querySelector('[data-action="download"]').click();
+
+    await vi.waitFor(() => expect(shareImage).toHaveBeenCalledWith(PNG, 'hueman-result-joy.png'));
+    expect(downloadImage).not.toHaveBeenCalled();
   });
 
   it('closes with Escape and removes the dialog from the page', async () => {

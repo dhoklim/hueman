@@ -4,6 +4,7 @@ import {
   createTransfer,
   downloadBlob,
   getTransferApiUrl,
+  sharePng,
 } from './photoTransfer.js';
 import { drawQr } from './qrCode.js';
 
@@ -16,6 +17,7 @@ export function openQrTransferModal({
   createRemoteTransfer = createTransfer,
   makeReceiveUrl = buildReceiveUrl,
   renderQr = drawQr,
+  shareImage = sharePng,
   downloadImage = downloadBlob,
   shareLink = shareReceiveUrl,
   documentRef = document,
@@ -58,7 +60,8 @@ export function openQrTransferModal({
   async function downloadOnIpad() {
     try {
       const image = await ensurePng();
-      downloadImage(image, filename);
+      const outcome = await shareImage(image, filename);
+      if (outcome !== 'shared') downloadImage(image, filename);
     } catch {
       render('network');
     }

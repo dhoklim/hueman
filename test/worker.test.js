@@ -5,11 +5,12 @@ import {
   createTransferWorker,
   parseToken,
   transferKey,
-} from '../worker/src/index.js';
+} from '../worker/src/transfer.js';
 
 const ORIGIN = 'https://dhoklim.github.io';
 const UUID = '123e4567-e89b-42d3-a456-426614174000';
 const NOW = 1760000000000;
+const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 
 function createEnv({ allowedOrigins = ORIGIN } = {}) {
   return {
@@ -33,7 +34,7 @@ function createContext() {
   };
 }
 
-function uploadRequest({ origin = ORIGIN, type = 'image/png', body = new Uint8Array([137, 80, 78, 71]) } = {}) {
+function uploadRequest({ origin = ORIGIN, type = 'image/png', body = PNG_SIGNATURE } = {}) {
   return new Request('https://transfer.example/v1/transfers', {
     method: 'POST',
     headers: { origin, 'content-type': type },
@@ -88,6 +89,7 @@ describe('POST /v1/transfers', () => {
   it.each([
     ['foreign origin', uploadRequest({ origin: 'https://attacker.example' }), 403],
     ['JPEG body', uploadRequest({ type: 'image/jpeg' }), 415],
+    ['non-PNG body marked as PNG', uploadRequest({ body: new Uint8Array([0, 1, 2, 3]) }), 415],
     ['oversized body', uploadRequest({ body: new Uint8Array(MAX_TRANSFER_BYTES + 1) }), 413],
   ])('rejects a %s before R2 write', async (_label, request, expectedStatus) => {
     const env = createEnv();
@@ -148,6 +150,18 @@ describe('GET /v1/transfers/:token', () => {
     expect(malformed.status).toBe(404);
     expect(missing.status).toBe(404);
     expect(env.TRANSFERS.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('treats an invalid URL-encoded token as not found instead of throwing', async () => {
+    const env = createEnv();
+    const worker = createTransferWorker({ now: () => NOW, createId: () => UUID });
+
+    const response = await worker.fetch(new Request('https://transfer.example/v1/transfers/%E0%A4%A', {
+      headers: { origin: ORIGIN },
+    }), env, createContext());
+
+    expect(response.status).toBe(404);
+    expect(env.TRANSFERS.get).not.toHaveBeenCalled();
   });
 });
 

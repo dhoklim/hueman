@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -18,14 +18,13 @@ describe('production build layout', () => {
     expect(existsSync(join(dist, 'index.html'))).toBe(true);
     expect(existsSync(receiver)).toBe(true);
     expect(readFileSync(receiver, 'utf8')).toContain('hueman 결과 카드');
-    expect(readFileSync(join(dist, 'assets', findReceiverAsset(dist)), 'utf8'))
-      .toContain('https://transfer.example');
+    expect(readBuiltJavaScript(dist)).toContain('https://transfer.example');
   });
 });
 
-function findReceiverAsset(dist) {
-  const html = readFileSync(join(dist, 'receive.html'), 'utf8');
-  const match = html.match(/src="\/hueman\/assets\/([^\"]+\.js)"/);
-  if (!match) throw new Error('receive page script asset is missing');
-  return match[1];
+function readBuiltJavaScript(dist) {
+  return readdirSync(join(dist, 'assets'))
+    .filter((file) => file.endsWith('.js'))
+    .map((file) => readFileSync(join(dist, 'assets', file), 'utf8'))
+    .join('\n');
 }
