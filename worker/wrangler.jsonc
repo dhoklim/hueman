@@ -1,0 +1,18 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "hueman-photo-transfer",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-13",
+  "r2_buckets": [
+    {
+      "binding": "TRANSFERS",
+      "bucket_name": "hueman-photo-transfers"
+    }
+  ],
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "https://dhoklim.github.io"
+  }
+}
