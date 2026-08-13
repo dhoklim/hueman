@@ -1,12 +1,12 @@
 # Locks
 
-Last updated: 2026-08-13 14:32 KST by Codex
+Last updated: 2026-08-13 14:35 KST by Codex
 
 ## Active Locks
 
 | Agent | Scope | Status | Since | Notes |
 | --- | --- | --- | --- | --- |
-| _None_ | _None_ | _None_ | _None_ | No active locks. |
+| Codex | `worker/**`, `.github/workflows/deploy.yml`, `test/buildLayout.test.js`, `.agents/coordination/{current-state,inbox,session-log,locks}.md` | active | 2026-08-13 14:35 KST | Verify and deploy QR transfer service, configure Pages build, record release. |
 
 ## Lock Rules
 

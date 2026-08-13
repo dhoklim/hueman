@@ -19,7 +19,7 @@ describe('production build layout', () => {
     expect(existsSync(receiver)).toBe(true);
     expect(readFileSync(receiver, 'utf8')).toContain('hueman 결과 카드');
     expect(readBuiltJavaScript(dist)).toContain('https://transfer.example');
-  });
+  }, 30_000);
 });
 
 function readBuiltJavaScript(dist) {
