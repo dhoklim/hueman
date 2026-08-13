@@ -3,6 +3,7 @@
 ## Open
 
 - 2026-08-13 14:18 KST | Codex | `wrangler whoami` 결과 Cloudflare 로그인 상태가 아님. 실제 R2 생성·Worker 배포·GitHub Pages 변수 연결은 계정 로그인/사용자 권한 뒤에만 가능.
+- 2026-08-13 14:23 KST | Codex | `git push --dry-run origin main`도 GitHub HTTPS 사용자 인증 부재로 실패. 온라인 완료에는 GitHub와 Cloudflare 양쪽 로그인/권한이 필요.
 
 ## Resolved
 
