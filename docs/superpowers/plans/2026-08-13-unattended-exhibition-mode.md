@@ -8,7 +8,7 @@
 
 **Tech Stack:** Vite 8, JavaScript ES modules, Vitest 4 + jsdom, 기존 Cloudflare 공동 감정 벽 정적 페이지.
 
-**Status (2026-08-13):** 구현 및 병합 검증 완료 — `npm test` 248개와 `npm run build`를 순차 통과했고, production bundle에서 대기 화면과 초기화 안내 문구를 확인했다.
+**Status (2026-08-13):** 구현·병합·Pages 배포 검증 완료 — `npm test` 248개와 `npm run build`를 순차 통과했고, GitHub Pages workflow `31705123006` success 후 공개 production bundle에서 대기 화면과 초기화 안내 문구를 확인했다.
 
 ## Global Constraints
 

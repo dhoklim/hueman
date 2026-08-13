@@ -6,6 +6,7 @@
 
 ## Resolved
 
+- 2026-08-13 22:32 KST | Codex | GitHub Pages workflow `31705123006`의 build·deploy가 success로 끝났다. 공개 `/hueman/` index와 새 asset `index-CDlpD1Gp.js`는 no-cache HTTP 200이며, asset에 `wall.html`과 `새 관람자를 위해`가 포함됨을 확인했다.
 - 2026-08-13 22:29 KST | Codex | 무인 전시 모드를 `main`에 통합했다. 대기 화면은 작품 소개와 공동 감정 벽을 보이고, 체험 60초/결과·QR 120초 무입력 뒤 10초 취소 안내를 띄운다. 자동 초기화·다시 하기·Shift+R는 카메라·QR·모자이크·스냅샷을 함께 정리한다. `npm test` 248개와 production build를 순차 검증했고 독립 코드 검토에서 차단 이슈가 없었다.
 - 2026-08-13 22:02 KST | Codex | 결과 화면 `다시 하기`를 `main`에 통합했다. 버튼은 전체 새로고침으로 카메라·모자이크·감정 기록을 초기화하고 인트로부터 새 관람자 체험을 시작한다. TDD RED→GREEN, `npm test` 234개와 production build를 순차 검증했다.
 - 2026-08-13 19:48 KST | Codex | 공동 감정 벽을 `main`에 배포했다. SQLite Durable Object `EmotionWall`은 다섯 대표 감정의 KST 일일 합계만 저장하고, iPad 결과는 비차단으로 한 감정만 전송한다. Worker POST 201→GET 200, GitHub Pages run `31692315086` success, 공개 `wall.html`의 Canvas·합계·범례 렌더를 Chrome으로 확인했다.
