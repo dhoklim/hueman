@@ -1,5 +1,9 @@
 # Session Log
 
+## 2026-08-13
+
+- KST | Codex | 사용자 승인 QR 임시 사진 전달·iPad 대응 설계를 `docs/superpowers/specs/2026-08-13-qr-photo-transfer-design.md`에 문서화. Cloudflare Worker+비공개 R2, 10분 만료, GitHub Pages `receive.html#token`, 원본 카메라·스냅샷 미전송, iPad 공유/안전영역/회전 대응 및 테스트·배포 기준을 확정. 설계 자체 검토에서 만료 정리 순서를 보장하도록 R2 키를 `transfers/<expiresAt>/<uuid>.png`과 `<expiresAt>.<uuid>` token으로 명확화. Verification: 문서 placeholder scan 및 `git diff --check` 통과.
+
 ## 2026-06-15
 
 - 22:10 KST | Claude Code | **기능 1 — 중립 얼굴 감정 보정(per-person baseline) 구현**(사용자 요청; QR 가져가기=기능 2는 보류). 흐름: 인트로 → 사진 촬영(기존) → **무표정 보정(3초 카운트다운, 신규)** → 게임. `src/emotionMapping.js`에 순수 함수 `computeBaseline(samples,min=3)`·`applyBaseline(expr,baseline)`(기준값 빼고 0클램프·재정규화, 변화분 0이면 neutral=1, baseline/expr 없으면 통과) 추가. `src/liveEmotion.js`에 `setBaseline`/`getBaseline`/`startCalibration`/`finishCalibration` 추가, `tick`이 `applyBaseline` 적용·보정 중 원시 표정 수집, `startLiveEmotion` 시작 시 baseline 초기화. `src/ui.js` `renderCalibration(root,{seconds})→{setCount}`(타이머는 main 구동, `.calibration`은 `.scene-text` 없음). `src/main.js` `runCalibration(done)`이 사진 확정 후 보정 단계 실행. 어두움·얼굴 미검출로 샘플 부족 시 baseline=null → 보정 미적용(체험 안 막힘). 설계: `docs/superpowers/specs/2026-06-15-neutral-face-calibration-design.md`. TDD: RED `test/emotionMapping.test.js`(computeBaseline 미존재)·`test/liveEmotionCalibration.test.js`(startCalibration 미존재)·`test/mainLiveEmotion.test.js`(.calibration 없음) 확인 → GREEN. Verification: `npm test -- --run` 130 passed (22 files); `npm run build` exit 0(기존 chunk-size 경고만). 실제 웹캠 보정 효과는 카메라+브라우저 수동 QA 필요.

@@ -2,7 +2,7 @@
 
 ## Open
 
-- _None_
+- 2026-08-13 13:40 KST | Codex -> Team | QR 임시 사진 전달·iPad 대응 설계가 `docs/superpowers/specs/2026-08-13-qr-photo-transfer-design.md`에 문서화되어 사용자 검토 대기 중입니다. 검토 승인 전에는 구현을 시작하지 마세요.
 
 ## Resolved
 
