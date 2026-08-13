@@ -132,6 +132,9 @@ function show() {
           onReceivePhoto: ({ canvas, filename, trigger }) => {
             openQrTransferModal({ canvas, filename, trigger });
           },
+          onRestart: () => {
+            window.location.reload();
+          },
         });
       },
     });

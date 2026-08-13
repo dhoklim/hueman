@@ -220,6 +220,22 @@ describe('ui.showResult', () => {
     });
   });
 
+  it('starts a fresh experience when the restart button is tapped', () => {
+    const root = document.createElement('div');
+    let restarts = 0;
+
+    showResult(root, { topCategory: 'joy', isComposite: false, message: '메시지다' }, null, {
+      onRestart: () => { restarts += 1; },
+    });
+
+    const restart = [...root.querySelectorAll('button')]
+      .find((button) => button.textContent === '다시 하기');
+    expect(restart).toBeInstanceOf(HTMLButtonElement);
+    restart.click();
+
+    expect(restarts).toBe(1);
+  });
+
   it('draws the timeline in the order emotions were felt, not sorted by duration', () => {
     const root = document.createElement('div');
     showResult(root, {

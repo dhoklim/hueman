@@ -263,7 +263,7 @@ export function showResult(
   root,
   result,
   mosaicCanvas,
-  { createCard = createResultCardCanvas, onReceivePhoto = null } = {},
+  { createCard = createResultCardCanvas, onReceivePhoto = null, onRestart = null } = {},
 ) {
   clearKeys();
   // mosaicCanvas: 캔버스(완성본) 또는 리빌 핸들 { canvas(점점 채워짐), full(완성본), play }
@@ -348,6 +348,14 @@ export function showResult(
       });
     });
     saveCard.after(receive);
+  }
+
+  if (typeof onRestart === 'function') {
+    const restart = document.createElement('button');
+    restart.className = 'choice-btn save-btn result-restart';
+    restart.textContent = '다시 하기';
+    restart.addEventListener('click', onRestart);
+    (actions.querySelector('.qr-transfer-trigger') || saveCard).after(restart);
   }
 
   const statement = document.createElement('button');

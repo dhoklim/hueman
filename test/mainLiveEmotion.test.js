@@ -159,7 +159,7 @@ describe('live emotion display', () => {
     expect(tint.style.background).toContain('rgb(59, 125, 216)'); // sad
   });
 
-  it('publishes the final category without waiting before it renders the result', async () => {
+  it('publishes the final category without waiting and exposes a restart action', async () => {
     document.body.innerHTML = '<div id="app"></div>';
     wallMock.publishWallEmotion.mockReturnValue(new Promise(() => {}));
 
@@ -176,6 +176,8 @@ describe('live emotion display', () => {
     }
 
     expect(document.querySelector('.result')).toBeTruthy();
+    expect([...document.querySelectorAll('.result button')]
+      .some((button) => button.textContent === '다시 하기')).toBe(true);
     expect(wallMock.publishWallEmotion).toHaveBeenCalledTimes(1);
     expect(['joy', 'sad', 'anger', 'numb', 'anxiety'])
       .toContain(wallMock.publishWallEmotion.mock.calls[0][0]);
