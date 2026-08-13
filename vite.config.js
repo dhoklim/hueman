@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import { configDefaults } from 'vitest/config';
 
 export default defineConfig({
   base: '/hueman/',
@@ -13,5 +14,6 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    exclude: [...configDefaults.exclude, '**/.worktrees/**', '**/worktrees/**'],
   },
 });
