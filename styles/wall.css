@@ -1,0 +1,127 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; }
+body {
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #11131c;
+  color: #f7f5ee;
+  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
+}
+.emotion-wall, .wall-frame {
+  min-height: 100dvh;
+}
+.wall-frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  padding: max(36px, env(safe-area-inset-top)) max(42px, env(safe-area-inset-right))
+           max(36px, env(safe-area-inset-bottom)) max(42px, env(safe-area-inset-left));
+}
+.wall-frame::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at 50% 45%, transparent 20%, rgba(5, 7, 12, .7) 100%);
+  content: "";
+  pointer-events: none;
+}
+.wall-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+}
+.wall-copy {
+  width: min(1120px, 100%);
+  padding: clamp(24px, 5vw, 72px);
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: clamp(24px, 4vw, 48px);
+  background: rgba(15, 17, 25, .42);
+  box-shadow: 0 22px 80px rgba(0, 0, 0, .25);
+  backdrop-filter: blur(12px);
+  text-align: center;
+}
+.wall-kicker {
+  margin: 0 0 18px;
+  color: rgba(247, 245, 238, .72);
+  font-size: clamp(13px, 1.5vw, 18px);
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.wall-copy h1 {
+  max-width: 850px;
+  margin: 0 auto;
+  color: #fffdf6;
+  font-size: clamp(36px, 6.4vw, 94px);
+  font-weight: 800;
+  letter-spacing: -.055em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.wall-copy h1 span { color: #ffd23f; }
+.wall-empty {
+  min-height: 1.6em;
+  margin: 22px 0 0;
+  color: rgba(247, 245, 238, .84);
+  font-size: clamp(17px, 2vw, 25px);
+  line-height: 1.5;
+}
+.wall-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 28px;
+  margin: clamp(30px, 5vw, 58px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.wall-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(255, 255, 255, .86);
+  font-size: clamp(16px, 1.8vw, 23px);
+}
+.wall-legend-item strong { color: #fff; font-variant-numeric: tabular-nums; }
+.wall-swatch {
+  width: .76em;
+  height: .76em;
+  border: 1px solid rgba(255, 255, 255, .45);
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 16px currentColor;
+}
+.emotion-joy { color: #ffd23f; }
+.emotion-sad { color: #77a9ff; }
+.emotion-anger { color: #ff6565; }
+.emotion-numb { color: #c7c9d5; }
+.emotion-anxiety { color: #ffac56; }
+.wall-status {
+  min-height: 1.6em;
+  margin: 34px 0 0;
+  color: rgba(247, 245, 238, .62);
+  font-size: clamp(13px, 1.35vw, 17px);
+  line-height: 1.5;
+}
+[data-state="stale"] .wall-status { color: #ffdca2; }
+[data-state="offline"] .wall-status { color: #ffc0ba; }
+@media (max-width: 768px) {
+  .wall-frame {
+    align-items: stretch;
+    padding: max(20px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right))
+             max(20px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  }
+  .wall-copy {
+    display: grid;
+    align-content: center;
+    padding: clamp(24px, 7vw, 42px) 20px;
+  }
+  .wall-legend { gap: 12px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wall-copy { backdrop-filter: none; }
+}

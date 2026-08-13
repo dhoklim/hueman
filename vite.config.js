@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         index: resolve(process.cwd(), 'index.html'),
         receive: resolve(process.cwd(), 'receive.html'),
+        wall: resolve(process.cwd(), 'wall.html'),
       },
     },
   },
