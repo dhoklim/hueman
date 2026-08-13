@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-08-13 22:02 KST by Codex
+Last updated: 2026-08-13 22:29 KST by Codex
 
 ## Summary
 
@@ -17,6 +17,7 @@ Last updated: 2026-08-13 22:02 KST by Codex
 - **QR 임시 사진 전달·iPad 대응 배포 및 온라인 검증 완료 (2026-08-13)**: 최종 결과 카드 PNG만 Cloudflare Worker+비공개 R2로 전달하는 QR(`receive.html#token`) 기능, iPad Web Share/download fallback·safe area UI, 다중 Pages 빌드·배포 설정이 `main`에 통합됐다. 원본 카메라·타깃·스냅샷은 전송하지 않는다. R2 Standard 버킷 `hueman-photo-transfers`와 1분 정리 Cron을 가진 Worker `https://hueman-photo-transfer.dhoklim-bdd.workers.dev`를 실제 배포했고, GitHub Actions 변수 `QR_TRANSFER_API_URL`에 연결했다. GitHub Pages workflow run `31690160049`이 성공했고, 공개 `https://dhoklim.github.io/hueman/receive.html#token`을 실제 브라우저로 열어 유효 PNG가 로드되며 `사진 저장·공유` 버튼을 표시하는 `ready` 상태를 확인했다. `npm test` 185개와 Worker URL을 넣은 production build도 통과했다. 설계: `docs/superpowers/specs/2026-08-13-qr-photo-transfer-design.md`; 계획: `docs/superpowers/plans/2026-08-13-qr-photo-transfer.md`.
 - **공동 감정 벽 배포·온라인 검증 완료 (2026-08-13)**: iPad 결과가 대표 감정 하나를 비차단으로 보내고, 별도 전시 화면 `https://dhoklim.github.io/hueman/wall.html`이 4초마다 KST 일일 합계를 추상 Canvas로 표시한다. Cloudflare Worker `https://hueman-photo-transfer.dhoklim-bdd.workers.dev`에 SQLite Durable Object `EmotionWall`을 실제 생성·배포했다. 얼굴·사진·선택 경로·원본 표정 수치·식별자는 전송·저장하지 않고, 다섯 대표 감정의 합계·일자·갱신 시각만 보존한다. 실제 POST 201→GET 200, GitHub Pages workflow `31692315086` success, Chrome 공개 화면에서 Canvas·합계·범례 렌더를 확인했다. 검증: `npm test` 233개, production build, Worker dry-run. 설계: `docs/superpowers/specs/2026-08-13-emotion-wall-design.md`; 계획: `docs/superpowers/plans/2026-08-13-emotion-wall.md`.
 - **결과 화면 다시 하기 통합 (2026-08-13)**: 결과 카드·QR 버튼 뒤에 iPad 터치 영역(48px)을 유지하는 `다시 하기` 버튼을 추가했다. 선택하면 `window.location.reload()`로 인트로부터 새 체험을 시작해 카메라·모자이크·감정 기록·스토리 진행 상태를 함께 초기화한다. 브라우저의 일별 통계와 이미 발행된 공동 감정 벽 집계는 유지한다. 설계: `docs/superpowers/specs/2026-08-13-result-restart-design.md`; 계획: `docs/superpowers/plans/2026-08-13-result-restart.md`.
+- **무인 전시 모드 추가 (2026-08-13)**: 처음과 자동 초기화 뒤에는 작품 소개·공동 감정 벽을 은은히 보여 주는 대기 화면이 보인다. 체험 단계는 60초, 결과·QR·모자이크 단계는 120초 무입력 후 마지막 10초에 취소 가능한 초기화 안내를 띄운다. 자동 초기화·`다시 하기`·Shift+R는 카메라 스트림·QR 모달·모자이크 리빌·스냅샷을 함께 정리한 뒤 대기 화면으로 돌아가는 한 경로를 사용한다. 설계: `docs/superpowers/specs/2026-08-13-unattended-exhibition-mode-design.md`; 계획: `docs/superpowers/plans/2026-08-13-unattended-exhibition-mode.md`.
 
 ## Known Repository State
 
@@ -32,7 +33,7 @@ Last updated: 2026-08-13 22:02 KST by Codex
 ## Out of Scope (명시적 제외)
 
 - **심박 센서 Web Bluetooth** — 구현 안 함
-- **키오스크 모드** (어트랙트 루프, 자동 리셋, 전체화면·커서 숨김) — 구현 안 함
+- **키오스크 전체화면 고정·커서 숨김** — 대기 화면·자동 리셋은 구현됨. OS/브라우저별 전체화면 고정과 커서 숨김은 아직 구현 안 함
 
 (참고: 실시간 복합 감정 색 혼합은 2026-06-15 화면 틴트로 구현됨 — 위 System B 참고. `experienceLog.aggregate`의 isComposite는 여전히 결과 메시지용.)
 

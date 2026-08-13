@@ -8,6 +8,8 @@
 
 **Tech Stack:** Vite 8, JavaScript ES modules, Vitest 4 + jsdom, 기존 Cloudflare 공동 감정 벽 정적 페이지.
 
+**Status (2026-08-13):** 구현 및 병합 검증 완료 — `npm test` 248개와 `npm run build`를 순차 통과했고, production bundle에서 대기 화면과 초기화 안내 문구를 확인했다.
+
 ## Global Constraints
 
 - `attract` 단계는 자동 종료하지 않는다. `session`은 60,000ms, `result`는 120,000ms 무입력 뒤에 종료 10초 전 안내를 시작한다.
