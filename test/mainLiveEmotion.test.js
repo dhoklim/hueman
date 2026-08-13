@@ -4,6 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 let liveCallback = null;
 let startedVideo = null;
 
+const wallMock = vi.hoisted(() => ({
+  publishWallEmotion: vi.fn(() => Promise.resolve(false)),
+}));
+
 const snapshotMock = vi.hoisted(() => ({
   captureTargetFrom: vi.fn(() => true),
   grabTargetCanvas: vi.fn(() => document.createElement('canvas')),
@@ -33,6 +37,7 @@ vi.mock('../src/liveEmotion.js', () => ({
 }));
 
 vi.mock('../src/snapshots.js', () => snapshotMock);
+vi.mock('../src/wallClient.js', () => wallMock);
 
 vi.mock('../src/sound.js', () => ({ enableSound: vi.fn(), playEmotionCue: vi.fn() }));
 vi.mock('../src/videoMap.js', () => ({ SCENE_VIDEOS: {} }));
@@ -44,6 +49,7 @@ describe('live emotion display', () => {
     liveCallback = null;
     startedVideo = null;
     vi.clearAllMocks();
+    wallMock.publishWallEmotion.mockImplementation(() => Promise.resolve(false));
     vi.resetModules();
   });
 
@@ -151,5 +157,27 @@ describe('live emotion display', () => {
     expect(tint.style.background).toContain('linear-gradient');
     expect(tint.style.background).toContain('rgb(255, 210, 63)'); // joy
     expect(tint.style.background).toContain('rgb(59, 125, 216)'); // sad
+  });
+
+  it('publishes the final category without waiting before it renders the result', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+    wallMock.publishWallEmotion.mockReturnValue(new Promise(() => {}));
+
+    await import('../src/main.js');
+    document.querySelector('.intro-start-plain').click();
+    await vi.waitFor(() => expect(document.querySelector('.scene')).toBeTruthy());
+
+    let remainingSteps = 120;
+    while (!document.querySelector('.result') && remainingSteps > 0) {
+      const choice = document.querySelector('.choices .choice-btn');
+      if (choice) choice.click();
+      else document.querySelector('.scene').click();
+      remainingSteps -= 1;
+    }
+
+    expect(document.querySelector('.result')).toBeTruthy();
+    expect(wallMock.publishWallEmotion).toHaveBeenCalledTimes(1);
+    expect(['joy', 'sad', 'anger', 'numb', 'anxiety'])
+      .toContain(wallMock.publishWallEmotion.mock.calls[0][0]);
   });
 });
