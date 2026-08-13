@@ -2,10 +2,11 @@
 
 ## Open
 
-- _None_.
+- 2026-08-13 19:26 KST | Codex | 공동 감정 벽 설계가 확정됨. 다음 단계는 Durable Object 집계 API·`wall.html`·iPad 결과 전송을 구현하고 공개 전시 화면으로 검증하는 것.
 
 ## Resolved
 
+- 2026-08-13 19:26 KST | Codex | 공동 감정 벽 방향을 개인정보 보존형 일일 합계로 확정했다. 별도 전시 화면에는 추상 색 풍경과 익명 총합만 표시하며, 원본 카메라·사진·선택 경로는 전송하지 않는다.
 - 2026-08-13 19:17 KST | Codex | `main` push 후 GitHub Pages workflow `31690160049`의 build·deploy가 모두 success로 완료됐다. 공개 receiver bundle에 Worker URL이 포함됐고, 유효 PNG의 `receive.html#token`을 실제 Chrome에서 열어 이미지와 `사진 저장·공유` 버튼이 나타나는 `ready` 상태를 확인했다.
 - 2026-08-13 19:12 KST | Codex | `main` push·GitHub Pages workflow 실행 및 공개 QR 수신 검증 단계는 2026-08-13 19:17 KST에 완료됨.
 - 2026-08-13 19:12 KST | Codex | 사용자가 R2를 활성화한 뒤 `hueman-photo-transfers` Standard 버킷을 생성하고 Worker `https://hueman-photo-transfer.dhoklim-bdd.workers.dev`를 배포했다. `QR_TRANSFER_API_URL` GitHub Actions 변수도 설정했다. 실서비스 POST/GET PNG 검증은 200, `Access-Control-Allow-Origin: https://dhoklim.github.io`, `Cache-Control: private, no-store`를 반환했다.

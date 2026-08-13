@@ -1,12 +1,12 @@
 # Locks
 
-Last updated: 2026-08-13 19:17 KST by Codex
+Last updated: 2026-08-13 19:25 KST by Codex
 
 ## Active Locks
 
 | Agent | Scope | Status | Since | Notes |
 | --- | --- | --- | --- | --- |
-| _None_ | _None_ | _None_ | _None_ | No active locks. |
+| Codex | `docs/superpowers/specs/2026-08-13-emotion-wall-design.md`, `.agents/coordination/{current-state,inbox,session-log,locks}.md` | active | 2026-08-13 19:25 KST | Define privacy-preserving shared emotion wall before implementation. |
 
 ## Lock Rules
 

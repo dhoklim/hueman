@@ -2,6 +2,7 @@
 
 ## 2026-08-13
 
+- 19:26 KST | Codex | 사용자 요청으로 공동 감정 벽만 추가하기로 확정. 설계 `docs/superpowers/specs/2026-08-13-emotion-wall-design.md` 작성·자체 검토 완료: Cloudflare SQLite Durable Object의 KST 일일 대표감정 합계, 별도 `wall.html`, iPad 비차단 전송, 원본 이미지/선택/식별자 미전송, 8일 보존 삭제, CORS·상한·실서비스 검증 기준을 명시함.
 - 19:17 KST | Codex | `git.exe push origin main` 성공(`fda5e36`), GitHub Pages workflow `31690160049` build/deploy success. 공개 `receive.html`이 Worker endpoint 포함 asset을 제공하는지 확인하고, 1×1 유효 PNG를 실제 Worker에 POST→GET(200, 70 bytes, image/png)한 token을 public receiver URL fragment로 열었다. Chrome headless DOM에서 `data-state="ready"`, 결과 이미지, `사진 저장·공유` 버튼을 확인했다. 온라인 QR 전달 경로 검증 완료.
 - 19:12 KST | Codex | 사용자의 R2 활성화 후 `wrangler r2 bucket create hueman-photo-transfers` 성공. Worker `hueman-photo-transfer`를 `https://hueman-photo-transfer.dhoklim-bdd.workers.dev`에 실제 배포하고 1분 Cron·비공개 R2 바인딩을 확인했다. `gh.exe variable set QR_TRANSFER_API_URL`로 Pages build 변수 설정 완료. 실서비스 PNG POST→GET은 HTTP 200/CORS/no-store/attachment를 확인했다. 병렬 build와 내부 build test의 `dist/` 경합 및 Vitest 5초 기본 timeout으로 build layout test가 불안정한 것을 진단; 해당 실제 build integration test에 30초 timeout만 명시했다. 최종 검증: 185 tests, live endpoint embedded build.
 - 14:32 KST | Codex | 사용자 로그인 완료 후 재점검: `wrangler whoami`는 `dhoklim@gmail.com` OAuth를 확인했고 Windows Git Credential Manager를 쓰는 `git.exe push --dry-run origin main`도 성공했다. GitHub 연결 앱은 `dhoklim/hueman` admin 권한을 반환했다. 다만 `wrangler r2 bucket list`는 R2 초기 활성화 필요(code 10042)를 반환해, Dashboard에서 1회 Enable R2 후 실제 버킷/Worker/Pages 배포를 재개해야 한다.
