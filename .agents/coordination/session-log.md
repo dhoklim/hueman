@@ -1,7 +1,10 @@
 # Session Log
 
-## 2026-08-13
+## 2026-08-14
 
+- 00:12 KST | Codex | 사용자 스크린샷에서 대기 화면 작품 소개와 iframe 감정 벽의 중앙 제목이 겹치는 것을 확인했다. `wall.html?embed=ambient`가 텍스트 없는 canvas 풍경만 렌더하도록 `src/wall.js` variant를 추가하고, 기본 전체 감정 벽은 그대로 유지했다. TDD: ambient URL/DOM 테스트가 RED→GREEN. 검증: `npm test` 249 passed (33 files), `npm run build` passed. `be2b3c8`을 main에 push하고 Pages workflow `31713943426` success 뒤 공개 페이지를 Edge headless 1365×1000으로 캡처해 중첩 제목이 사라진 것을 확인했다.
+
+## 2026-08-13
 - 22:32 KST | Codex | GitHub Pages workflow `31705123006`의 build(1m33s)·deploy(29s)가 success로 완료됐다. no-cache 공개 요청에서 `https://dhoklim.github.io/hueman/`은 HTTP 200, `last-modified: Thu, 13 Aug 2026 13:31:10 GMT`를 반환했고 새 `index-CDlpD1Gp.js` asset도 HTTP 200으로 로드됐다. 해당 asset에서 `wall.html`과 `새 관람자를 위해` 문자열을 확인해 배포된 무인 전시 코드 경로를 검증했다. Actions는 Node 20 deprecation 경고만 보고했고 실패는 없었다.
 - 22:29 KST | Codex | 무인 전시 모드를 `main`에 fast-forward 통합(`a480d25`)했다. 초기·자동 초기화 뒤 대기 화면은 작품 소개와 비상호작용 공동 감정 벽을 보이고, 체험 60초/결과·QR 120초 무입력의 마지막 10초에 취소 가능한 안내를 띄운다. 자동 초기화·결과 다시 하기·Shift+R는 카메라 스트림, QR modal interval, 모자이크 리빌, 스냅샷을 함께 정리한다. TDD RED→GREEN: timer/UI/main 통합 회귀를 추가했다. 독립 코드 검토는 차단 이슈 없음. 병합 `main` 검증: `npm test` 248 passed (33 files), `npm run build` passed, bundle에 `새 관람자를 위해`와 `/hueman/wall.html` 포함 확인. `git diff --check`가 새 설계 문서의 Markdown hard-break 공백 2개를 발견해 `<br>`로 바꾼 뒤 다시 clean을 확인했다.
 - 22:02 KST | Codex | 결과 화면 다시 하기를 `main`에 fast-forward 통합(`c4a2889`)했다. `다시 하기`는 `window.location.reload()`로 새 관람자 세션을 시작하며 기존 iPad 48px 터치 UI를 재사용한다. TDD: UI 콜백과 실제 엔딩 경로의 버튼 노출을 RED→GREEN으로 확인. 최종 순차 검증: `npm test` 234 passed, `npm run build` passed. 처음 병렬로 실행한 test/build는 같은 `dist/` 폴더를 비우려다 `ENOTEMPTY`로 충돌했으며, 기능 실패가 아닌 동시 실행 경합임을 순차 재현으로 확인했다.

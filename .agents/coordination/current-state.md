@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-08-13 22:29 KST by Codex
+Last updated: 2026-08-14 00:12 KST by Codex
 
 ## Summary
 
@@ -18,6 +18,7 @@ Last updated: 2026-08-13 22:29 KST by Codex
 - **공동 감정 벽 배포·온라인 검증 완료 (2026-08-13)**: iPad 결과가 대표 감정 하나를 비차단으로 보내고, 별도 전시 화면 `https://dhoklim.github.io/hueman/wall.html`이 4초마다 KST 일일 합계를 추상 Canvas로 표시한다. Cloudflare Worker `https://hueman-photo-transfer.dhoklim-bdd.workers.dev`에 SQLite Durable Object `EmotionWall`을 실제 생성·배포했다. 얼굴·사진·선택 경로·원본 표정 수치·식별자는 전송·저장하지 않고, 다섯 대표 감정의 합계·일자·갱신 시각만 보존한다. 실제 POST 201→GET 200, GitHub Pages workflow `31692315086` success, Chrome 공개 화면에서 Canvas·합계·범례 렌더를 확인했다. 검증: `npm test` 233개, production build, Worker dry-run. 설계: `docs/superpowers/specs/2026-08-13-emotion-wall-design.md`; 계획: `docs/superpowers/plans/2026-08-13-emotion-wall.md`.
 - **결과 화면 다시 하기 통합 (2026-08-13)**: 결과 카드·QR 버튼 뒤에 iPad 터치 영역(48px)을 유지하는 `다시 하기` 버튼을 추가했다. 선택하면 `window.location.reload()`로 인트로부터 새 체험을 시작해 카메라·모자이크·감정 기록·스토리 진행 상태를 함께 초기화한다. 브라우저의 일별 통계와 이미 발행된 공동 감정 벽 집계는 유지한다. 설계: `docs/superpowers/specs/2026-08-13-result-restart-design.md`; 계획: `docs/superpowers/plans/2026-08-13-result-restart.md`.
 - **무인 전시 모드 추가·배포 검증 완료 (2026-08-13)**: 처음과 자동 초기화 뒤에는 작품 소개·공동 감정 벽을 은은히 보여 주는 대기 화면이 보인다. 체험 단계는 60초, 결과·QR·모자이크 단계는 120초 무입력 후 마지막 10초에 취소 가능한 초기화 안내를 띄운다. 자동 초기화·`다시 하기`·Shift+R는 카메라 스트림·QR 모달·모자이크 리빌·스냅샷을 함께 정리한 뒤 대기 화면으로 돌아가는 한 경로를 사용한다. GitHub Pages workflow `31705123006` build·deploy success 뒤 공개 index와 새 JS bundle을 no-cache HTTP 200으로 확인했고, bundle에 대기 벽·초기화 문구가 포함됐다. 설계: `docs/superpowers/specs/2026-08-13-unattended-exhibition-mode-design.md`; 계획: `docs/superpowers/plans/2026-08-13-unattended-exhibition-mode.md`.
+- **대기 화면 제목 겹침 수정·배포 검증 완료 (2026-08-14)**: 대기 화면의 감정 벽 iframe은 이제 `embed=ambient` 배경 전용 모드로 색 풍경만 그린다. 중앙 제목·범례·상태 문구를 만들지 않아 작품 소개와 겹치지 않는다. GitHub Pages workflow `31713943426` success 후 공개 페이지를 Edge headless로 1365×1000 캡처해 배경 제목이 사라진 것을 실제 확인했다.
 
 ## Known Repository State
 
