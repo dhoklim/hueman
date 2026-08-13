@@ -511,6 +511,73 @@ export function openStatement(host) {
   return overlay;
 }
 
+// 무인 전시의 대기 화면. 감정 벽은 관람자가 바로 참여하는 화면이 아니라,
+// 지금까지 남은 감정을 은은하게 비추는 배경으로만 사용한다.
+export function renderAttract(root, { onActivate } = {}) {
+  let activated = false;
+  const activate = () => {
+    if (activated) return;
+    activated = true;
+    onActivate?.();
+  };
+
+  const el = document.createElement('div');
+  el.className = 'attract';
+  el.innerHTML = `
+    <iframe class="attract-wall" src="${import.meta.env.BASE_URL}wall.html" tabindex="-1" aria-hidden="true"></iframe>
+    <div class="attract-shade" aria-hidden="true"></div>
+    <div class="attract-copy">
+      <p class="attract-kicker">hueman · 모든 감정의 색</p>
+      <h1 class="attract-title">당신의 선택과 표정이<br>하나의 색이 됩니다.</h1>
+      <p class="attract-desc">한 사람의 일생을 따라가며, 지금의 감정을 마주해 보세요.</p>
+      <p class="attract-wall-caption">오늘 전시장에 남은 감정의 빛</p>
+      <button class="choice-btn attract-activate">화면을 터치해 시작</button>
+    </div>
+  `;
+
+  el.addEventListener('click', activate);
+  setTint();
+  setBgVideo(null);
+  mount(root, el);
+
+  keyHandler = (e) => {
+    if (e.key === ' ' || e.key === 'Enter') activate();
+  };
+  document.addEventListener('keydown', keyHandler);
+}
+
+// 초기화 직전의 마지막 안내. 이 UI는 타이머 로직을 갖지 않으며,
+// 계속 관람하기를 누르면 kioskMode가 카운트다운을 지우고 새 타이머를 건다.
+export function renderKioskCountdown({ seconds = 10, onContinue } = {}) {
+  document.querySelector('.kiosk-reset-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'kiosk-reset-overlay';
+  overlay.setAttribute('role', 'alert');
+  overlay.setAttribute('aria-live', 'assertive');
+  overlay.innerHTML = `
+    <div class="kiosk-reset-card">
+      <p class="kiosk-reset-copy">새 관람자를 위해 <strong class="kiosk-reset-seconds">${seconds}</strong>초 후 처음으로 돌아갑니다.</p>
+      <button class="choice-btn kiosk-reset-continue">계속 관람하기</button>
+    </div>
+  `;
+
+  const secondsEl = overlay.querySelector('.kiosk-reset-seconds');
+  const remove = () => overlay.remove();
+  overlay.querySelector('.kiosk-reset-continue').addEventListener('click', () => {
+    onContinue?.();
+    remove();
+  });
+  document.body.appendChild(overlay);
+
+  return {
+    setSeconds(nextSeconds) {
+      secondsEl.textContent = String(nextSeconds);
+    },
+    remove,
+  };
+}
+
 export function renderIntro(root, { onStart } = {}) {
   const el = document.createElement('div');
   el.className = 'intro';

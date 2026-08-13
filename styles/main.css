@@ -213,6 +213,48 @@ body {
 }
 .choice-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; pointer-events: none; }
 .text-link:disabled  { opacity: .3; cursor: not-allowed; pointer-events: none; }
+
+/* 무인 전시 대기 화면 — 감정 벽은 움직이되 터치 조작은 시작 버튼으로만 모은다. */
+.attract { padding: 0; overflow: hidden; cursor: pointer; }
+.attract-wall {
+  position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+  opacity: .5; filter: saturate(.8) blur(.35px); pointer-events: none;
+}
+.attract-shade {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 43%, rgba(18,18,30,.18), rgba(0,0,0,.78) 72%),
+    linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.7));
+}
+.attract-copy {
+  position: relative; z-index: 1; display: flex; flex-direction: column;
+  align-items: center; max-width: min(720px, 86vw); text-shadow: 0 2px 18px rgba(0,0,0,.72);
+}
+.attract-kicker { font-size: clamp(12px, 1.8vw, 16px); letter-spacing: .09em; opacity: .78; }
+.attract-title { margin-top: 20px; font-size: clamp(30px, 5.8vw, 66px); line-height: 1.3; letter-spacing: -.03em; }
+.attract-desc { margin-top: 20px; font-size: clamp(15px, 2.2vw, 20px); line-height: 1.7; opacity: .88; }
+.attract-wall-caption { margin-top: 38px; font-size: 13px; letter-spacing: .08em; opacity: .7; }
+.attract-activate { margin-top: 14px; min-height: 52px; }
+
+/* 타이머가 끝나기 전에도 QR·모자이크보다 위에서 명확하게 안내한다. */
+.kiosk-reset-overlay {
+  position: fixed; inset: 0; z-index: 10003;
+  display: grid; place-items: center;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+  background: rgba(0,0,0,.74); backdrop-filter: blur(12px);
+}
+.kiosk-reset-card {
+  width: min(500px, 100%); padding: clamp(28px, 6vw, 48px);
+  text-align: center; border: 1px solid rgba(255,255,255,.2); border-radius: 22px;
+  background: #171720; box-shadow: 0 20px 70px rgba(0,0,0,.65);
+}
+.kiosk-reset-copy { font-size: clamp(20px, 4vw, 30px); line-height: 1.55; font-weight: 700; }
+.kiosk-reset-seconds { font-variant-numeric: tabular-nums; color: #FFD23F; }
+.kiosk-reset-continue { margin-top: 26px; min-height: 52px; }
 /* 별도 카메라 캡처 화면 */
 .camera-screen { gap: 22px; justify-content: center; }
 .camera-stage {

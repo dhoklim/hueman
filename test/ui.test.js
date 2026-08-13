@@ -2,7 +2,15 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { renderIntro, renderScene, showResult, renderCameraCapture, setTint } from '../src/ui.js';
+import {
+  renderAttract,
+  renderIntro,
+  renderScene,
+  showResult,
+  renderCameraCapture,
+  renderKioskCountdown,
+  setTint,
+} from '../src/ui.js';
 
 const mainCss = readFileSync(join(process.cwd(), 'styles', 'main.css'), 'utf8');
 
@@ -73,6 +81,67 @@ describe('ui.renderIntro', () => {
     expect(typeof intro.setLoading).toBe('function');
     expect(intro.setCaptureReady).toBeUndefined();
     expect(root.querySelector('.photo-capture-btn')).toBeNull();
+  });
+});
+
+describe('ui.renderAttract', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('shows the artwork introduction and a passive emotion-wall preview', () => {
+    const root = document.createElement('div');
+    renderAttract(root, { onActivate: vi.fn() });
+
+    expect(root.textContent).toContain('모든 감정의 색');
+    expect(root.textContent).toContain('오늘 전시장에 남은 감정의 빛');
+    const wall = root.querySelector('.attract-wall');
+    expect(wall).toBeInstanceOf(HTMLIFrameElement);
+    expect(wall.getAttribute('src')).toMatch(/\/wall\.html$/);
+    expect(wall.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('starts the experience only once when the idle screen is touched', () => {
+    const root = document.createElement('div');
+    const onActivate = vi.fn();
+    renderAttract(root, { onActivate });
+
+    root.querySelector('.attract-activate').click();
+    root.querySelector('.attract').click();
+
+    expect(onActivate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ui.renderKioskCountdown', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('shows the reset message, updates its remaining seconds, and can continue', () => {
+    const onContinue = vi.fn();
+    const countdown = renderKioskCountdown({ seconds: 10, onContinue });
+
+    expect(document.body.textContent).toContain('새 관람자를 위해 10초 후 처음으로 돌아갑니다');
+    countdown.setSeconds(4);
+    expect(document.body.textContent).toContain('새 관람자를 위해 4초 후 처음으로 돌아갑니다');
+
+    document.querySelector('.kiosk-reset-continue').click();
+    expect(onContinue).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('.kiosk-reset-overlay')).toBeNull();
+  });
+
+  it('replaces an older countdown overlay instead of stacking notices', () => {
+    const first = renderKioskCountdown({ seconds: 10 });
+    const second = renderKioskCountdown({ seconds: 9 });
+
+    expect(document.querySelectorAll('.kiosk-reset-overlay')).toHaveLength(1);
+    expect(document.body.textContent).toContain('9초 후 처음으로 돌아갑니다');
+
+    first.remove();
+    expect(document.querySelector('.kiosk-reset-overlay')).toBeTruthy();
+    second.remove();
+    expect(document.querySelector('.kiosk-reset-overlay')).toBeNull();
   });
 });
 
