@@ -2,7 +2,8 @@
 
 ## Open
 
-- _None_
+- 2026-08-13 14:16 KST | Codex | `codex/qr-photo-transfer`에 QR 결과 카드·iPad 대응 구현을 커밋함(`81fc3bd` 포함). `npm test` 184개, Vite build, Worker dry-run, 로컬 PNG 업로드/수신 확인. 사용자 통합 선택(main 병합 / PR / 브랜치 보존) 대기.
+- 2026-08-13 14:18 KST | Codex | `wrangler whoami` 결과 Cloudflare 로그인 상태가 아님. 실제 R2 생성·Worker 배포·GitHub Pages 변수 연결은 계정 로그인/사용자 권한 뒤에만 가능.
 
 ## Resolved
 

@@ -2,6 +2,13 @@
 
 ## 2026-08-13
 
+- 14:18 KST | Codex | 실제 배포 준비 상태 점검: GitHub remote는 `dhoklim/hueman`, feature branch는 `codex/qr-photo-transfer`(`81fc3bd`)로 clean 상태. `wrangler whoami`는 미인증을 보고하여 Cloudflare R2/Worker 실제 배포는 로그인 후 필요. 통합 선택·자격 증명 대기.
+- 14:16 KST | Codex | QR·iPad 구현을 worktree 브랜치 `codex/qr-photo-transfer`에 완성: 결과 카드 전용 PNG QR/수신 페이지, Worker+비공개 R2·10분 만료·CORS·PNG 시그니처 검증, iPad Web Share/safe area, Pages 다중 빌드·배포 문서. Worker 런타임 export 오류를 `worker/src/transfer.js` 분리로 수정했고 로컬 Worker PNG POST/GET도 확인. Commits: `a01e60b`…`81fc3bd`. Verification: `npm test` 184 passed; `npm run build`; `npm run worker:deploy -- --dry-run`; `npm audit` 0 vulnerabilities. 통합 선택 대기.
+- 13:52 KST | Codex | 격리 worktree `codex/qr-photo-transfer`에서 QR 구현 시작. 기존 `test/videoMap.test.js`의 비추적 `video/영상_장면_설명.txt` 의존을 명시적 레거시 fallback 목록으로 교체해 5개 대상 테스트 통과. Commit: `a01e60b`.
+- 13:54 KST | Codex | `src/photoTransfer.js`와 `test/photoTransfer.test.js` 추가: HTTPS/로컬 API 검증, `<expiresAt>.<UUID>` URL, Canvas PNG 변환, 8MiB/형식 제한, upload/download 오류 정규화, iPad Web Share·download fallback. RED import failure 확인 후 22개 테스트 PASS. Commit: `d136b24`.
+- 13:56 KST | Codex | `worker/src/index.js`와 `test/worker.test.js` 추가: Cloudflare Worker가 비공개 R2에 PNG 8MiB 이하만 저장하고 `<expiresAt>.<UUID>` token을 10분간 발급, CORS Origin 검사, 만료 410+비동기 삭제, Cron 정리를 수행. RED import failure 확인 후 11개 테스트 PASS. Commit: `b672d0e`.
+- 14:00 KST | Codex | `qrcode` 의존성, `src/qrCode.js`, `src/qrTransferModal.js`, `test/qrTransferModal.test.js` 추가: 브라우저 내 QR 렌더, 10분 카운트다운, 링크 복사/공유, 재시도, 서버 미설정 시 iPad 직접 저장, Escape·focus 복귀. 초기 GREEN에서 카운트다운이 시간 함수 대신 숫자를 전달해 성공 업로드를 network로 덮는 문제를 diagnostic으로 확인하고 한 인자 수정 후 6개 테스트 PASS. Commit: `ef8dcaa`.
+- 14:02 KST | Codex | `receive.html`, `src/receive.js`, `styles/receive.css`, `test/receive.test.js` 추가: fragment token만 읽는 경량 수신 페이지, PNG 미리보기, 사진 공유/다운로드 fallback, 만료·없는 링크·네트워크 안내. RED import failure 확인 후 9개 테스트 PASS. Commit: `80d670d`.
 - 13:44 KST | Codex | QR 임시 사진 전달·iPad 대응 구현 계획을 `docs/superpowers/plans/2026-08-13-qr-photo-transfer.md`에 작성·자체 검토. 8개 독립 TDD 작업(기존 영상 테스트 fixture 복구, client/Worker API, 배포 설정, QR 모달, 결과 UI, 수신 페이지, iPad QA)을 파일·함수·명령·커밋 단위로 명시. 현재 `npm test` baseline은 추적되지 않은 `video/영상_장면_설명.txt` 때문에 `test/videoMap.test.js` import가 실패하고 나머지 125개 테스트는 통과함; Task 1에서 버전 관리되는 레거시 목록으로 복구 예정.
 - KST | Codex | 사용자 승인 QR 임시 사진 전달·iPad 대응 설계를 `docs/superpowers/specs/2026-08-13-qr-photo-transfer-design.md`에 문서화. Cloudflare Worker+비공개 R2, 10분 만료, GitHub Pages `receive.html#token`, 원본 카메라·스냅샷 미전송, iPad 공유/안전영역/회전 대응 및 테스트·배포 기준을 확정. 설계 자체 검토에서 만료 정리 순서를 보장하도록 R2 키를 `transfers/<expiresAt>/<uuid>.png`과 `<expiresAt>.<uuid>` token으로 명확화. Verification: 문서 placeholder scan 및 `git diff --check` 통과.
 
