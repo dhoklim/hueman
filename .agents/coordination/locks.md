@@ -1,12 +1,12 @@
 # Locks
 
-Last updated: 2026-08-13 22:02 KST by Codex
+Last updated: 2026-08-13 22:10 KST by Codex
 
 ## Active Locks
 
 | Agent | Scope | Status | Since | Notes |
 | --- | --- | --- | --- | --- |
-| _None_ | — | — | — | No active file locks. |
+| Codex | kiosk idle mode: `src/main.js`, `src/ui.js`, `styles/main.css`, `src/kioskMode.js`, related tests and design/plan notes | active | 2026-08-13 22:10 KST | Add unattended-exhibition reset timer, countdown, and attract screen. |
 
 ## Lock Rules
 
