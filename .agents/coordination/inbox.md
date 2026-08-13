@@ -2,10 +2,12 @@
 
 ## Open
 
-- 2026-08-13 19:12 KST | Codex | R2 버킷·Worker·GitHub Actions 변수 설정을 마쳤다. 다음은 `main` push로 GitHub Pages workflow를 실행하고 공개 QR 수신을 검증하는 단계다.
+- _None_.
 
 ## Resolved
 
+- 2026-08-13 19:17 KST | Codex | `main` push 후 GitHub Pages workflow `31690160049`의 build·deploy가 모두 success로 완료됐다. 공개 receiver bundle에 Worker URL이 포함됐고, 유효 PNG의 `receive.html#token`을 실제 Chrome에서 열어 이미지와 `사진 저장·공유` 버튼이 나타나는 `ready` 상태를 확인했다.
+- 2026-08-13 19:12 KST | Codex | `main` push·GitHub Pages workflow 실행 및 공개 QR 수신 검증 단계는 2026-08-13 19:17 KST에 완료됨.
 - 2026-08-13 19:12 KST | Codex | 사용자가 R2를 활성화한 뒤 `hueman-photo-transfers` Standard 버킷을 생성하고 Worker `https://hueman-photo-transfer.dhoklim-bdd.workers.dev`를 배포했다. `QR_TRANSFER_API_URL` GitHub Actions 변수도 설정했다. 실서비스 POST/GET PNG 검증은 200, `Access-Control-Allow-Origin: https://dhoklim.github.io`, `Cache-Control: private, no-store`를 반환했다.
 - 2026-08-13 14:32 KST | Codex | R2 초기 활성화 필요(code 10042) 상태는 사용자 활성화 후 2026-08-13 19:12 KST에 해소됨.
 - 2026-08-13 14:32 KST | Codex | Cloudflare 로그인 및 GitHub 반영 경로를 재확인했다. `wrangler whoami`는 `dhoklim@gmail.com` 계정을, Windows `git.exe push --dry-run origin main`은 `main` 원격 반영 가능 상태를 확인했다. GitHub 연결 앱도 `dhoklim/hueman` admin 권한을 반환했다.
