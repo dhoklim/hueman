@@ -19,6 +19,7 @@ import {
 import { buildMosaic } from './mosaic.js';
 import { resolveSceneText } from './storyText.js';
 import { enableSound, playEmotionCue } from './sound.js';
+import { openQrTransferModal } from './qrTransferModal.js';
 
 const root = document.getElementById('app');
 const engine = createEngine(story);
@@ -125,7 +126,11 @@ function show() {
         if (stats) result.statsText = statsLine(stats.record(statsCategory), CATEGORY_LABELS[statsCategory]);
         const full = hasEnough() ? buildMosaic(getTarget(), getTiles()) : null;
         const mosaic = full ? { full, ...createReveal(full) } : null; // 타일이 차오르는 타임랩스 리빌
-        showResult(root, result, mosaic);
+        showResult(root, result, mosaic, {
+          onReceivePhoto: ({ canvas, filename, trigger }) => {
+            openQrTransferModal({ canvas, filename, trigger });
+          },
+        });
       },
     });
     return;

@@ -7,14 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "worker:dev": "wrangler dev --config worker/wrangler.jsonc",
+    "worker:deploy": "wrangler deploy --config worker/wrangler.jsonc"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
     "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "wrangler": "^4.122.0"
   },
   "dependencies": {
-    "@vladmandic/face-api": "^1.7.15"
+    "@vladmandic/face-api": "^1.7.15",
+    "qrcode": "^1.5.4"
   }
 }

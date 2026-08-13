@@ -1,6 +1,7 @@
 import { CATEGORY_LABELS } from './comfortMessages.js';
 import { browserGalleryStore } from './gallery.js';
 import { createResultCardCanvas, resultFilename, receiptLine } from './resultCard.js';
+import { canvasToPng, downloadBlob, sharePng } from './photoTransfer.js';
 import { SCENE_VIDEOS } from './videoMap.js';
 import { grabTargetCanvas } from './snapshots.js';
 import { tintBackground } from './emotionColor.js';
@@ -258,7 +259,12 @@ export function renderScene(root, scene, { onAdvance, onChoice } = {}) {
   }
 }
 
-export function showResult(root, result, mosaicCanvas) {
+export function showResult(
+  root,
+  result,
+  mosaicCanvas,
+  { createCard = createResultCardCanvas, onReceivePhoto = null } = {},
+) {
   clearKeys();
   // mosaicCanvas: 캔버스(완성본) 또는 리빌 핸들 { canvas(점점 채워짐), full(완성본), play }
   const mosaic = mosaicCanvas
@@ -299,19 +305,10 @@ export function showResult(root, result, mosaicCanvas) {
     zoom.addEventListener('click', () => openMosaicZoom(mosaic.full));
     actions.appendChild(zoom);
 
-    const saveCard = document.createElement('button');
-    saveCard.className = 'choice-btn save-btn';
-    saveCard.textContent = '결과 카드 저장';
-    saveCard.addEventListener('click', () => {
-      const card = createResultCardCanvas(result, mosaic.full);
-      downloadCanvas(card, resultFilename(result));
-    });
-    actions.appendChild(saveCard);
-
     const save = document.createElement('button');
     save.className = 'choice-btn save-btn';
     save.textContent = '모자이크만 저장';
-    save.addEventListener('click', () => downloadCanvas(mosaic.full, `hueman-${result.topCategory}.png`));
+    save.addEventListener('click', () => saveCanvas(mosaic.full, `hueman-${result.topCategory}.png`));
     actions.appendChild(save);
 
     const gallery = document.createElement('button');
@@ -320,7 +317,7 @@ export function showResult(root, result, mosaicCanvas) {
     gallery.addEventListener('click', () => {
       const store = browserGalleryStore();
       if (!store) return;
-      const card = createResultCardCanvas(result, mosaic.full);
+      const card = createCard(result, mosaic.full);
       store.add({
         image: card.toDataURL('image/png'),
         emotion: result.isComposite ? 'composite' : result.topCategory,
@@ -330,6 +327,27 @@ export function showResult(root, result, mosaicCanvas) {
     actions.appendChild(gallery);
   } else {
     slot.innerHTML = '<div class="mosaic-placeholder">여기에 사진 모자이크가 들어갑니다 — 카메라를 켜고 체험하면 당신의 표정으로 채워집니다</div>';
+  }
+
+  const makeCard = () => createCard(result, mosaic?.full || null);
+  const saveCard = document.createElement('button');
+  saveCard.className = 'choice-btn save-btn';
+  saveCard.textContent = '결과 카드 저장';
+  saveCard.addEventListener('click', () => saveCanvas(makeCard(), resultFilename(result)));
+  actions.prepend(saveCard);
+
+  if (typeof onReceivePhoto === 'function') {
+    const receive = document.createElement('button');
+    receive.className = 'choice-btn save-btn qr-transfer-trigger';
+    receive.textContent = 'QR로 결과 카드 받기';
+    receive.addEventListener('click', () => {
+      onReceivePhoto({
+        canvas: makeCard(),
+        filename: resultFilename(result),
+        trigger: receive,
+      });
+    });
+    saveCard.after(receive);
   }
 
   const statement = document.createElement('button');
@@ -419,16 +437,14 @@ function renderTimeline(el, runs) {
   });
 }
 
-function downloadCanvas(canvas, filename) {
-  canvas.toBlob((blob) => {
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, 'image/png');
+async function saveCanvas(canvas, filename) {
+  try {
+    const blob = await canvasToPng(canvas);
+    const outcome = await sharePng(blob, filename);
+    if (outcome !== 'shared') downloadBlob(blob, filename);
+  } catch {
+    // Browsers can reject canvas export for a tainted image. Keep the result screen usable.
+  }
 }
 
 // 아티스트 스테이트먼트 (과제 요구: 무엇을·어떻게 플레이·뒤에 있는 생각·AI 사용)

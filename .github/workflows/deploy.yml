@@ -24,6 +24,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          # Repository variable: the public HTTPS URL of the Cloudflare Worker.
+          # The URL is compiled into the browser bundle, so it is deliberately not a secret.
+          VITE_QR_TRANSFER_API_URL: ${{ vars.QR_TRANSFER_API_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

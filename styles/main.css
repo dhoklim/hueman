@@ -1,12 +1,14 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 /* hidden 속성이 display 규칙(flex 등)에 덮이지 않도록 항상 우선 */
 [hidden] { display: none !important; }
-html, body, #app { height: 100%; }
+html, body, #app { min-height: 100%; height: 100%; }
 body {
   font-family: system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
+  min-height: 100dvh;
   background: #000; color: #fff; overflow: hidden;
+  -webkit-text-size-adjust: 100%;
 }
-#app { position: relative; z-index: 3; }
+#app { position: relative; z-index: 3; min-height: 100dvh; height: 100dvh; }
 
 /* 배경 영상 레이어 — 두 버퍼를 겹쳐 크로스페이드(검은 공백 없이 전환) */
 .bg-video {
@@ -23,7 +25,7 @@ body {
 
 /* 테스트용 웹캠 미리보기 (좌우 반전 거울) */
 #cam-preview {
-  position: fixed; bottom: 12px; right: 12px;
+  position: fixed; bottom: max(12px, env(safe-area-inset-bottom)); right: max(12px, env(safe-area-inset-right));
   width: 132px; height: 99px; object-fit: cover;
   border-radius: 10px; transform: scaleX(-1);
   opacity: .92; z-index: 9998; background: #000;
@@ -37,7 +39,12 @@ body {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  text-align: center; padding: 6vh 8vw;
+  text-align: center;
+  padding:
+    max(6vh, calc(env(safe-area-inset-top) + 16px))
+    max(8vw, calc(env(safe-area-inset-right) + 16px))
+    max(6vh, calc(env(safe-area-inset-bottom) + 16px))
+    max(8vw, calc(env(safe-area-inset-left) + 16px));
   transition: background 1.2s ease, opacity 0.8s ease;
   opacity: 0;
 }
@@ -55,17 +62,17 @@ body {
 .choice-btn {
   background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.6);
   color: #fff; border-radius: 14px; padding: 16px 30px;
-  font-size: 18px; font-weight: 600; cursor: pointer; backdrop-filter: blur(4px);
+  min-height: 44px; font-size: 18px; font-weight: 600; cursor: pointer; backdrop-filter: blur(4px);
   transition: background .15s, transform .15s;
   touch-action: manipulation;
 }
-.choice-btn:hover { background: rgba(255,255,255,.26); transform: translateY(-2px); }
 .choice-key { display: block; font-size: 12px; opacity: .6; margin-top: 5px; font-weight: 400; }
 
 .result {
   gap: 6px; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  justify-content: flex-start; max-height: 100%;
-  padding-top: max(32px, 6vh); padding-bottom: max(32px, 6vh);
+  justify-content: flex-start; max-height: 100dvh;
+  padding-top: max(32px, 6vh, calc(env(safe-area-inset-top) + 16px));
+  padding-bottom: max(32px, 6vh, calc(env(safe-area-inset-bottom) + 16px));
 }
 .result .message { font-size: clamp(16px, 2.4vw, 24px); line-height: 1.7; max-width: 640px; }
 .result .receipt {
@@ -90,12 +97,20 @@ body {
   image-rendering: auto;
   border-radius: 12px; box-shadow: 0 10px 36px rgba(0,0,0,.5);
 }
-.result-actions { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-.save-btn { padding: 12px 22px; font-size: 15px; }
+.result-actions {
+  display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap;
+  width: min(720px, 100%); margin-top: 20px;
+}
+.save-btn { min-height: 48px; padding: 12px 22px; font-size: 15px; }
 .mosaic-zoom-overlay {
   position: fixed; inset: 0; z-index: 10001;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,.86); padding: 4vh 4vw;
+  background: rgba(0,0,0,.86);
+  padding:
+    max(4vh, env(safe-area-inset-top))
+    max(4vw, env(safe-area-inset-right))
+    max(4vh, env(safe-area-inset-bottom))
+    max(4vw, env(safe-area-inset-left));
 }
 .mosaic-zoom-frame {
   width: min(92vw, 860px); max-height: 92vh;
@@ -106,6 +121,41 @@ body {
   border-radius: 8px; box-shadow: 0 18px 70px rgba(0,0,0,.65);
 }
 .mosaic-zoom-close { z-index: 1; }
+
+/* 결과 카드 한 장만 10분 동안 전달하는 QR 모달 — iPad 세로/가로 모두 한 손으로 조작 가능 */
+.qr-transfer-overlay {
+  position: fixed; inset: 0; z-index: 10002;
+  display: grid; place-items: center;
+  background: rgba(0,0,0,.72); backdrop-filter: blur(10px);
+  padding:
+    max(20px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+.qr-transfer-card {
+  position: relative;
+  width: min(460px, 100%); max-height: min(88dvh, 760px); overflow-y: auto;
+  padding: clamp(24px, 5vw, 40px);
+  border: 1px solid rgba(255,255,255,.18); border-radius: 22px;
+  background: #171720; box-shadow: 0 20px 70px rgba(0,0,0,.65);
+  text-align: center;
+}
+.qr-transfer-card h2 { padding-right: 30px; font-size: clamp(23px, 5vw, 30px); line-height: 1.35; }
+.qr-transfer-body { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 18px; }
+.qr-transfer-body p { line-height: 1.6; opacity: .86; }
+.qr-transfer-code {
+  display: block; width: min(280px, 68vw); height: auto; aspect-ratio: 1;
+  border-radius: 12px; background: #fff; padding: 8px;
+}
+.qr-transfer-expiry { font-variant-numeric: tabular-nums; font-size: 14px; opacity: .7 !important; }
+.qr-transfer-actions {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px; margin-top: 24px;
+}
+.qr-transfer-actions .choice-btn { width: 100%; min-height: 48px; padding: 11px 12px; font-size: 15px; }
+.qr-transfer-actions .text-link { min-height: 44px; margin: 0; padding: 8px; }
+.qr-transfer-close { min-width: 44px; min-height: 44px; }
 
 .timeline-label {
   font-size: 11px; letter-spacing: .1em; opacity: .55;
@@ -207,7 +257,6 @@ body {
   box-shadow: 0 0 0 8px rgba(224,49,49,.2), 0 10px 34px rgba(0,0,0,.55);
   transition: transform .15s;
 }
-.camera-shutter:hover { transform: translateY(-2px); }
 .camera-shutter:disabled { opacity: .45; cursor: wait; transform: none; }
 .capture-confirm { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
@@ -218,14 +267,17 @@ body {
   text-decoration: underline; text-underline-offset: 4px;
   margin-top: 14px; font-weight: 500;
 }
-.text-link:hover { opacity: 1; }
 
 /* 아티스트 스테이트먼트 오버레이 */
 .statement-overlay {
   position: fixed; inset: 0; z-index: 10000;
   display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,.66); backdrop-filter: blur(8px);
-  padding: 5vh 5vw;
+  padding:
+    max(5vh, env(safe-area-inset-top))
+    max(5vw, env(safe-area-inset-right))
+    max(5vh, env(safe-area-inset-bottom))
+    max(5vw, env(safe-area-inset-left));
 }
 .statement-card {
   position: relative; width: min(720px, 92vw); max-height: 88vh; overflow-y: auto;
@@ -239,7 +291,6 @@ body {
   background: none; border: none; color: #fff; opacity: .6;
   font-size: 20px; cursor: pointer; line-height: 1;
 }
-.statement-close:hover { opacity: 1; }
 .statement-body h2 { font-size: clamp(24px, 4vw, 34px); font-weight: 800; margin-bottom: 4px; }
 .statement-body h2 span { font-weight: 500; opacity: .6; font-size: .6em; }
 .statement-body h3 {
@@ -277,4 +328,11 @@ body {
   .intro-how { display: none; }
   .scene-text { font-size: clamp(18px, 4.8vw, 28px); }
   .result .message { font-size: clamp(15px, 4vw, 22px); }
+  .qr-transfer-actions { grid-template-columns: 1fr; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .choice-btn:hover { background: rgba(255,255,255,.26); transform: translateY(-2px); }
+  .camera-shutter:hover { transform: translateY(-2px); }
+  .text-link:hover, .statement-close:hover { opacity: 1; }
 }

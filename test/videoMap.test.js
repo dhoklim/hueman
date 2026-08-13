@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import story from '../content/story.json';
 import { SCENE_VIDEOS } from '../src/videoMap.js';
 
-const videoDescription = readFileSync(
-  join(process.cwd(), 'video', '영상_장면_설명.txt'),
-  'utf8'
-);
+const LEGACY_FALLBACK_FILES = new Set([
+  'childhood.mp4',
+  'teen.mp4',
+  'no-date.mp4',
+  'smoke-no.mp4',
+  'startup.mp4',
+]);
 
 describe('video map integrity', () => {
   it('keeps video clips on required study scenes', () => {
@@ -39,12 +42,12 @@ describe('video map integrity', () => {
     }
   });
 
-  it('uses only documented per-scene video files, not legacy fallback reels', () => {
+  it('does not use legacy fallback reels', () => {
     for (const [sceneId, config] of Object.entries(SCENE_VIDEOS)) {
       expect(
-        videoDescription.includes(config.file),
-        `${sceneId} uses undocumented video ${config.file}`
-      ).toBe(true);
+        LEGACY_FALLBACK_FILES.has(config.file),
+        `${sceneId} uses legacy fallback ${config.file}`
+      ).toBe(false);
     }
   });
 

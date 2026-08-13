@@ -198,6 +198,28 @@ describe('ui.showResult', () => {
     expect(root.textContent).toContain('갤러리에 남기기');
   });
 
+  it('hands a generated result card to the QR photo receiver action', () => {
+    const root = document.createElement('div');
+    const card = document.createElement('canvas');
+    const createCard = vi.fn(() => card);
+    const onReceivePhoto = vi.fn();
+    const result = { topCategory: 'joy', isComposite: false, message: '메시지다' };
+
+    showResult(root, result, null, { createCard, onReceivePhoto });
+
+    const receive = [...root.querySelectorAll('button')]
+      .find((button) => button.textContent === 'QR로 결과 카드 받기');
+    expect(receive).toBeTruthy();
+    receive.click();
+
+    expect(createCard).toHaveBeenCalledWith(result, null);
+    expect(onReceivePhoto).toHaveBeenCalledWith({
+      canvas: card,
+      filename: 'hueman-result-joy.png',
+      trigger: receive,
+    });
+  });
+
   it('draws the timeline in the order emotions were felt, not sorted by duration', () => {
     const root = document.createElement('div');
     showResult(root, {
