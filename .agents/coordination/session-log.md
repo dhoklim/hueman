@@ -2,6 +2,7 @@
 
 ## 2026-08-13
 
+- 14:22 KST | Codex | 사용자 완료 요청에 따라 QR branch를 local `main`에 병합(`fbf65fe`)하고 `npm ci` 후 main에서 검증. 병합 뒤 `.worktrees/qr-photo-transfer`의 테스트가 중복 발견되는 원인을 Vitest 기본 제외 목록(node_modules/.git만)으로 확인 → RED discovery test 후 `configDefaults.exclude`+worktree glob 추가(`a330777`). 최종 main verification: `npm test` 185 passed (29 files), `npm run build`, Worker dry-run, audit 0 vulnerabilities. Git worktree 등록·feature branch는 정리했으나 Windows I/O 오류로 ignored orphan directory는 남음; 기능에는 영향 없음.
 - 14:18 KST | Codex | 실제 배포 준비 상태 점검: GitHub remote는 `dhoklim/hueman`, feature branch는 `codex/qr-photo-transfer`(`81fc3bd`)로 clean 상태. `wrangler whoami`는 미인증을 보고하여 Cloudflare R2/Worker 실제 배포는 로그인 후 필요. 통합 선택·자격 증명 대기.
 - 14:16 KST | Codex | QR·iPad 구현을 worktree 브랜치 `codex/qr-photo-transfer`에 완성: 결과 카드 전용 PNG QR/수신 페이지, Worker+비공개 R2·10분 만료·CORS·PNG 시그니처 검증, iPad Web Share/safe area, Pages 다중 빌드·배포 문서. Worker 런타임 export 오류를 `worker/src/transfer.js` 분리로 수정했고 로컬 Worker PNG POST/GET도 확인. Commits: `a01e60b`…`81fc3bd`. Verification: `npm test` 184 passed; `npm run build`; `npm run worker:deploy -- --dry-run`; `npm audit` 0 vulnerabilities. 통합 선택 대기.
 - 13:52 KST | Codex | 격리 worktree `codex/qr-photo-transfer`에서 QR 구현 시작. 기존 `test/videoMap.test.js`의 비추적 `video/영상_장면_설명.txt` 의존을 명시적 레거시 fallback 목록으로 교체해 5개 대상 테스트 통과. Commit: `a01e60b`.

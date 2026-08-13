@@ -1,12 +1,12 @@
 # Locks
 
-Last updated: 2026-08-13 14:20 KST by Codex
+Last updated: 2026-08-13 14:22 KST by Codex
 
 ## Active Locks
 
 | Agent | Scope | Status | Since | Notes |
 | --- | --- | --- | --- | --- |
-| Codex | `main` integration; `.agents/coordination/*` | active | 2026-08-13 14:20 KST | 사용자 완료 요청에 따라 QR worktree를 main으로 로컬 통합 |
+| _None_ | _None_ | _None_ | _None_ | No active locks. |
 
 ## Lock Rules
 
