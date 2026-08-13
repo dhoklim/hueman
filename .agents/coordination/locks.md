@@ -1,12 +1,12 @@
 # Locks
 
-Last updated: 2026-08-13 19:25 KST by Codex
+Last updated: 2026-08-13 21:56 KST by Codex
 
 ## Active Locks
 
 | Agent | Scope | Status | Since | Notes |
 | --- | --- | --- | --- | --- |
-| _None_ | — | — | — | No active file locks. |
+| Codex | `src/ui.js`, `src/main.js`, `test/ui.test.js`, restart design/plan and coordination notes | active | 2026-08-13 21:56 KST | Add an explicit result-screen restart that fully resets the experience. |
 
 ## Lock Rules
 
