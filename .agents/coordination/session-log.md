@@ -2,6 +2,7 @@
 
 ## 2026-08-13
 
+- 19:48 KST | Codex | 공동 감정 벽을 실제 release했다. `main` fast-forward 뒤 `git.exe push origin main` 성공(`af7b216`), Cloudflare Worker deploy로 SQLite `EmotionWall` export 생성(version `e84e9d42-43b5-4b21-a6c2-c37ca0dd833f`), allowed-Origin POST `joy` 201→GET 200 snapshot 확인. GitHub Pages `31692315086` build/deploy success 후 Chrome headless 공개 `wall.html`에서 Canvas, `오늘 전시를 지나간 1개의 감정`, 5개 범례, KST 상태 문구를 검증했다. 첫 DO 활성화 직후 503은 약 20초 뒤 재요청 201/200으로 해소됐고 tail에는 Worker error가 없었다. 최종 코드 검증: `npm test` 233 passed, `npm run build`, Worker dry-run.
 - 19:31 KST | Codex | 공동 감정 벽 구현 계획 `docs/superpowers/plans/2026-08-13-emotion-wall.md`를 작성·자체 검토했다. Durable Object 저장·공개 API·iPad 비차단 발행·전시 화면·배포 검증을 독립 TDD 작업으로 분해했고, placeholder scan과 `git diff --check`를 통과했다.
 - 19:26 KST | Codex | 사용자 요청으로 공동 감정 벽만 추가하기로 확정. 설계 `docs/superpowers/specs/2026-08-13-emotion-wall-design.md` 작성·자체 검토 완료: Cloudflare SQLite Durable Object의 KST 일일 대표감정 합계, 별도 `wall.html`, iPad 비차단 전송, 원본 이미지/선택/식별자 미전송, 8일 보존 삭제, CORS·상한·실서비스 검증 기준을 명시함.
 - 19:17 KST | Codex | `git.exe push origin main` 성공(`fda5e36`), GitHub Pages workflow `31690160049` build/deploy success. 공개 `receive.html`이 Worker endpoint 포함 asset을 제공하는지 확인하고, 1×1 유효 PNG를 실제 Worker에 POST→GET(200, 70 bytes, image/png)한 token을 public receiver URL fragment로 열었다. Chrome headless DOM에서 `data-state="ready"`, 결과 이미지, `사진 저장·공유` 버튼을 확인했다. 온라인 QR 전달 경로 검증 완료.

@@ -2,10 +2,12 @@
 
 ## Open
 
-- 2026-08-13 19:26 KST | Codex | 공동 감정 벽 설계가 확정됨. 다음 단계는 Durable Object 집계 API·`wall.html`·iPad 결과 전송을 구현하고 공개 전시 화면으로 검증하는 것.
+- _None_
 
 ## Resolved
 
+- 2026-08-13 19:48 KST | Codex | 공동 감정 벽을 `main`에 배포했다. SQLite Durable Object `EmotionWall`은 다섯 대표 감정의 KST 일일 합계만 저장하고, iPad 결과는 비차단으로 한 감정만 전송한다. Worker POST 201→GET 200, GitHub Pages run `31692315086` success, 공개 `wall.html`의 Canvas·합계·범례 렌더를 Chrome으로 확인했다.
+- 2026-08-13 19:26 KST | Codex | 공동 감정 벽 설계가 확정됨. 다음 단계는 Durable Object 집계 API·`wall.html`·iPad 결과 전송을 구현하고 공개 전시 화면으로 검증하는 것.
 - 2026-08-13 19:26 KST | Codex | 공동 감정 벽 방향을 개인정보 보존형 일일 합계로 확정했다. 별도 전시 화면에는 추상 색 풍경과 익명 총합만 표시하며, 원본 카메라·사진·선택 경로는 전송하지 않는다.
 - 2026-08-13 19:17 KST | Codex | `main` push 후 GitHub Pages workflow `31690160049`의 build·deploy가 모두 success로 완료됐다. 공개 receiver bundle에 Worker URL이 포함됐고, 유효 PNG의 `receive.html#token`을 실제 Chrome에서 열어 이미지와 `사진 저장·공유` 버튼이 나타나는 `ready` 상태를 확인했다.
 - 2026-08-13 19:12 KST | Codex | `main` push·GitHub Pages workflow 실행 및 공개 QR 수신 검증 단계는 2026-08-13 19:17 KST에 완료됨.
