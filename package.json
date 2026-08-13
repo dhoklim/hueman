@@ -15,6 +15,7 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
-    "@vladmandic/face-api": "^1.7.15"
+    "@vladmandic/face-api": "^1.7.15",
+    "qrcode": "^1.5.4"
   }
 }
