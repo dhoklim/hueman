@@ -44,6 +44,7 @@ vi.mock('../src/videoMap.js', () => ({ SCENE_VIDEOS: {} }));
 
 describe('live emotion display', () => {
   afterEach(() => {
+    window.dispatchEvent(new Event('pagehide'));
     vi.useRealTimers();
     document.body.innerHTML = '';
     liveCallback = null;
@@ -55,17 +56,76 @@ describe('live emotion display', () => {
 
   // 인트로 → 카메라 시작 → 사진 촬영 확정 → 보정 카운트다운 종료까지 진행해
   // 스토리 장면(.scene-text)에 도달시킨다. (fake timer 필요)
+  function activateIntro() {
+    const activate = document.querySelector('.attract-activate');
+    expect(activate).toBeTruthy();
+    activate.click();
+    expect(document.querySelector('.intro')).toBeTruthy();
+  }
+
   async function reachStoryScene() {
+    activateIntro();
     document.querySelector('.intro-start-cam').click();
     await vi.advanceTimersByTimeAsync(1); // startLiveEmotion 비동기 flush
     document.querySelector('.confirm-start').click();
     await vi.advanceTimersByTimeAsync(4000); // 보정 카운트다운 종료 → 장면 진입
   }
 
+  it('starts with an attraction screen and enters the intro only after activation', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+
+    await import('../src/main.js');
+
+    expect(document.querySelector('.attract')).toBeTruthy();
+    expect(document.querySelector('.attract-wall')).toBeTruthy();
+    expect(document.querySelector('.intro')).toBeNull();
+
+    activateIntro();
+  });
+
+  it('shows the 60-second session reset warning after 50 seconds without input', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = '<div id="app"></div>';
+
+    await import('../src/main.js');
+    activateIntro();
+    document.querySelector('.intro-start-plain').click();
+    expect(document.querySelector('.scene-text')).toBeTruthy();
+
+    await vi.advanceTimersByTimeAsync(49_999);
+    expect(document.querySelector('.kiosk-reset-overlay')).toBeNull();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(document.querySelector('.kiosk-reset-overlay')).toBeTruthy();
+  });
+
+  it('waits 110 seconds on the final result before warning the next viewer', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = '<div id="app"></div>';
+
+    await import('../src/main.js');
+    activateIntro();
+    document.querySelector('.intro-start-plain').click();
+
+    let remainingSteps = 120;
+    while (!document.querySelector('.result') && remainingSteps > 0) {
+      const choice = document.querySelector('.choices .choice-btn');
+      if (choice) choice.click();
+      else document.querySelector('.scene').click();
+      remainingSteps -= 1;
+    }
+    expect(document.querySelector('.result')).toBeTruthy();
+
+    await vi.advanceTimersByTimeAsync(109_999);
+    expect(document.querySelector('.kiosk-reset-overlay')).toBeNull();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(document.querySelector('.kiosk-reset-overlay')).toBeTruthy();
+  });
+
   it('opens a separate camera capture screen instead of capturing on the intro', async () => {
     document.body.innerHTML = '<div id="app"></div>';
 
     await import('../src/main.js');
+    activateIntro();
     document.querySelector('.intro-start-cam').click();
 
     await vi.waitFor(() => expect(document.querySelector('.camera-screen')).toBeTruthy());
@@ -78,6 +138,7 @@ describe('live emotion display', () => {
     document.body.innerHTML = '<div id="app"></div>';
 
     await import('../src/main.js');
+    activateIntro();
     document.querySelector('.intro-start-cam').click();
     await vi.waitFor(() => expect(liveCallback).toBeTypeOf('function'));
 
@@ -96,6 +157,7 @@ describe('live emotion display', () => {
     document.body.innerHTML = '<div id="app"></div>';
 
     await import('../src/main.js');
+    activateIntro();
     document.querySelector('.intro-start-cam').click();
     await vi.advanceTimersByTimeAsync(1);
 
@@ -164,6 +226,7 @@ describe('live emotion display', () => {
     wallMock.publishWallEmotion.mockReturnValue(new Promise(() => {}));
 
     await import('../src/main.js');
+    activateIntro();
     document.querySelector('.intro-start-plain').click();
     await vi.waitFor(() => expect(document.querySelector('.scene')).toBeTruthy());
 

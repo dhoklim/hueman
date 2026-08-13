@@ -1,6 +1,15 @@
 import story from '../content/story.json';
 import { createEngine, current, choose, advance, isEnding, receipts } from './engine.js';
-import { renderIntro, renderScene, showResult, renderCameraCapture, renderCalibration, setTint } from './ui.js';
+import {
+  renderAttract,
+  renderIntro,
+  renderScene,
+  showResult,
+  renderCameraCapture,
+  renderCalibration,
+  renderKioskCountdown,
+  setTint,
+} from './ui.js';
 import { tintEmotionsFromHistory } from './emotionColor.js';
 import { createLog, record, aggregate, emotionRuns } from './experienceLog.js';
 import { browserDailyStats, statsLine } from './dailyStats.js';
@@ -21,6 +30,7 @@ import { resolveSceneText } from './storyText.js';
 import { enableSound, playEmotionCue } from './sound.js';
 import { openQrTransferModal } from './qrTransferModal.js';
 import { publishWallEmotion } from './wallClient.js';
+import { createKioskMode } from './kioskMode.js';
 
 const root = document.getElementById('app');
 const engine = createEngine(story);
@@ -33,6 +43,12 @@ let live = { active: false, emotion: null, detected: null, faceFound: false, til
 let introSetLoading = null;
 let starting = false; // begin() 재진입 가드 — 로딩 중 중복 시작 방지
 let gameStarted = false;
+let kiosk = null;
+let kioskPhase = null;
+let qrTransfer = null;
+let activeReveal = null;
+let calibrationTimer = null;
+let resetting = false;
 
 // 게임 중 코너 썸네일(#cam-preview)을 카메라 화면 동안엔 숨겼다 다시 보인다
 function setCamPreviewHidden(hidden) {
@@ -46,16 +62,49 @@ let liveTintHistory = [];
 
 const CALIBRATION_SECONDS = 3; // 무표정 보정 카운트다운 길이
 
+// 같은 체험 단계의 화면 전환은 무입력 시간을 새로 주지 않는다. 관람자의 실제
+// pointer/touch/key 입력은 kioskMode의 전역 listener가 별도로 타이머를 다시 건다.
+function setKioskPhase(nextPhase) {
+  if (kioskPhase === nextPhase) return;
+  kioskPhase = nextPhase;
+  kiosk?.setPhase(nextPhase);
+}
+
+// 자동 초기화와 '다시 하기'·Shift+R가 같은 경로를 사용한다. reload 직전에도
+// 스트림·QR interval·모자이크 reveal을 먼저 닫아 iPad에서 다음 관람자가 바로 시작한다.
+function resetExperience() {
+  if (resetting) return;
+  resetting = true;
+  kiosk?.destroy();
+  if (calibrationTimer !== null) {
+    clearInterval(calibrationTimer);
+    calibrationTimer = null;
+  }
+  qrTransfer?.close?.();
+  qrTransfer = null;
+  activeReveal?.stop?.();
+  activeReveal = null;
+  document.querySelector('.mosaic-zoom-overlay')?.remove();
+  document.querySelector('.statement-overlay')?.remove();
+  stopLiveEmotion();
+  resetSnapshots();
+  webcamActive = false;
+  camVideo = null;
+  live = { active: false, emotion: null, detected: null, faceFound: false, tiles: 0, hasTarget: false };
+  window.location.reload();
+}
+
 // 사진 촬영 후, 게임 시작 전: 무표정을 잠깐 모아 개인 기준값을 잡는다.
 // 카운트다운이 끝나면 보정값을 확정(샘플 부족 시 내부에서 null → 보정 미적용)하고 done().
 function runCalibration(done) {
   startCalibration();
   const { setCount } = renderCalibration(root, { seconds: CALIBRATION_SECONDS });
   let remaining = CALIBRATION_SECONDS;
-  const id = setInterval(() => {
+  calibrationTimer = setInterval(() => {
     remaining -= 1;
     if (remaining > 0) { setCount(remaining); return; }
-    clearInterval(id);
+    clearInterval(calibrationTimer);
+    calibrationTimer = null;
     finishCalibration();
     done();
   }, 1000);
@@ -108,6 +157,7 @@ function handleEmotion(info) {
 }
 
 function show() {
+  setKioskPhase('session');
   const scene = current(engine);
   setFallback(scene.emotion); // 얼굴 미검출 시 이 장면 색으로 fallback
   playEmotionCue(scene.emotion);
@@ -126,16 +176,19 @@ function show() {
         const stats = browserDailyStats();
         if (stats) result.statsText = statsLine(stats.record(statsCategory), CATEGORY_LABELS[statsCategory]);
         const full = hasEnough() ? buildMosaic(getTarget(), getTiles()) : null;
-        const mosaic = full ? { full, ...createReveal(full) } : null; // 타일이 차오르는 타임랩스 리빌
+        activeReveal?.stop?.();
+        activeReveal = full ? createReveal(full) : null;
+        const mosaic = activeReveal ? { full, ...activeReveal } : null; // 타일이 차오르는 타임랩스 리빌
         void publishWallEmotion(result.topCategory);
         showResult(root, result, mosaic, {
           onReceivePhoto: ({ canvas, filename, trigger }) => {
-            openQrTransferModal({ canvas, filename, trigger });
+            kiosk?.noteActivity();
+            qrTransfer?.close?.();
+            qrTransfer = openQrTransferModal({ canvas, filename, trigger });
           },
-          onRestart: () => {
-            window.location.reload();
-          },
+          onRestart: resetExperience,
         });
+        setKioskPhase('result');
       },
     });
     return;
@@ -149,6 +202,7 @@ function show() {
 async function begin(withCamera) {
   if (starting) return; // 로딩 중 클릭/키 중복 진입 차단
   starting = true;
+  setKioskPhase('session');
   enableSound();
   if (withCamera) {
     introSetLoading?.('카메라와 모델을 불러오는 중…');
@@ -191,9 +245,24 @@ async function begin(withCamera) {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.shiftKey && e.code === 'KeyR') window.location.reload();
+  if (e.shiftKey && e.code === 'KeyR') resetExperience();
 });
 
-// 인트로(간단한 설명) → 카메라 켜고/없이 시작
-const { setLoading } = renderIntro(root, { onStart: begin });
-introSetLoading = setLoading;
+function showIntro() {
+  setKioskPhase('session');
+  const { setLoading } = renderIntro(root, { onStart: begin });
+  introSetLoading = setLoading;
+}
+
+function showAttract() {
+  setKioskPhase('attract');
+  renderAttract(root, { onActivate: showIntro });
+}
+
+kiosk = createKioskMode({
+  onCountdown: renderKioskCountdown,
+  onReset: resetExperience,
+});
+
+window.addEventListener('pagehide', () => kiosk?.destroy(), { once: true });
+showAttract();
