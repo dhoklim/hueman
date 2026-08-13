@@ -6,7 +6,7 @@ Last updated: 2026-08-13 19:25 KST by Codex
 
 | Agent | Scope | Status | Since | Notes |
 | --- | --- | --- | --- | --- |
-| Codex | `docs/superpowers/specs/2026-08-13-emotion-wall-design.md`, `.agents/coordination/{current-state,inbox,session-log,locks}.md` | active | 2026-08-13 19:25 KST | Define privacy-preserving shared emotion wall before implementation. |
+| Codex | `docs/superpowers/{specs,plans}/2026-08-13-emotion-wall-*.md`, `worker/src/{index,transfer,wall}.js`, `worker/wrangler.jsonc`, `src/{main,wall,wallClient}.js`, `wall.html`, `styles/wall.css`, `vite.config.js`, `test/{wall,worker,workerEntry,wallClient,wallPage,buildLayout}.test.js`, `.agents/coordination/{current-state,inbox,session-log,locks}.md` | active | 2026-08-13 19:25 KST | Implement privacy-preserving shared emotion wall with a Cloudflare Durable Object and separate exhibit screen. |
 
 ## Lock Rules
 
