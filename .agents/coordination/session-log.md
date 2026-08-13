@@ -2,6 +2,7 @@
 
 ## 2026-08-13
 
+- 13:44 KST | Codex | QR 임시 사진 전달·iPad 대응 구현 계획을 `docs/superpowers/plans/2026-08-13-qr-photo-transfer.md`에 작성·자체 검토. 8개 독립 TDD 작업(기존 영상 테스트 fixture 복구, client/Worker API, 배포 설정, QR 모달, 결과 UI, 수신 페이지, iPad QA)을 파일·함수·명령·커밋 단위로 명시. 현재 `npm test` baseline은 추적되지 않은 `video/영상_장면_설명.txt` 때문에 `test/videoMap.test.js` import가 실패하고 나머지 125개 테스트는 통과함; Task 1에서 버전 관리되는 레거시 목록으로 복구 예정.
 - KST | Codex | 사용자 승인 QR 임시 사진 전달·iPad 대응 설계를 `docs/superpowers/specs/2026-08-13-qr-photo-transfer-design.md`에 문서화. Cloudflare Worker+비공개 R2, 10분 만료, GitHub Pages `receive.html#token`, 원본 카메라·스냅샷 미전송, iPad 공유/안전영역/회전 대응 및 테스트·배포 기준을 확정. 설계 자체 검토에서 만료 정리 순서를 보장하도록 R2 키를 `transfers/<expiresAt>/<uuid>.png`과 `<expiresAt>.<uuid>` token으로 명확화. Verification: 문서 placeholder scan 및 `git diff --check` 통과.
 
 ## 2026-06-15
