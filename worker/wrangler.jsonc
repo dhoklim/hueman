@@ -9,6 +9,20 @@
       "bucket_name": "hueman-photo-transfers"
     }
   ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "WALL",
+        "class_name": "EmotionWall"
+      }
+    ]
+  },
+  "exports": {
+    "EmotionWall": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  },
   "triggers": {
     "crons": ["* * * * *"]
   },

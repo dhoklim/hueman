@@ -1,3 +1,10 @@
+import {
+  isWallEmotion,
+  shouldCleanupWallAt,
+  wallCleanupDayAt,
+  wallDayAt,
+} from './wall.js';
+
 export const TRANSFER_TTL_MS = 10 * 60 * 1000;
 export const MAX_TRANSFER_BYTES = 8 * 1024 * 1024;
 
@@ -43,6 +50,12 @@ export function createTransferWorker({
         }
         return read(token, env, origin, ctx, now);
       }
+      if (request.method === 'POST' && url.pathname === '/v1/wall/events') {
+        return createWallEvent(request, env, origin, now);
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/wall') {
+        return readWall(env, origin, now);
+      }
       return json({ error: 'not-found' }, 404, origin);
     },
 
@@ -74,6 +87,7 @@ export function createTransferWorker({
       }
 
       if (keys.length) await env.TRANSFERS.delete(keys);
+      if (shouldCleanupWallAt(currentTime)) await cleanupWall(env, currentTime);
     },
   };
 }
@@ -127,6 +141,66 @@ async function read(token, env, origin, ctx, now) {
   headers.set('cache-control', 'private, no-store');
   headers.set('content-disposition', 'attachment; filename="hueman-result.png"');
   return new Response(object.body, { status: 200, headers });
+}
+
+async function createWallEvent(request, env, origin, now) {
+  const contentType = request.headers.get('content-type')?.split(';')[0].trim().toLowerCase();
+  if (contentType !== 'application/json') return json({ error: 'invalid-event' }, 400, origin);
+
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return json({ error: 'invalid-event' }, 400, origin);
+  }
+  if (!isWallEmotion(payload?.emotion)) return json({ error: 'invalid-event' }, 400, origin);
+
+  return callWall(env, origin, 'POST', '/events', wallDayAt(now()), { emotion: payload.emotion });
+}
+
+async function readWall(env, origin, now) {
+  return callWall(env, origin, 'GET', '/snapshot', wallDayAt(now()));
+}
+
+async function cleanupWall(env, timestamp) {
+  if (!env.WALL?.getByName) return;
+  const day = wallCleanupDayAt(timestamp);
+  try {
+    const stub = env.WALL.getByName(day);
+    await stub.fetch(new Request(`https://emotion-wall.internal/snapshot?day=${encodeURIComponent(day)}`, {
+      method: 'DELETE',
+    }));
+  } catch {
+    // The next one-minute cron run can continue R2 cleanup even if wall retention is unavailable.
+  }
+}
+
+async function callWall(env, origin, method, path, day, payload) {
+  if (!env.WALL?.getByName) return json({ error: 'wall-unavailable' }, 503, origin);
+
+  try {
+    const stub = env.WALL.getByName(day);
+    const response = await stub.fetch(new Request(`https://emotion-wall.internal${path}?day=${encodeURIComponent(day)}`, {
+      method,
+      ...(payload === undefined
+        ? {}
+        : {
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        }),
+    }));
+    if (!response || response.status >= 500) return json({ error: 'wall-unavailable' }, 503, origin);
+    return copyWallResponse(response, origin);
+  } catch {
+    return json({ error: 'wall-unavailable' }, 503, origin);
+  }
+}
+
+function copyWallResponse(response, origin) {
+  const headers = corsHeaders(origin);
+  const contentType = response.headers.get('content-type');
+  if (contentType) headers.set('content-type', contentType);
+  return new Response(response.body, { status: response.status, headers });
 }
 
 function isAllowedOrigin(origin, allowedOrigins) {
