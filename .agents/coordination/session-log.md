@@ -2,6 +2,7 @@
 
 ## 2026-08-13
 
+- 14:32 KST | Codex | 사용자 로그인 완료 후 재점검: `wrangler whoami`는 `dhoklim@gmail.com` OAuth를 확인했고 Windows Git Credential Manager를 쓰는 `git.exe push --dry-run origin main`도 성공했다. GitHub 연결 앱은 `dhoklim/hueman` admin 권한을 반환했다. 다만 `wrangler r2 bucket list`는 R2 초기 활성화 필요(code 10042)를 반환해, Dashboard에서 1회 Enable R2 후 실제 버킷/Worker/Pages 배포를 재개해야 한다.
 - 14:23 KST | Codex | 온라인 배포 권한 점검: `git push --dry-run origin main`이 GitHub HTTPS 인증 부재로 실패했고, 앞선 `wrangler whoami`도 미인증. 코드·main 통합은 완료됐지만 실서비스 배포는 두 계정 로그인 후에만 가능.
 - 14:22 KST | Codex | 사용자 완료 요청에 따라 QR branch를 local `main`에 병합(`fbf65fe`)하고 `npm ci` 후 main에서 검증. 병합 뒤 `.worktrees/qr-photo-transfer`의 테스트가 중복 발견되는 원인을 Vitest 기본 제외 목록(node_modules/.git만)으로 확인 → RED discovery test 후 `configDefaults.exclude`+worktree glob 추가(`a330777`). 최종 main verification: `npm test` 185 passed (29 files), `npm run build`, Worker dry-run, audit 0 vulnerabilities. Git worktree 등록·feature branch는 정리했으나 Windows I/O 오류로 ignored orphan directory는 남음; 기능에는 영향 없음.
 - 14:18 KST | Codex | 실제 배포 준비 상태 점검: GitHub remote는 `dhoklim/hueman`, feature branch는 `codex/qr-photo-transfer`(`81fc3bd`)로 clean 상태. `wrangler whoami`는 미인증을 보고하여 Cloudflare R2/Worker 실제 배포는 로그인 후 필요. 통합 선택·자격 증명 대기.
