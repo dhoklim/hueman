@@ -158,6 +158,10 @@ function handleEmotion(info) {
 
 function show() {
   setKioskPhase('session');
+  // 영상이 끝나 자동으로 넘어가는 나레이션도 '관람 중'이다. 장면이 바뀔 때마다 무입력
+  // 시간을 새로 줘야 긴 몽타주(공부 경로 ~48초)를 보는 도중 초기화 경고가 뜨지 않는다.
+  // 자리를 떠난 체험은 다음 선택지·텍스트 장면에서 멈추므로 그 뒤 60초에 그대로 초기화된다.
+  kiosk?.noteActivity();
   const scene = current(engine);
   setFallback(scene.emotion); // 얼굴 미검출 시 이 장면 색으로 fallback
   playEmotionCue(scene.emotion);

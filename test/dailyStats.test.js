@@ -23,6 +23,16 @@ describe('daily stats store', () => {
     expect(store.summary('anger')).toEqual({ total: 3, same: 0 });
   });
 
+  it('still returns a summary when the browser storage refuses the write', () => {
+    const store = createDailyStats({
+      getItem: () => null,
+      setItem: () => { throw new DOMException('full', 'QuotaExceededError'); },
+      removeItem: () => {},
+    }, { today: () => '2026-06-11' });
+
+    expect(() => store.record('joy')).not.toThrow();
+  });
+
   it('starts fresh when the stored date is not today', () => {
     const storage = memoryStorage();
     const yesterday = createDailyStats(storage, { today: () => '2026-06-10' });

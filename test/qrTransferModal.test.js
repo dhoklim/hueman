@@ -21,6 +21,7 @@ function modalOptions(overrides = {}) {
     shareLink: vi.fn().mockResolvedValue('shared'),
     clipboardRef: { writeText: vi.fn().mockResolvedValue() },
     now: () => 0,
+    localSave: true, // 기본 시나리오는 손에 드는 기기(iPad)
     ...overrides,
   };
 }
@@ -109,6 +110,36 @@ describe('openQrTransferModal', () => {
     modal.element.querySelector('[data-action="download"]').click();
     await vi.waitFor(() => expect(shareImage).toHaveBeenCalledWith(PNG, 'hueman-result-joy.png'));
     await vi.waitFor(() => expect(downloadImage).toHaveBeenCalledWith(PNG, 'hueman-result-joy.png'));
+  });
+
+  it('shows only the QR on a laptop, without saving to the exhibition machine', async () => {
+    const modal = openQrTransferModal(modalOptions({ localSave: false }));
+
+    await modal.ready;
+    expect(modal.element.dataset.state).toBe('ready');
+    expect(modal.element.querySelector('canvas')).toBeTruthy();
+    expect(modal.element.querySelector('[data-action="download"]')).toBeNull();
+    expect(modal.element.querySelector('[data-action="copy"]')).toBeNull();
+    expect(modal.element.querySelector('[data-action="share"]')).toBeNull();
+    expect(modal.element.textContent).not.toContain('iPad');
+  });
+
+  it('offers only a retry on a laptop when the upload fails', async () => {
+    const createRemoteTransfer = vi.fn().mockRejectedValue(new TransferError('network', 'offline'));
+    const modal = openQrTransferModal(modalOptions({ localSave: false, createRemoteTransfer }));
+
+    await modal.ready;
+    expect(modal.element.dataset.state).toBe('network');
+    expect(modal.element.querySelector('[data-action="retry"]')).toBeTruthy();
+    expect(modal.element.querySelector('[data-action="download"]')).toBeNull();
+  });
+
+  it('labels direct saving for any handheld device rather than only iPad', async () => {
+    const modal = openQrTransferModal(modalOptions());
+
+    await modal.ready;
+    expect(modal.element.querySelector('[data-action="download"]').textContent).toBe('이 기기에 저장');
+    expect(modal.element.textContent).not.toContain('iPad');
   });
 
   it('prefers iPad Web Share for a direct result-card save', async () => {

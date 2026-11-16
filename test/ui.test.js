@@ -260,11 +260,46 @@ describe('ui.showResult', () => {
         { category: 'joy', durationMs: 4000 },
         { category: 'sad', durationMs: 6000 },
       ],
-    }, canvas);
+    }, canvas, { localSave: true });
 
     expect(root.querySelectorAll('.timeline-segment')).toHaveLength(2);
     expect(root.textContent).toContain('결과 카드 저장');
+    expect(root.textContent).toContain('모자이크만 저장');
     expect(root.textContent).toContain('갤러리에 남기기');
+  });
+
+  it('hides saving to the exhibition laptop but keeps the QR and restart actions', () => {
+    const root = document.createElement('div');
+    const canvas = document.createElement('canvas');
+    showResult(root, { topCategory: 'joy', isComposite: false, message: '메시지다' }, canvas, {
+      localSave: false,
+      onReceivePhoto: vi.fn(),
+      onRestart: vi.fn(),
+    });
+
+    const labels = [...root.querySelectorAll('.result-actions button')].map((b) => b.textContent);
+    expect(labels).not.toContain('결과 카드 저장');
+    expect(labels).not.toContain('모자이크만 저장');
+    expect(labels[0]).toBe('QR로 결과 카드 받기');
+    expect(labels[1]).toBe('다시 하기');
+    expect(labels).toContain('크게 보기');
+  });
+
+  it('saves a gallery card once and warns that other viewers can see it', () => {
+    const root = document.createElement('div');
+    const canvas = document.createElement('canvas');
+    const createCard = vi.fn(() => ({ toDataURL: () => 'data:image/png;base64,AA' }));
+    localStorage.clear();
+    showResult(root, { topCategory: 'joy', isComposite: false, message: '메시지다' }, canvas, { createCard });
+
+    const gallery = root.querySelector('.gallery-save');
+    expect(gallery.textContent).toContain('다른 관람자도 볼 수 있어요');
+    gallery.click();
+    gallery.click();
+
+    expect(gallery.textContent).toBe('갤러리에 남겼습니다');
+    expect(JSON.parse(localStorage.getItem('huemanGallery'))).toHaveLength(1);
+    localStorage.clear();
   });
 
   it('hands a generated result card to the QR photo receiver action', () => {

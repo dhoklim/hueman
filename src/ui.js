@@ -5,6 +5,7 @@ import { canvasToPng, downloadBlob, sharePng } from './photoTransfer.js';
 import { SCENE_VIDEOS } from './videoMap.js';
 import { grabTargetCanvas } from './snapshots.js';
 import { tintBackground } from './emotionColor.js';
+import { isHandheldDevice } from './device.js';
 
 let keyHandler = null;
 let bgEls = [];            // 두 개의 <video> 버퍼 (더블 버퍼링)
@@ -263,7 +264,14 @@ export function showResult(
   root,
   result,
   mosaicCanvas,
-  { createCard = createResultCardCanvas, onReceivePhoto = null, onRestart = null } = {},
+  {
+    createCard = createResultCardCanvas,
+    onReceivePhoto = null,
+    onRestart = null,
+    // 노트북 전시에서는 '저장'이 전시 노트북 다운로드 폴더에 얼굴 사진을 쌓을 뿐이다.
+    // 직접 저장 버튼은 손에 드는 기기에서만 보이고, 노트북 관람자는 QR로 가져간다.
+    localSave = isHandheldDevice(),
+  } = {},
 ) {
   clearKeys();
   // mosaicCanvas: 캔버스(완성본) 또는 리빌 핸들 { canvas(점점 채워짐), full(완성본), play }
@@ -305,24 +313,33 @@ export function showResult(
     zoom.addEventListener('click', () => openMosaicZoom(mosaic.full));
     actions.appendChild(zoom);
 
-    const save = document.createElement('button');
-    save.className = 'choice-btn save-btn';
-    save.textContent = '모자이크만 저장';
-    save.addEventListener('click', () => saveCanvas(mosaic.full, `hueman-${result.topCategory}.png`));
-    actions.appendChild(save);
+    if (localSave) {
+      const save = document.createElement('button');
+      save.className = 'choice-btn save-btn';
+      save.textContent = '모자이크만 저장';
+      save.addEventListener('click', () => saveCanvas(mosaic.full, `hueman-${result.topCategory}.png`));
+      actions.appendChild(save);
+    }
 
     const gallery = document.createElement('button');
     gallery.className = 'text-link gallery-save';
-    gallery.textContent = '갤러리에 남기기';
+    // 갤러리는 이 전시 기기에 남아 다음 관람자도 보므로 버튼에서 미리 알린다.
+    gallery.textContent = '갤러리에 남기기 · 다른 관람자도 볼 수 있어요';
     gallery.addEventListener('click', () => {
+      if (gallery.disabled) return;
       const store = browserGalleryStore();
       if (!store) return;
       const card = createCard(result, mosaic.full);
-      store.add({
+      const saved = store.add({
         image: card.toDataURL('image/png'),
         emotion: result.isComposite ? 'composite' : result.topCategory,
       });
-      gallery.textContent = '갤러리에 남겼습니다';
+      if (saved) {
+        gallery.textContent = '갤러리에 남겼습니다';
+        gallery.disabled = true; // 같은 카드가 여러 번 쌓이지 않게
+      } else {
+        gallery.textContent = '저장 공간이 부족해 남기지 못했습니다';
+      }
     });
     actions.appendChild(gallery);
   } else {
@@ -330,11 +347,14 @@ export function showResult(
   }
 
   const makeCard = () => createCard(result, mosaic?.full || null);
-  const saveCard = document.createElement('button');
-  saveCard.className = 'choice-btn save-btn';
-  saveCard.textContent = '결과 카드 저장';
-  saveCard.addEventListener('click', () => saveCanvas(makeCard(), resultFilename(result)));
-  actions.prepend(saveCard);
+  let saveCard = null;
+  if (localSave) {
+    saveCard = document.createElement('button');
+    saveCard.className = 'choice-btn save-btn';
+    saveCard.textContent = '결과 카드 저장';
+    saveCard.addEventListener('click', () => saveCanvas(makeCard(), resultFilename(result)));
+    actions.prepend(saveCard);
+  }
 
   if (typeof onReceivePhoto === 'function') {
     const receive = document.createElement('button');
@@ -347,7 +367,8 @@ export function showResult(
         trigger: receive,
       });
     });
-    saveCard.after(receive);
+    if (saveCard) saveCard.after(receive);
+    else actions.prepend(receive);
   }
 
   if (typeof onRestart === 'function') {
@@ -355,7 +376,9 @@ export function showResult(
     restart.className = 'choice-btn save-btn result-restart';
     restart.textContent = '다시 하기';
     restart.addEventListener('click', onRestart);
-    (actions.querySelector('.qr-transfer-trigger') || saveCard).after(restart);
+    const anchor = actions.querySelector('.qr-transfer-trigger') || saveCard;
+    if (anchor) anchor.after(restart);
+    else actions.prepend(restart);
   }
 
   const statement = document.createElement('button');
@@ -531,7 +554,7 @@ export function renderAttract(root, { onActivate } = {}) {
       <h1 class="attract-title">당신의 선택과 표정이<br>하나의 색이 됩니다.</h1>
       <p class="attract-desc">한 사람의 일생을 따라가며, 지금의 감정을 마주해 보세요.</p>
       <p class="attract-wall-caption">오늘 전시장에 남은 감정의 빛</p>
-      <button class="choice-btn attract-activate">화면을 터치해 시작</button>
+      <button class="choice-btn attract-activate">눌러서 시작하기</button>
     </div>
   `;
 
@@ -588,7 +611,8 @@ export function renderIntro(root, { onStart } = {}) {
 영상은 원본 그대로 흐르고,
 여정의 끝에서 당신을 가장 많이 채운 감정과 마주합니다.</div>
     <div class="privacy-note">카메라를 켜면 얼굴 표정은 이 브라우저 안에서만 임시로 쓰입니다.
-결과 저장이나 갤러리 남기기는 마지막에 직접 선택할 수 있습니다.</div>
+결과는 마지막에 QR로 받아 갈 수 있고, 갤러리에 남긴 결과 카드는
+이 전시 기기에 보관되어 다른 관람자도 볼 수 있습니다.</div>
     <div class="intro-how">장면 넘기기 — 클릭 · Space · Enter
 선택의 순간 — 버튼 · 1 / 2 (또는 ← / →)</div>
     <div class="intro-buttons">

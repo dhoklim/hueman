@@ -7,7 +7,7 @@ import {
 } from './photoTransfer.js';
 
 const MESSAGE = {
-  expired: '링크가 만료되었습니다. iPad에서 새 QR을 요청해 주세요.',
+  expired: '링크가 만료되었습니다. 전시 화면에서 새 QR을 요청해 주세요.',
   'not-found': '사진을 찾을 수 없습니다. QR을 다시 스캔해 주세요.',
   network: '연결을 확인한 뒤 다시 시도해 주세요.',
   misconfigured: '전송 서버가 아직 설정되지 않았습니다.',

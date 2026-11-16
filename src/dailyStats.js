@@ -26,7 +26,13 @@ export function createDailyStats(storage, opts = {}) {
   function record(category) {
     const state = load();
     state.counts[category] = (state.counts[category] || 0) + 1;
-    storage.setItem(key, JSON.stringify(state));
+    try {
+      storage.setItem(key, JSON.stringify(state));
+    } catch {
+      // 저장 공간이 가득 차도 결과 화면은 떠야 한다 — 이번 집계만 반영한 요약을 돌려준다.
+      const total = Object.values(state.counts).reduce((sum, n) => sum + n, 0);
+      return { total, same: state.counts[category] };
+    }
     return summary(category);
   }
 

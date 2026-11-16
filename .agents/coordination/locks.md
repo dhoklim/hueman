@@ -1,10 +1,12 @@
 # Locks
 
-Last updated: 2026-08-14 00:12 KST by Codex
+Last updated: 2026-11-16 23:27 KST by Claude Code
 
 ## Active Locks
 
-_None_
+| Agent | Scope | Status | Since | Notes |
+| --- | --- | --- | --- | --- |
+| Claude Code | `src/main.js`, `src/ui.js`, `src/qrTransferModal.js`, `src/gallery.js`, `src/videoMap.js`, `public/video/`, `test/` | active | 2026-11-16 23:27 KST | 전시 노트북 감사 후 버그 수정 (리셋·HEVC·노트북 문구·갤러리) |
 
 ## Lock Rules
 

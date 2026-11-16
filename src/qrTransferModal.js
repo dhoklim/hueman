@@ -7,6 +7,7 @@ import {
   sharePng,
 } from './photoTransfer.js';
 import { drawQr } from './qrCode.js';
+import { isHandheldDevice } from './device.js';
 
 export function openQrTransferModal({
   canvas,
@@ -23,6 +24,9 @@ export function openQrTransferModal({
   documentRef = document,
   clipboardRef = typeof navigator === 'undefined' ? null : navigator.clipboard,
   now = () => Date.now(),
+  // 손에 드는 기기(iPad 등)에서만 링크 복사·공유·'이 기기에 저장'을 보여 준다.
+  // 노트북 전시에서는 관람자가 가져갈 수 없는 경로라 QR만 남긴다.
+  localSave = isHandheldDevice(),
 } = {}) {
   const overlay = documentRef.createElement('div');
   overlay.className = 'qr-transfer-overlay';
@@ -57,7 +61,7 @@ export function openQrTransferModal({
     return png;
   }
 
-  async function downloadOnIpad() {
+  async function downloadOnDevice() {
     try {
       const image = await ensurePng();
       const outcome = await shareImage(image, filename);
@@ -123,7 +127,7 @@ export function openQrTransferModal({
       expires.textContent = '유효 시간 10:00';
       body.appendChild(expires);
 
-      addButton('링크 복사', 'copy').addEventListener('click', async () => {
+      if (localSave) addButton('링크 복사', 'copy').addEventListener('click', async () => {
         try {
           await clipboardRef?.writeText?.(receiveUrl);
           expires.textContent = '링크를 복사했습니다 · ' + expiryLabel(expiresAt, now);
@@ -131,7 +135,7 @@ export function openQrTransferModal({
           expires.textContent = '링크를 복사하지 못했습니다 · ' + expiryLabel(expiresAt, now);
         }
       });
-      addButton('iPad에서 링크 공유', 'share', 'text-link').addEventListener('click', async () => {
+      if (localSave) addButton('링크 공유', 'share', 'text-link').addEventListener('click', async () => {
         const outcome = await shareLink(receiveUrl);
         if (outcome !== 'shared') {
           try {
@@ -142,29 +146,35 @@ export function openQrTransferModal({
           }
         }
       });
-      addButton('이 iPad에 저장', 'download', 'text-link').addEventListener('click', downloadOnIpad);
+      if (localSave) addButton('이 기기에 저장', 'download', 'text-link').addEventListener('click', downloadOnDevice);
       overlay.replaceChildren(card);
       card.focus();
       return { card, qrCanvas, expires };
     } else if (state === 'misconfigured') {
       title.textContent = 'QR 전송을 사용할 수 없습니다';
-      body.textContent = '전송 서버가 설정되지 않았습니다. 이 iPad에 결과 카드를 저장할 수 있습니다.';
-      addButton('이 iPad에 저장', 'download').addEventListener('click', downloadOnIpad);
+      body.textContent = localSave
+        ? '전송 서버가 설정되지 않았습니다. 이 기기에 결과 카드를 저장할 수 있습니다.'
+        : '전송 서버가 설정되지 않았습니다. 전시 진행자에게 알려 주세요.';
+      if (localSave) addButton('이 기기에 저장', 'download').addEventListener('click', downloadOnDevice);
     } else if (state === 'too-large') {
       title.textContent = 'QR 전송 파일이 너무 큽니다';
-      body.textContent = '결과 카드는 8MB 이하일 때 QR로 전달할 수 있습니다. 이 iPad에 직접 저장해 주세요.';
-      addButton('이 iPad에 저장', 'download').addEventListener('click', downloadOnIpad);
-      addButton('새 QR 만들기', 'retry', 'text-link').addEventListener('click', upload);
+      body.textContent = localSave
+        ? '결과 카드는 8MB 이하일 때 QR로 전달할 수 있습니다. 이 기기에 직접 저장해 주세요.'
+        : '결과 카드는 8MB 이하일 때 QR로 전달할 수 있습니다.';
+      if (localSave) addButton('이 기기에 저장', 'download').addEventListener('click', downloadOnDevice);
+      addButton('새 QR 만들기', 'retry', localSave ? 'text-link' : 'choice-btn').addEventListener('click', upload);
     } else if (state === 'expired') {
       title.textContent = 'QR 코드가 만료되었습니다';
       body.textContent = '개인정보 보호를 위해 10분 후 사진을 삭제합니다. 새 QR 코드를 만들 수 있습니다.';
       addButton('새 QR 만들기', 'retry').addEventListener('click', upload);
-      addButton('이 iPad에 저장', 'download', 'text-link').addEventListener('click', downloadOnIpad);
+      if (localSave) addButton('이 기기에 저장', 'download', 'text-link').addEventListener('click', downloadOnDevice);
     } else {
       title.textContent = 'QR 코드를 만들지 못했습니다';
-      body.textContent = '연결을 확인한 뒤 다시 시도하거나 이 iPad에 결과 카드를 저장해 주세요.';
+      body.textContent = localSave
+        ? '연결을 확인한 뒤 다시 시도하거나 이 기기에 결과 카드를 저장해 주세요.'
+        : '인터넷 연결을 확인한 뒤 다시 시도해 주세요.';
       addButton('다시 시도', 'retry').addEventListener('click', upload);
-      addButton('이 iPad에 저장', 'download', 'text-link').addEventListener('click', downloadOnIpad);
+      if (localSave) addButton('이 기기에 저장', 'download', 'text-link').addEventListener('click', downloadOnDevice);
     }
 
     overlay.replaceChildren(card);

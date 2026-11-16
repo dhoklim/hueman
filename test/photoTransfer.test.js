@@ -131,10 +131,8 @@ describe('createTransfer', () => {
 describe('fetchTransfer', () => {
   it('downloads the transient PNG through the Worker route', async () => {
     const png = new Blob(['result'], { type: 'image/png' });
-    const fetchImpl = vi.fn().mockResolvedValue(new Response(png, {
-      status: 200,
-      headers: { 'content-type': 'image/png' },
-    }));
+    // jsdom의 Blob은 Node 22+의 Response 생성자가 읽지 못하므로 fetch 응답 모양만 흉내 낸다.
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200, blob: async () => png });
 
     await expect(fetchTransfer(API, TOKEN, { fetchImpl })).resolves.toEqual(png);
     expect(fetchImpl).toHaveBeenCalledWith(`${API}/v1/transfers/${encodeURIComponent(TOKEN)}`, {
