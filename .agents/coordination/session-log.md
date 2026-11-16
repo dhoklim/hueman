@@ -1,5 +1,9 @@
 # Session Log
 
+## 2026-11-16
+
+- 23:59 KST | Claude Code | 과제전용 노트북(GitHub Pages) 감사 후 수정. 헤드리스 크롬 전체 플레이로 공부 경로 50초 리셋 경고를 재현(RED 테스트 `test/mainKioskNarration.test.js`)→`show()`에서 noteActivity로 GREEN. 노트북 저장 버튼 숨김·기기 중립 문구(`src/device.js`), 갤러리 quota·중복 저장·공개 안내, dailyStats 저장 실패 내성, 영상 58개 H.264 1080p 재인코딩(929→186MB, HEVC MOV 2개 mp4 교체), build 테스트 temp outDir, fetchTransfer 테스트의 Node 22 Blob 호환. 검증: `npm test` 262 passed (35 files), `npm run build`, 재플레이에서 경고 없음·결과 화면 QR/다시 하기만 노출.
+
 ## 2026-08-14
 
 - 00:12 KST | Codex | 사용자 스크린샷에서 대기 화면 작품 소개와 iframe 감정 벽의 중앙 제목이 겹치는 것을 확인했다. `wall.html?embed=ambient`가 텍스트 없는 canvas 풍경만 렌더하도록 `src/wall.js` variant를 추가하고, 기본 전체 감정 벽은 그대로 유지했다. TDD: ambient URL/DOM 테스트가 RED→GREEN. 검증: `npm test` 249 passed (33 files), `npm run build` passed. `be2b3c8`을 main에 push하고 Pages workflow `31713943426` success 뒤 공개 페이지를 Edge headless 1365×1000으로 캡처해 중첩 제목이 사라진 것을 확인했다.

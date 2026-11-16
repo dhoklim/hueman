@@ -83,11 +83,11 @@ export const SCENE_VIDEOS = {
   blinddate_choice: { file: '소개팅vs첫사랑.mp4',   start: 0, end: 10 }, // 소개팅/첫사랑 전화 → 선택
 
   /* ── 소개팅(만남) 경로 ──────────────────────────────────────── */
-  marry_arranged_1: { file: '소개팅.MOV',          start: 0, end: 7 }, // 소개팅 연락
+  marry_arranged_1: { file: '소개팅.mp4',          start: 0, end: 7 }, // 소개팅 연락
   marry_arranged_2: { file: '첫사랑-결혼식.mp4',   start: 0, end: 2 }, // 성대한 결혼식
 
   /* ── 첫사랑 경로 ────────────────────────────────────────────── */
-  marry_love_1: { file: '첫사랑.MOV',           start: 0, end: 6 }, // 첫사랑에게 전화
+  marry_love_1: { file: '첫사랑.mp4',           start: 0, end: 6 }, // 첫사랑에게 전화
   marry_love_2: { file: '첫사랑- 신혼생활.mp4', start: 0, end: 2 }, // 신혼 생활
 
   /* ── 비혼 경로 ──────────────────────────────────────────────── */

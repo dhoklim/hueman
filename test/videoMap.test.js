@@ -28,6 +28,13 @@ describe('video map integrity', () => {
     }
   });
 
+  it('uses only H.264 .mp4 clips that every laptop browser can play', () => {
+    // iPhone 원본 .MOV(HEVC 10bit)는 윈도우 크롬·파이어폭스에서 재생되지 않을 수 있다.
+    for (const [sceneId, config] of Object.entries(SCENE_VIDEOS)) {
+      expect(config.file, sceneId).toMatch(/\.mp4$/);
+    }
+  });
+
   it('does not reuse one video clip for multiple scene texts', () => {
     const owners = new Map();
 

@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-08-14 00:12 KST by Codex
+Last updated: 2026-11-16 23:59 KST by Claude Code
 
 ## Summary
 
@@ -19,6 +19,8 @@ Last updated: 2026-08-14 00:12 KST by Codex
 - **결과 화면 다시 하기 통합 (2026-08-13)**: 결과 카드·QR 버튼 뒤에 iPad 터치 영역(48px)을 유지하는 `다시 하기` 버튼을 추가했다. 선택하면 `window.location.reload()`로 인트로부터 새 체험을 시작해 카메라·모자이크·감정 기록·스토리 진행 상태를 함께 초기화한다. 브라우저의 일별 통계와 이미 발행된 공동 감정 벽 집계는 유지한다. 설계: `docs/superpowers/specs/2026-08-13-result-restart-design.md`; 계획: `docs/superpowers/plans/2026-08-13-result-restart.md`.
 - **무인 전시 모드 추가·배포 검증 완료 (2026-08-13)**: 처음과 자동 초기화 뒤에는 작품 소개·공동 감정 벽을 은은히 보여 주는 대기 화면이 보인다. 체험 단계는 60초, 결과·QR·모자이크 단계는 120초 무입력 후 마지막 10초에 취소 가능한 초기화 안내를 띄운다. 자동 초기화·`다시 하기`·Shift+R는 카메라 스트림·QR 모달·모자이크 리빌·스냅샷을 함께 정리한 뒤 대기 화면으로 돌아가는 한 경로를 사용한다. GitHub Pages workflow `31705123006` build·deploy success 뒤 공개 index와 새 JS bundle을 no-cache HTTP 200으로 확인했고, bundle에 대기 벽·초기화 문구가 포함됐다. 설계: `docs/superpowers/specs/2026-08-13-unattended-exhibition-mode-design.md`; 계획: `docs/superpowers/plans/2026-08-13-unattended-exhibition-mode.md`.
 - **대기 화면 제목 겹침 수정·배포 검증 완료 (2026-08-14)**: 대기 화면의 감정 벽 iframe은 이제 `embed=ambient` 배경 전용 모드로 색 풍경만 그린다. 중앙 제목·범례·상태 문구를 만들지 않아 작품 소개와 겹치지 않는다. GitHub Pages workflow `31713943426` success 후 공개 페이지를 Edge headless로 1365×1000 캡처해 배경 제목이 사라진 것을 실제 확인했다.
+
+- **전시 노트북 감사·수정 (2026-11-16, 브랜치 `claude/zen-edison-kvhw5d`, main 미병합)**: GitHub Pages를 노트북 크롬으로 띄우는 전시 기준으로 점검. 나레이션 자동 진행도 무입력 타이머를 갱신해 공부 몽타주(~48초) 중 리셋되던 문제 수정(`main.js` `show()`→`kiosk.noteActivity()`). `src/device.js` `isHandheldDevice()`로 노트북에서는 결과 카드·모자이크 직접 저장과 QR 모달의 복사·공유·저장을 숨기고 QR만 남김(손에 드는 기기는 '이 기기에 저장'). 갤러리는 '다른 관람자도 볼 수 있어요' 안내·중복 저장 방지·localStorage 가득 차면 오래된 카드부터 제거, 일별 통계는 저장 실패에도 결과 화면 유지. `public/video/` 58개 전부 1080p H.264(CRF22, GOP 30, faststart)로 재인코딩해 929MB→186MB, HEVC `소개팅.MOV`·`첫사랑.MOV`는 `.mp4`로 교체. `npm test`의 build 테스트는 임시 폴더로 빌드해 `dist/`를 덮어쓰지 않음. 검증: `npm test` 262 passed, build, 헤드리스 크롬 전체 플레이.
 
 ## Known Repository State
 
