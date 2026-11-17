@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  hueman 전시용 크롬 잠금 프로필 (macOS).
+  설치한 맥 사용자 계정의 Google Chrome에만 적용된다(PayloadScope=User).
+  - hueman 사이트와 QR·감정 벽 서버 외의 모든 주소를 차단한다.
+  - hueman 사이트의 카메라 사용을 묻지 않고 허용한다.
+  - 시크릿 창·게스트·새 프로필·개발자 도구·크롬 로그인을 끈다.
+  해제: 시스템 설정 → 개인정보 보호 및 보안 → 프로파일(또는 일반 → 기기 관리)에서 이 프로필을 제거.
+-->
+<plist version="1.0">
+<dict>
+  <key>PayloadDisplayName</key>
+  <string>hueman 전시용 크롬 잠금</string>
+  <key>PayloadDescription</key>
+  <string>전시 기간 동안 이 계정의 Google Chrome에서 hueman 작품만 열리게 합니다. 전시가 끝나면 이 프로필을 제거하세요.</string>
+  <key>PayloadIdentifier</key>
+  <string>io.github.dhoklim.hueman.kiosk</string>
+  <key>PayloadOrganization</key>
+  <string>hueman</string>
+  <key>PayloadType</key>
+  <string>Configuration</string>
+  <key>PayloadUUID</key>
+  <string>6E0F3A52-7C1B-4F0E-9B8D-2A61C4D7E901</string>
+  <key>PayloadVersion</key>
+  <integer>1</integer>
+  <key>PayloadScope</key>
+  <string>User</string>
+  <key>PayloadRemovalDisallowed</key>
+  <false/>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>PayloadDisplayName</key>
+      <string>Google Chrome 정책</string>
+      <key>PayloadIdentifier</key>
+      <string>io.github.dhoklim.hueman.kiosk.chrome</string>
+      <key>PayloadType</key>
+      <string>com.apple.ManagedClient.preferences</string>
+      <key>PayloadUUID</key>
+      <string>9C3D1B7A-58E2-4A6F-8D04-B1E7F2A9C613</string>
+      <key>PayloadVersion</key>
+      <integer>1</integer>
+      <key>PayloadEnabled</key>
+      <true/>
+      <key>PayloadContent</key>
+      <dict>
+        <key>com.google.Chrome</key>
+        <dict>
+          <key>Forced</key>
+          <array>
+            <dict>
+              <key>mcx_preference_settings</key>
+              <dict>
+                <!-- 모든 주소 차단 후 아래 허용 목록만 연다 -->
+                <key>URLBlocklist</key>
+                <array>
+                  <string>*</string>
+                </array>
+                <key>URLAllowlist</key>
+                <array>
+                  <!-- 작품 (영상·모델·감정 벽 iframe 포함) -->
+                  <string>https://dhoklim.github.io/hueman</string>
+                  <!-- QR 결과 카드 전달·공동 감정 벽 서버. 빼면 QR이 동작하지 않는다 -->
+                  <string>https://hueman-photo-transfer.dhoklim-bdd.workers.dev</string>
+                </array>
+                <!-- 카메라 권한을 묻지 않고 허용 -->
+                <key>VideoCaptureAllowedUrls</key>
+                <array>
+                  <string>https://dhoklim.github.io</string>
+                </array>
+                <!-- 1 = 시크릿 창 사용 안 함 -->
+                <key>IncognitoModeAvailability</key>
+                <integer>1</integer>
+                <!-- 2 = 개발자 도구 사용 안 함 -->
+                <key>DeveloperToolsAvailability</key>
+                <integer>2</integer>
+                <key>BrowserGuestModeEnabled</key>
+                <false/>
+                <key>BrowserAddPersonEnabled</key>
+                <false/>
+                <!-- 0 = 크롬 로그인 사용 안 함 -->
+                <key>BrowserSignin</key>
+                <integer>0</integer>
+                <key>PasswordManagerEnabled</key>
+                <false/>
+                <key>TranslateEnabled</key>
+                <false/>
+                <!-- 관람자가 결과 카드를 노트북에 내려받지 못하게 (QR로만 가져감) -->
+                <key>DownloadRestrictions</key>
+                <integer>3</integer>
+              </dict>
+            </dict>
+          </array>
+        </dict>
+      </dict>
+    </dict>
+  </array>
+</dict>
+</plist>

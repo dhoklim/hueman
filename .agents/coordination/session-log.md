@@ -1,5 +1,9 @@
 # Session Log
 
+## 2026-11-17
+
+- 00:45 KST | Claude Code | 맥 전시 잠금 자료 `kiosk/mac/` 추가: `hueman-kiosk.command`(크롬 --kiosk·전용 프로필·caffeinate·스와이프 차단), `hueman-chrome-lock.mobileconfig`(사용자 범위 크롬 정책: URLBlocklist * + hueman·Worker 허용, 카메라 자동 허용, 시크릿·게스트·로그인·개발자 도구·다운로드 차단), README(전시 전용 계정·설치·해제). 검증: plist 파싱, `bash -n`, 같은 URL·카메라·다운로드 정책을 Linux Chromium managed policy로 걸고 로컬 빌드를 끝까지 플레이 — google.com ERR_BLOCKED_BY_ADMINISTRATOR, hueman 요청 차단 0건, 카메라 무확인 허용, 영상·감정 벽 iframe·갤러리 data: 이미지 정상. `chrome://policy` 허용 항목은 동작하지 않아 제거. 개발자 도구 차단은 자동화(CDP)를 막아 같은 실험에서 제외. 실제 macOS 설치는 미검증. `npm test` 262 passed.
+
 ## 2026-11-16
 
 - 23:59 KST | Claude Code | 과제전용 노트북(GitHub Pages) 감사 후 수정. 헤드리스 크롬 전체 플레이로 공부 경로 50초 리셋 경고를 재현(RED 테스트 `test/mainKioskNarration.test.js`)→`show()`에서 noteActivity로 GREEN. 노트북 저장 버튼 숨김·기기 중립 문구(`src/device.js`), 갤러리 quota·중복 저장·공개 안내, dailyStats 저장 실패 내성, 영상 58개 H.264 1080p 재인코딩(929→186MB, HEVC MOV 2개 mp4 교체), build 테스트 temp outDir, fetchTransfer 테스트의 Node 22 Blob 호환. 검증: `npm test` 262 passed (35 files), `npm run build`, 재플레이에서 경고 없음·결과 화면 QR/다시 하기만 노출.
