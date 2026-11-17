@@ -9,6 +9,7 @@ vi.mock('../src/liveEmotion.js', () => ({
   setFallback: vi.fn(),
   startCalibration: vi.fn(),
   finishCalibration: vi.fn(() => null),
+  preloadEmotionModels: vi.fn(() => Promise.resolve(true)),
 }));
 vi.mock('../src/wallClient.js', () => ({ publishWallEmotion: vi.fn(() => Promise.resolve(false)) }));
 vi.mock('../src/sound.js', () => ({ enableSound: vi.fn(), playEmotionCue: vi.fn() }));

@@ -22,6 +22,7 @@ const snapshotMock = vi.hoisted(() => ({
 const liveMock = vi.hoisted(() => ({
   startCalibration: vi.fn(),
   finishCalibration: vi.fn(() => null),
+  preloadEmotionModels: vi.fn(() => Promise.resolve(true)),
 }));
 
 vi.mock('../src/liveEmotion.js', () => ({
@@ -34,6 +35,7 @@ vi.mock('../src/liveEmotion.js', () => ({
   setFallback: vi.fn(),
   startCalibration: liveMock.startCalibration,
   finishCalibration: liveMock.finishCalibration,
+  preloadEmotionModels: liveMock.preloadEmotionModels,
 }));
 
 vi.mock('../src/snapshots.js', () => snapshotMock);
@@ -81,6 +83,17 @@ describe('live emotion display', () => {
     expect(document.querySelector('.intro')).toBeNull();
 
     activateIntro();
+  });
+
+  it('preloads the emotion models on the attraction screen without turning on the camera', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+    const { startLiveEmotion } = await import('../src/liveEmotion.js');
+
+    await import('../src/main.js');
+    await vi.waitFor(() => expect(liveMock.preloadEmotionModels).toHaveBeenCalled());
+
+    expect(document.querySelector('.attract')).toBeTruthy();
+    expect(startLiveEmotion).not.toHaveBeenCalled();
   });
 
   it('shows the 60-second session reset warning after 50 seconds without input', async () => {

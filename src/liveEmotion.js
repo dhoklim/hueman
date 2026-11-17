@@ -1,6 +1,6 @@
 // 컨트롤러: 일정 간격으로 표정을 감지해 평활화된 감정을 만들고, 콜백으로 흘려보낸다.
 // 로그 기록/모자이크 수집은 main 이 콜백에서 처리한다(이 모듈은 감지→감정에만 집중).
-import { loadModels, startCamera, detectExpressions } from './faceEmotion.js';
+import { loadModels, warmUp, startCamera, detectExpressions } from './faceEmotion.js';
 import { expressionToEmotion, smooth, computeBaseline, applyBaseline } from './emotionMapping.js';
 
 const TICK_MS = 300;
@@ -18,6 +18,19 @@ let detecting = false;
 let baseline = null;          // 적용 중인 기준값(없으면 보정 미적용)
 let calibrating = false;      // 보정 중이면 tick이 원시 표정을 모은다
 let calibrationSamples = [];
+
+const MODEL_URL = `${import.meta.env.BASE_URL}models`;
+
+// 대기 화면에서 미리 모델을 받고 인식 엔진을 데워 둔다. 카메라는 켜지 않는다.
+// 실패해도(오프라인 등) 조용히 넘어가고, 카메라 시작 때 다시 시도한다.
+export async function preloadEmotionModels() {
+  try {
+    await warmUp(MODEL_URL);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export function setFallback(emotion) {
   fallback = emotion || 'numb';
@@ -52,12 +65,16 @@ export async function startLiveEmotion({ onEmotion } = {}) {
   video.muted = true;
   document.body.appendChild(video);
 
-  try {
-    await loadModels(`${import.meta.env.BASE_URL}models`);
-    stream = await startCamera(video);
-  } catch (e) {
+  // 모델 받기와 카메라 켜기를 동시에 진행한다(맥 카메라는 켜지는 데 1~2초 걸린다).
+  // 한쪽이 실패해도 다른 쪽이 끝날 때까지 기다려, 켜진 카메라를 반드시 다시 끈다.
+  const [models, camera] = await Promise.allSettled([
+    loadModels(MODEL_URL),
+    startCamera(video),
+  ]);
+  if (camera.status === 'fulfilled') stream = camera.value;
+  if (models.status === 'rejected' || camera.status === 'rejected') {
     stopLiveEmotion();
-    throw e;
+    throw models.status === 'rejected' ? models.reason : camera.reason;
   }
 
   history = [];

@@ -15,7 +15,14 @@ import { createLog, record, aggregate, emotionRuns } from './experienceLog.js';
 import { browserDailyStats, statsLine } from './dailyStats.js';
 import { CATEGORY_LABELS } from './comfortMessages.js';
 import { createReveal } from './mosaicReveal.js';
-import { startLiveEmotion, stopLiveEmotion, setFallback, startCalibration, finishCalibration } from './liveEmotion.js';
+import {
+  startLiveEmotion,
+  stopLiveEmotion,
+  setFallback,
+  startCalibration,
+  finishCalibration,
+  preloadEmotionModels,
+} from './liveEmotion.js';
 import {
   captureTargetFrom,
   setTarget,
@@ -270,3 +277,8 @@ kiosk = createKioskMode({
 
 window.addEventListener('pagehide', () => kiosk?.destroy(), { once: true });
 showAttract();
+
+// 관람자를 기다리는 동안 표정 인식 모델을 받고 엔진을 데워 둔다(카메라는 켜지 않는다).
+// '카메라 켜고 시작'을 누른 뒤에는 카메라가 켜지는 시간만 기다리면 된다.
+// 대기 화면이 먼저 그려지도록 잠깐 뒤에 시작한다.
+setTimeout(() => { void preloadEmotionModels(); }, 300);
